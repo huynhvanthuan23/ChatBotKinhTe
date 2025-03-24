@@ -1,0 +1,32 @@
+2025-03-24 13:16:57,087 - app.api.router - INFO - Templates directory: d:\ThucTap\ChatBotKinhTe\app\web\templates
+2025-03-24 13:16:57,088 - app.api.router - INFO - Static files mounted from: d:\ThucTap\ChatBotKinhTe\app\web\static
+2025-03-24 13:17:09,882 - app.api.router - INFO - Templates directory: d:\ThucTap\ChatBotKinhTe\app\web\templates
+2025-03-24 13:17:09,882 - app.api.router - INFO - Static files mounted from: d:\ThucTap\ChatBotKinhTe\app\web\static
+2025-03-24 13:23:31,831 - app.api.router - INFO - Templates directory: d:\ThucTap\ChatBotKinhTe\app\web\templates
+2025-03-24 13:23:31,831 - app.api.router - INFO - Static files mounted from: d:\ThucTap\ChatBotKinhTe\app\web\static
+2025-03-24 14:04:10,039 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-03-24 14:04:10,156 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-03-24 14:04:30,642 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-03-24 14:04:30,642 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-03-24 14:04:33,995 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-03-24 14:04:33,999 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-03-24 14:04:34,179 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-03-24 14:04:34,186 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-03-24 14:04:34,293 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-03-24 14:04:36,834 - app.services.chatbot - INFO - Loaded LLM model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-03-24 14:04:36,836 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-03-24 14:05:19,634 - app.services.chatbot - INFO - Answer generated successfully
+2025-03-24 14:05:19,636 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-03-24 14:23:29,151 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-03-24 14:23:29,189 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-03-24 14:23:33,925 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-03-24 14:23:33,925 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-03-24 14:23:37,496 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-03-24 14:23:37,499 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-03-24 14:23:37,514 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-03-24 14:23:37,520 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-03-24 14:23:37,626 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-03-24 14:23:39,995 - app.services.chatbot - INFO - Loaded LLM model from models/Vi-Qwen2-3B-RAG.Q4_0.gguf
+2025-03-24 14:23:39,998 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-03-24 14:26:16,421 - app.services.chatbot - INFO - Answer generated successfully
+2025-03-24 14:26:16,421 - app.api.endpoints.chat - INFO - Successfully generated response

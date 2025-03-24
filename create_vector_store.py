@@ -12,7 +12,7 @@ loader = DirectoryLoader(DATA_PATH, glob="*.txt")
 documents = loader.load()
 
 # 2. Chunk documents
-text_splitter = CharacterTextSplitter(chunk_size=10, chunk_overlap=2)
+text_splitter = CharacterTextSplitter(chunk_size=30, chunk_overlap=5)
 texts = text_splitter.split_documents(documents)
 
 # 3. Tạo embeddings và vector store
