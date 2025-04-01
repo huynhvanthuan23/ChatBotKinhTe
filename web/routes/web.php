@@ -36,9 +36,7 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
 Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->name('admin.api.media');
 
 // Cập nhật route dashboard nếu chưa có
-Route::get('/admin', function () {
-    return view('admin.dashboard');
-})->middleware(['auth'])->name('admin.dashboard');
+Route::get('/admin', [DashboardController::class, 'index'])->middleware(['auth'])->name('admin.dashboard');
 
 require __DIR__.'/auth.php';
 

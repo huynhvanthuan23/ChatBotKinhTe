@@ -1,34 +1,157 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Admin Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layouts.admin')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">Thống kê hệ thống</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-blue-100 p-4 rounded-lg">
-                            <div class="text-xl font-bold">{{ $usersCount }}</div>
-                            <div>Người dùng</div>
+@section('content')
+<div class="container-fluid">
+    <h1 class="h3 mb-4">Dashboard</h1>
+    
+    <div class="row">
+        <!-- Users stats -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Người dùng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $usersCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
                         </div>
                     </div>
-                    
-                    <div class="mt-8">
-                        <h3 class="text-lg font-semibold mb-4">Quản lý hệ thống</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <a href="{{ route('admin.users.index') }}" class="block p-4 bg-indigo-100 rounded-lg hover:bg-indigo-200">
-                                <h4 class="text-lg font-semibold">Quản lý người dùng</h4>
-                                <p class="text-sm text-gray-700">Xem và quản lý tài khoản người dùng</p>
-                            </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts stats -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Bài đăng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $postsCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pages stats -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Trang</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $pagesCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media stats -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Media</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $mediaCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-photo-video fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</x-app-layout>
+
+    <div class="row">
+        <!-- Recent Users -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Người dùng mới nhất</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Tên</th>
+                                    <th>Email</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentUsers as $user)
+                                <tr>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->email }}</td>
+                                    <td>{{ $user->created_at->format('d/m/Y') }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">Không có dữ liệu</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Posts -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Bài đăng mới nhất</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentPosts as $post)
+                                <tr>
+                                    <td>{{ $post->title }}</td>
+                                    <td>
+                                        <span class="badge {{ $post->status == 'published' ? 'bg-success' : 'bg-warning' }}">
+                                            {{ $post->status == 'published' ? 'Đã xuất bản' : 'Bản nháp' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $post->created_at->format('d/m/Y') }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">Không có dữ liệu</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
