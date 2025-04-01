@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\MediaController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -25,15 +25,20 @@ Route::middleware('auth')->group(function () {
 // Admin routes
 Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('users', Admin\UserController::class);
+    Route::resource('users', UserController::class);
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
     Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
-    Route::resource('media', MediaController::class);
-    Route::post('media/upload-from-editor', [MediaController::class, 'uploadFromEditor'])->name('media.upload-from-editor');
+    Route::resource('media', \App\Http\Controllers\Admin\MediaController::class);
+    Route::post('media/upload-from-editor', [\App\Http\Controllers\Admin\MediaController::class, 'uploadFromEditor'])->name('media.upload-from-editor');
 });
 
 // API route cho media manager
 Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->name('admin.api.media');
+
+// Cập nhật route dashboard nếu chưa có
+Route::get('/admin', function () {
+    return view('admin.dashboard');
+})->middleware(['auth'])->name('admin.dashboard');
 
 require __DIR__.'/auth.php';
 

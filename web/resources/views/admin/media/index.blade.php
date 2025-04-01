@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3">Quản lý media</h1>
         <a href="{{ route('admin.media.create') }}" class="btn btn-primary">
-            Tải lên file mới
+            <i class="fas fa-upload"></i> Tải lên file mới
         </a>
     </div>
 

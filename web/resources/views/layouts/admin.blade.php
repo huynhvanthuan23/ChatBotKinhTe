@@ -1,114 +1,230 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ config('app.name', 'Laravel') }} - Admin</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - @yield('title', 'Dashboard')</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            padding-top: 56px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .admin-navbar {
+            background-color: #343a40;
+        }
+        .admin-navbar .navbar-brand {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .admin-navbar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0 0.25rem;
+        }
+        .admin-navbar .nav-link:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .admin-navbar .nav-link.active {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+        .admin-navbar .dropdown-menu {
+            background-color: #343a40;
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .admin-navbar .dropdown-item {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .admin-navbar .dropdown-item:hover, 
+        .admin-navbar .dropdown-item:focus {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .content-wrapper {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding-top: 1rem;
+        }
+        .sidebar .nav-link {
+            color: #343a40;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .sidebar .nav-link:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .sidebar .nav-link.active {
+            color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+            font-weight: 500;
+        }
+        .sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+            margin-right: 0.5rem;
+        }
+        footer {
+            background-color: #f8f9fa;
+            padding: 1rem 0;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+    @stack('styles')
 </head>
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
-        <!-- Navigation -->
-        <nav class="bg-white border-b border-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
-                        <!-- Logo -->
-                        <div class="shrink-0 flex items-center">
-                            <a href="{{ route('admin.dashboard') }}" class="font-bold text-xl">
-                                Admin Panel
-                            </a>
-                        </div>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top admin-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ route('admin.dashboard') }}">Admin Panel</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ Request::routeIs('admin.users.*') || Request::routeIs('admin.posts.*') || Request::routeIs('admin.pages.*') || Request::routeIs('admin.media.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog"></i> Quản lý
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                    <i class="fas fa-users"></i> Quản lý người dùng
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.posts.*') ? 'active' : '' }}" href="{{ route('admin.posts.index') }}">
+                                    <i class="fas fa-file-alt"></i> Quản lý bài đăng
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.pages.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}">
+                                    <i class="fas fa-file"></i> Quản lý trang
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}">
+                                    <i class="fas fa-photo-video"></i> Quản lý Media
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('home') }}" target="_blank">
+                            <i class="fas fa-home"></i> Xem trang chủ
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                    <i class="fas fa-user-edit"></i> Hồ sơ
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-                        <!-- Navigation Links -->
-                        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out">
-                                Dashboard
+    <!-- Main Content -->
+    <div class="container-fluid content-wrapper">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block d-none sidebar">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
-                            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                                Quản lý người dùng
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                <i class="fas fa-users"></i> Quản lý người dùng
                             </a>
-                            <a href="{{ url('/') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                                Về trang chủ
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('admin.posts.*') ? 'active' : '' }}" href="{{ route('admin.posts.index') }}">
+                                <i class="fas fa-file-alt"></i> Quản lý bài đăng
                             </a>
-                            <li class="nav-item">
-                                <a class="nav-link {{ Request::routeIs('admin.posts.*') ? 'active' : '' }}" 
-                                   href="{{ route('admin.posts.index') }}">
-                                    <i class="fas fa-file-alt"></i>
-                                    <span>Quản lý bài đăng</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ Request::routeIs('admin.pages.*') ? 'active' : '' }}" 
-                                   href="{{ route('admin.pages.index') }}">
-                                    <i class="fas fa-file"></i>
-                                    <span>Quản lý trang</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ Request::routeIs('admin.media.*') ? 'active' : '' }}" 
-                                   href="{{ route('admin.media.index') }}">
-                                    <i class="fas fa-photo-video"></i>
-                                    <span>Quản lý Media</span>
-                                </a>
-                            </li>
-                        </div>
-                    </div>
-
-                    <!-- Settings Dropdown -->
-                    <div class="hidden sm:flex sm:items-center sm:ms-6">
-                        <div class="ms-3 relative">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('admin.pages.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}">
+                                <i class="fas fa-file"></i> Quản lý trang
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}">
+                                <i class="fas fa-photo-video"></i> Quản lý Media
+                            </a>
+                        </li>
+                        <li class="nav-item mt-3">
+                            <a class="nav-link" href="{{ route('home') }}" target="_blank">
+                                <i class="fas fa-home"></i> Xem trang chủ
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </nav>
-
-        <!-- Page Heading -->
-        <header class="bg-white shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    @yield('header')
-                </h2>
-            </div>
-        </header>
-
-        <!-- Page Content -->
-        <main>
-            <div class="py-12">
-                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    @if (session('success'))
-                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                            <p>{{ session('success') }}</p>
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                            <p>{{ session('error') }}</p>
-                        </div>
-                    @endif
-
-                    @yield('content')
-                </div>
-            </div>
-        </main>
+            
+            <!-- Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                @yield('content')
+            </main>
+        </div>
     </div>
 
-    @include('admin.partials.media-manager')
+    <!-- Footer -->
+    <footer class="text-center py-3">
+        <div class="container">
+            <span class="text-muted">© {{ date('Y') }} Admin Panel. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
+    
+    <!-- Thêm Media Manager Modal nếu cần -->
+    @if(View::exists('admin.partials.media-manager'))
+        @include('admin.partials.media-manager')
+    @endif
 </body>
 </html>
