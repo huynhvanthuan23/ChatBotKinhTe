@@ -14,7 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::where('role', 'user')->get();
+        $users = User::paginate(10);
         return view('admin.users.index', compact('users'));
     }
 
@@ -35,16 +35,15 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:user,admin',
         ]);
 
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'user',
-        ]);
+        $validated['password'] = Hash::make($validated['password']);
 
-        return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được tạo thành công.');
+        User::create($validated);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Người dùng đã được tạo thành công.');
     }
 
     /**
@@ -68,22 +67,30 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
+            'role' => 'required|in:user,admin',
+        ];
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        
-        if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
+        // Chỉ thêm quy tắc cho mật khẩu nếu người dùng muốn thay đổi
+        if ($request->filled('password')) {
+            $rules['password'] = 'string|min:8|confirmed';
         }
 
-        $user->save();
+        $validated = $request->validate($rules);
 
-        return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được cập nhật thành công.');
+        // Chỉ cập nhật mật khẩu nếu có giá trị mới
+        if ($request->filled('password')) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Thông tin người dùng đã được cập nhật thành công.');
     }
 
     /**
@@ -91,7 +98,15 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        // Ngăn xóa chính mình
+        if ($user->id === auth()->id()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Bạn không thể xóa tài khoản của chính mình.');
+        }
+
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được xóa thành công.');
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Người dùng đã được xóa thành công.');
     }
 } 

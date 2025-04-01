@@ -5,52 +5,58 @@
 @endsection
 
 @section('content')
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold">Danh sách người dùng</h3>
-                <a href="{{ route('admin.users.create') }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Thêm người dùng</a>
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">Danh sách người dùng</h1>
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Thêm người dùng
+            </a>
+        </div>
+
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
             </div>
-            
-            @if(session('success'))
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border">
-                    <thead>
-                        <tr>
-                            <th class="py-2 px-4 border-b">ID</th>
-                            <th class="py-2 px-4 border-b">Tên</th>
-                            <th class="py-2 px-4 border-b">Email</th>
-                            <th class="py-2 px-4 border-b">Ngày tạo</th>
-                            <th class="py-2 px-4 border-b">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($users as $user)
+        @endif
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
                             <tr>
-                                <td class="py-2 px-4 border-b">{{ $user->id }}</td>
-                                <td class="py-2 px-4 border-b">{{ $user->name }}</td>
-                                <td class="py-2 px-4 border-b">{{ $user->email }}</td>
-                                <td class="py-2 px-4 border-b">{{ $user->created_at->format('d/m/Y') }}</td>
-                                <td class="py-2 px-4 border-b">
-                                    <div class="flex space-x-2">
-                                        <a href="{{ route('admin.users.show', $user) }}" class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Xem</a>
-                                        <a href="{{ route('admin.users.edit', $user) }}" class="px-2 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm">Sửa</a>
-                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Xóa</button>
-                                        </form>
-                                    </div>
+                                <th>ID</th>
+                                <th>Tên</th>
+                                <th>Email</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($users as $user)
+                            <tr>
+                                <td>{{ $user->id }}</td>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>{{ $user->created_at->format('d/m/Y') }}</td>
+                                <td>
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </a>
+                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                {{ $users->links() }}
             </div>
         </div>
     </div>

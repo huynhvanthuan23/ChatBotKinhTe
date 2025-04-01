@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\MediaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,14 +25,15 @@ Route::middleware('auth')->group(function () {
 // Admin routes
 Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('users', UserController::class);
-    
-    // Thêm routes cho admin ở đây
-    // Ví dụ:
-    // Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    // Route::resource('categories', CategoryController::class);
-    // Route::resource('products', ProductController::class);
+    Route::resource('users', Admin\UserController::class);
+    Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
+    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
+    Route::resource('media', MediaController::class);
+    Route::post('media/upload-from-editor', [MediaController::class, 'uploadFromEditor'])->name('media.upload-from-editor');
 });
+
+// API route cho media manager
+Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->name('admin.api.media');
 
 require __DIR__.'/auth.php';
 

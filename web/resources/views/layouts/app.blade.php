@@ -32,5 +32,16 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- Menu pages -->
+        @if(isset($menuPages) && count($menuPages) > 0)
+            @foreach($menuPages as $menuPage)
+            <li class="nav-item">
+                <a class="nav-link {{ request()->is('page/'.$menuPage->slug) ? 'active' : '' }}" href="{{ route('pages.show', $menuPage->slug) }}">
+                    {{ $menuPage->title }}
+                </a>
+            </li>
+            @endforeach
+        @endif
     </body>
 </html>

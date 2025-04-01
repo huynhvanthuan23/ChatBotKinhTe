@@ -5,45 +5,65 @@
 @endsection
 
 @section('content')
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
-            <form method="POST" action="{{ route('admin.users.store') }}">
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Thêm người dùng mới</h3>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.users.store') }}" method="POST">
                 @csrf
-                
-                <div class="mb-4">
-                    <label for="name" class="block text-sm font-medium text-gray-700">Tên</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Tên</label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                           id="name" name="name" value="{{ old('name') }}" required>
                     @error('name')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" name="email" id="email" value="{{ old('email') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                           id="email" name="email" value="{{ old('email') }}" required>
                     @error('email')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
-                    <input type="password" name="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Mật khẩu</label>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                           id="password" name="password" required>
                     @error('password')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <div class="mb-4">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+
+                <div class="mb-3">
+                    <label for="password_confirmation" class="form-label">Xác nhận mật khẩu</label>
+                    <input type="password" class="form-control" 
+                           id="password_confirmation" name="password_confirmation" required>
                 </div>
-                
-                <div class="flex items-center justify-end">
-                    <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 mr-2">Hủy</a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Thêm người dùng</button>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Vai trò</label>
+                    <select class="form-select @error('role') is-invalid @enderror" 
+                            id="role" name="role" required>
+                        <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Người dùng</option>
+                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Quản trị viên</option>
+                    </select>
+                    @error('role')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Thêm mới</button>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Hủy</a>
                 </div>
             </form>
         </div>
     </div>
+</div>
 @endsection
