@@ -43,8 +43,10 @@ Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->name(
 Route::get('/admin', [DashboardController::class, 'index'])->middleware(['auth'])->name('admin.dashboard');
 
 // Route chat
-Route::get('/chat', [ChatController::class, 'index'])->name('chat');
-Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+Route::middleware('auth')->group(function () {
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat');
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+});
 
 // Frontend page routes
 Route::get('/page/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');

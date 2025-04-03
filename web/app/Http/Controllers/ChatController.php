@@ -14,7 +14,7 @@ class ChatController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // Middleware auth sẽ được áp dụng trong route definition
     }
 
     /**
