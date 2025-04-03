@@ -334,6 +334,12 @@
         background: transparent;
         font-size: 15px;
     }
+    
+    #message-input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    }
 
     #send-button {
         border: none;
@@ -352,7 +358,7 @@
     /* Chat messages */
     .chat-message {
         margin-bottom: 20px;
-        max-width: 80%;
+        max-width: 60%;
     }
 
     .chat-message.user {
