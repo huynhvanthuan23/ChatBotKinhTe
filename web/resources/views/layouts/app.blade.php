@@ -13,6 +13,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
@@ -33,15 +36,49 @@
             </main>
         </div>
 
-        <!-- Menu pages -->
+        <!-- Menu pages với cấu trúc đa cấp -->
         @if(isset($menuPages) && count($menuPages) > 0)
             @foreach($menuPages as $menuPage)
-            <li class="nav-item">
-                <a class="nav-link {{ request()->is('page/'.$menuPage->slug) ? 'active' : '' }}" href="{{ route('pages.show', $menuPage->slug) }}">
-                    {{ $menuPage->title }}
-                </a>
-            </li>
+                @if($menuPage->children->count() > 0)
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('page/' . $menuPage->slug) || request()->is('page/' . $menuPage->slug . '/*') ? 'active' : '' }}" 
+                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ $menuPage->title }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ request()->is('page/' . $menuPage->slug) ? 'active' : '' }}" 
+                                   href="{{ route('pages.show', $menuPage->slug) }}">
+                                    {{ $menuPage->title }}
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            @foreach($menuPage->children as $childPage)
+                                <li>
+                                    <a class="dropdown-item {{ request()->is('page/' . $childPage->slug) ? 'active' : '' }}" 
+                                       href="{{ route('pages.show', $childPage->slug) }}">
+                                        {{ $childPage->title }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </li>
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('page/' . $menuPage->slug) ? 'active' : '' }}" 
+                           href="{{ $menuPage->is_homepage ? route('home') : route('pages.show', $menuPage->slug) }}">
+                            {{ $menuPage->title }}
+                        </a>
+                    </li>
+                @endif
             @endforeach
         @endif
+
+        <!-- Thêm link chat trong phần menu -->
+        <li class="nav-item">
+            <a class="nav-link {{ Request::routeIs('chat') ? 'active' : '' }}" href="{{ route('chat') }}">
+                <i class="fas fa-robot"></i> Chat với Bot
+            </a>
+        </li>
     </body>
 </html>
