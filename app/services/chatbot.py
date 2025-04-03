@@ -5,7 +5,7 @@ from langchain.prompts import PromptTemplate
 from langchain_community.llms import LlamaCpp
 from typing import Dict, Any, Optional
 from app.core.config import settings
-from app.core.logging import get_logger
+from app.core.logger import get_logger
 import os
 
 logger = get_logger(__name__)

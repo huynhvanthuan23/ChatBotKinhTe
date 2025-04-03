@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 import os
 from app.core.config import settings
 from app.api.endpoints import chat
-from app.core.logging import get_logger
+from app.core.logger import get_logger
 
 logger = get_logger(__name__)
 

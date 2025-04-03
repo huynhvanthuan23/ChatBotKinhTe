@@ -195,6 +195,11 @@
                                 <i class="fas fa-photo-video"></i> Quản lý Media
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('admin.system.index') ? 'active' : '' }}" href="{{ route('admin.system.index') }}">
+                                <i class="fas fa-server"></i> Trạng thái hệ thống
+                            </a>
+                        </li>
                         <li class="nav-item mt-3">
                             <a class="nav-link" href="{{ route('home') }}" target="_blank">
                                 <i class="fas fa-home"></i> Xem trang chủ

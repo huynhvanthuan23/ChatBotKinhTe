@@ -34,6 +34,13 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
     Route::post('posts/check-title', [App\Http\Controllers\Admin\PostController::class, 'checkTitle'])->name('posts.checkTitle');
     Route::post('pages/check-title', [App\Http\Controllers\Admin\PageController::class, 'checkTitle'])->name('pages.checkTitle');
     Route::post('pages/{page}/set-homepage', [App\Http\Controllers\Admin\PageController::class, 'setHomepage'])->name('pages.set-homepage');
+    
+    // System status routes
+    Route::get('/system', [\App\Http\Controllers\Admin\SystemController::class, 'index'])->name('system.index');
+    Route::post('/system/test-chatbot', [\App\Http\Controllers\Admin\SystemController::class, 'testChatbot'])->name('system.test-chatbot');
+    Route::get('/system/api-docs', function () {
+        return view('admin.system.api-docs');
+    })->name('system.api-docs');
 });
 
 // API route cho media manager
@@ -46,6 +53,7 @@ Route::get('/admin', [DashboardController::class, 'index'])->middleware(['auth']
 Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::get('/chat/test-connection', [ChatController::class, 'testConnection'])->name('chat.test-connection');
 });
 
 // Frontend page routes

@@ -358,7 +358,7 @@
     /* Chat messages */
     .chat-message {
         margin-bottom: 20px;
-        max-width: 60%;
+        max-width: 80%;
     }
 
     .chat-message.user {
@@ -445,64 +445,50 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('message-input');
     const chatForm = document.getElementById('chat-form');
     const chatMessages = document.getElementById('chat-messages');
-    const typingIndicator = document.createElement('div');
-    typingIndicator.id = 'typing-indicator';
-    typingIndicator.className = 'chat-message bot';
-    typingIndicator.innerHTML = `
-        <div class="message-content">
-            <div class="typing-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    `;
-    chatMessages.appendChild(typingIndicator);
+    const typingIndicator = document.getElementById('typing-indicator');
+    const suggestionBtns = document.querySelectorAll('.suggestion-btn');
     
-    // User avatar dropdown
-    const userAvatar = document.getElementById('user-avatar');
-    const avatarDropdown = document.getElementById('avatar-dropdown');
+    let conversationId = Date.now(); // Mã cuộc trò chuyện
+    let isProcessing = false; // Biến trạng thái đang xử lý
     
-    userAvatar.addEventListener('click', function(e) {
-        e.stopPropagation();
-        avatarDropdown.classList.toggle('show');
+    // Khởi tạo bộ xử lý markdown
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false,
     });
     
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!userAvatar.contains(e.target) && !avatarDropdown.contains(e.target)) {
-            avatarDropdown.classList.remove('show');
-        }
-    });
-    
-    let conversationId = Date.now();
-    let isProcessing = false;
-    
-    // Auto resize textarea
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
+    // Kiểm tra kết nối với API chatbot khi trang được tải
+    testChatbotConnection();
     
     // Xử lý gửi tin nhắn
     chatForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (isProcessing) return;
+        if (isProcessing) return; // Ngăn gửi khi đang xử lý
         
         const message = messageInput.value.trim();
         if (message) {
             sendMessage(message);
             messageInput.value = '';
-            messageInput.style.height = 'auto';
         }
     });
     
-    // Xử lý khi nhấn Enter
+    // Xử lý nút gợi ý
+    suggestionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const message = this.getAttribute('data-message');
+            messageInput.value = message;
+            chatForm.dispatchEvent(new Event('submit'));
+        });
+    });
+    
+    // Xử lý khi nhấn Enter (gửi tin nhắn)
     messageInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -510,8 +496,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Focus input khi mở trang
-    messageInput.focus();
+    // Hàm kiểm tra kết nối với chatbot API
+    function testChatbotConnection() {
+        fetch('{{ route("chat.test-connection") }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Kết nối chatbot API thành công:', data);
+                } else {
+                    console.error('Lỗi kết nối chatbot API:', data);
+                    showConnectionError();
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi kiểm tra kết nối:', error);
+                showConnectionError();
+            });
+    }
+    
+    // Hiển thị thông báo lỗi kết nối
+    function showConnectionError() {
+        appendMessage(
+            'Không thể kết nối với chatbot API. Vui lòng kiểm tra lại kết nối hoặc liên hệ quản trị viên.', 
+            'bot', 
+            'error'
+        );
+    }
     
     // Hàm gửi tin nhắn
     function sendMessage(message) {
@@ -526,12 +536,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hiển thị tin nhắn của người dùng
         appendMessage(message, 'user');
         
-        // Hiển thị đang gõ
-        typingIndicator.style.display = 'block';
+        // Hiển thị biểu tượng đang gõ
+        typingIndicator.classList.remove('d-none');
         isProcessing = true;
-        
-        // Cuộn xuống dưới
-        scrollToBottom();
         
         // Gửi request đến server
         fetch('{{ route("chat.send") }}', {
@@ -545,10 +552,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 conversation_id: conversationId
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Lỗi kết nối server: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
-            // Ẩn typing indicator
-            typingIndicator.style.display = 'none';
+            // Ẩn biểu tượng đang gõ
+            typingIndicator.classList.add('d-none');
             isProcessing = false;
             
             // Hiển thị tin nhắn từ bot
@@ -559,22 +571,43 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            typingIndicator.style.display = 'none';
+            typingIndicator.classList.add('d-none');
             isProcessing = false;
-            appendMessage('Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.', 'bot');
+            
+            // Hiển thị lỗi
+            appendMessage('Xin lỗi, có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Chi tiết: ' + error.message, 'bot', 'error');
+            scrollToBottom();
         });
     }
     
     // Hàm thêm tin nhắn vào giao diện
-    function appendMessage(message, sender) {
+    function appendMessage(message, sender, type = 'normal') {
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message', sender);
         
-        messageElement.innerHTML = `
-            <div class="message-content">${message}</div>
-        `;
+        if (type === 'error') {
+            messageElement.classList.add('error');
+        }
         
-        chatMessages.insertBefore(messageElement, typingIndicator);
+        if (sender === 'user') {
+            messageElement.innerHTML = `
+                <div class="message-content">${message}</div>
+            `;
+        } else {
+            // Xử lý markdown cho tin nhắn của bot
+            const formattedMessage = type === 'error' 
+                ? `<div class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>${message}</div>`
+                : marked.parse(message);
+            
+            messageElement.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">${formattedMessage}</div>
+            `;
+        }
+        
+        chatMessages.appendChild(messageElement);
         scrollToBottom();
     }
     

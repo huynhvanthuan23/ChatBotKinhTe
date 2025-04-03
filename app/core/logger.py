@@ -4,8 +4,11 @@ from importlib import import_module
 import json
 import logging as python_logging
 import sys
-from .config import settings  
+from .config import settings
+from dotenv import load_dotenv
+from pydantic import validator  
 
+# Sử dụng import module để tránh lỗi khi import
 pydantic_settings = import_module('pydantic_settings')
 BaseSettings = pydantic_settings.BaseSettings
 

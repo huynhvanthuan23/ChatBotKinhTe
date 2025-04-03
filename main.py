@@ -7,6 +7,7 @@ import os
 from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.api.endpoints import chat  
+from fastapi.middleware.cors import CORSMiddleware
 
 # Tạo ứng dụng FastAPI
 app = FastAPI(
@@ -15,6 +16,15 @@ app = FastAPI(
     version="1.0.0",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
+)
+
+# Cấu hình CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "*"],  # Cho phép Laravel kết nối
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Tạo router và đăng ký vào app

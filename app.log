@@ -30,3 +30,31 @@
 2025-03-24 14:23:39,998 - app.services.chatbot - INFO - ChatbotService components initialized successfully
 2025-03-24 14:26:16,421 - app.services.chatbot - INFO - Answer generated successfully
 2025-03-24 14:26:16,421 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-03 23:51:42,606 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-03 23:51:42,725 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-03 23:51:47,802 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-04-03 23:51:47,802 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-03 23:51:51,469 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-03 23:51:51,472 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-03 23:51:51,545 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-03 23:51:51,550 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-03 23:51:51,651 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-03 23:51:54,079 - app.services.chatbot - INFO - Loaded LLM model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-03 23:51:54,080 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-03 23:53:20,181 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-03 23:53:20,181 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-04 00:06:57,563 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 00:14:01,780 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 00:22:50,833 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 00:25:53,554 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 00:25:58,698 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-04-04 00:25:58,699 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 00:26:02,108 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 00:26:02,110 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 00:26:02,240 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 00:26:02,244 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 00:26:02,245 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 00:26:02,776 - app.services.chatbot - INFO - Loaded LLM model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-04 00:26:02,777 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-04 00:27:32,878 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-04 00:27:32,878 - app.api.endpoints.chat - INFO - Successfully generated response
