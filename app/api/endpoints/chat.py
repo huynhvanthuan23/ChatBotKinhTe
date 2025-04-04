@@ -145,11 +145,22 @@ async def chat_direct(data: Dict[str, Any] = Body(...), chatbot_service: Chatbot
     logger.info(f"Received direct chat request from user {user_id}: {message}")
     try:
         answer = await chatbot_service.get_answer(message)
-        logger.info("Successfully generated response")
+        logger.info(f"Generated answer: {answer}")
+        
+        # Kiểm tra không trả về kết quả rỗng
+        if not answer or not answer.get("answer") or answer.get("answer").strip() == "":
+            logger.warning("Empty answer generated, using fallback response")
+            response_text = "Xin lỗi, tôi không thể xử lý câu hỏi này lúc này. Vui lòng thử lại với cách diễn đạt khác."
+        else:
+            response_text = answer.get("answer")
+        
         return {
-            "response": answer["answer"],
+            "response": response_text,
             "query": message
         }
     except Exception as e:
         logger.error(f"Error processing chat request: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}") 
+        return {
+            "response": f"Xin lỗi, đã xảy ra lỗi khi xử lý câu hỏi của bạn: {str(e)}",
+            "query": message
+        } 

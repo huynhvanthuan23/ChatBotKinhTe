@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Validation\ValidationException;
 
 class ChatController extends Controller
 {
@@ -18,7 +19,6 @@ class ChatController extends Controller
     public function __construct()
     {
         // Middleware auth sẽ được áp dụng trong định nghĩa route
-        // KHÔNG gọi $this->middleware() ở đây
     }
 
     /**
@@ -39,36 +39,71 @@ class ChatController extends Controller
      */
     public function sendMessage(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string|max:1000',
-            'conversation_id' => 'nullable|string',
-        ]);
-
         try {
-            // Sử dụng API endpoint từ .env
-            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/ping');
+            $validated = $request->validate([
+                'message' => 'required|string|max:1000',
+            ]);
+
+            // Sử dụng API endpoint đúng từ .env với port 8080
+            $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
+            $apiUrl = $baseUrl . '/chat-direct';
+            
+            // Log thông tin gửi đi
+            Log::info('Sending message to API URL: ' . $apiUrl . ' with message: ' . $request->message);
             
             $client = new Client([
-                'timeout' => 30,
-                'connect_timeout' => 5,
+                'timeout' => 60,  // Tăng timeout lên để chờ model xử lý
+                'connect_timeout' => 10,
             ]);
             
-            // Kiểm tra kết nối trước
-            $pingResponse = $client->get($apiUrl, [
+            // Gọi API chat-direct
+            $response = $client->post($apiUrl, [
+                'json' => [
+                    'message' => $request->message,
+                    'user_id' => Auth::id() ? (string)Auth::id() : null
+                ],
                 'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                 ]
             ]);
             
-            $pingResult = json_decode($pingResponse->getBody()->getContents(), true);
-            Log::info('API Ping: ' . json_encode($pingResult));
+            $responseBody = $response->getBody()->getContents();
+            Log::info('Raw API Response: ' . $responseBody);
             
-            // Hiển thị thông báo kết nối thành công thay vì xử lý chat thực sự
-            return response()->json([
-                'message' => 'Kết nối thành công với Chatbot API! Phản hồi: ' . ($pingResult['message'] ?? 'API hoạt động')
-            ]);
-        } catch (\Exception $e) {
+            $result = json_decode($responseBody, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('JSON decode error: ' . json_last_error_msg() . ', Raw response: ' . substr($responseBody, 0, 500));
+                return response()->json([
+                    'message' => 'Lỗi phân tích dữ liệu từ server. Vui lòng thử lại sau.'
+                ], 500);
+            }
+            
+            Log::info('Parsed Chat API Response: ' . json_encode($result));
+            
+            // Trả về kết quả từ API - kiểm tra các trường có thể có
+            if (isset($result['response']) && !empty(trim($result['response']))) {
+                return response()->json([
+                    'message' => $result['response']
+                ]);
+            } elseif (isset($result['answer']) && !empty(trim($result['answer']))) {
+                return response()->json([
+                    'message' => $result['answer']
+                ]);
+            } elseif (isset($result['result']) && !empty(trim($result['result']))) {
+                return response()->json([
+                    'message' => $result['result']
+                ]);
+            } else {
+                // Phản hồi mặc định nếu không có nội dung hợp lệ
+                Log::warning('Empty or unexpected API response structure: ' . $responseBody);
+                return response()->json([
+                    'message' => 'Tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại với cách diễn đạt khác.'
+                ]);
+            }
+        } catch (Exception $e) {
+            // Xử lý lỗi
             Log::error('Chat Processing Error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Xin lỗi, có lỗi xảy ra trong quá trình xử lý tin nhắn của bạn: ' . $e->getMessage()
@@ -81,11 +116,18 @@ class ChatController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function testConnection()
+    public function testConnection(Request $request)
     {
         try {
+            // Make sure to use the correct port 8080 where our API is running
+            $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
+            $apiUrl = $baseUrl . '/ping';
+            
+            // Log the URL we're trying to connect to for debugging
+            Log::info('Testing connection to API URL: ' . $apiUrl);
+            
             $client = new Client(['timeout' => 5]);
-            $response = $client->get(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/ping'), [
+            $response = $client->get($apiUrl, [
                 'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
@@ -93,6 +135,7 @@ class ChatController extends Controller
             ]);
             
             $result = json_decode($response->getBody()->getContents(), true);
+            Log::info('API Test Response: ' . json_encode($result));
             
             return response()->json([
                 'success' => true,
@@ -117,8 +160,9 @@ class ChatController extends Controller
      */
     private function callChatbotAPI($message)
     {
-        // Sử dụng endpoint đúng của FastAPI
-        $apiUrl = 'http://localhost:8000/api/v1/chat/chat-direct';
+        // Use the environment variable for API URL
+        $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/'), '/');
+        $apiUrl = $baseUrl . '/chat-direct';
         
         $client = new Client([
             'timeout' => 30,
@@ -184,7 +228,9 @@ class ChatController extends Controller
      */
     private function callChatbotAPIAlternative($message)
     {
-        $apiUrl = 'http://localhost:8000/api/v1/chat/chat-direct';
+        // Use the environment variable for API URL
+        $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/'), '/');
+        $apiUrl = $baseUrl . '/chat-direct';
         
         $client = new Client([
             'timeout' => 30,

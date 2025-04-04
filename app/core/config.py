@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     N_CTX: int = int(os.getenv("N_CTX", "2048"))
     N_GPU_LAYERS: int = int(os.getenv("N_GPU_LAYERS", "8"))
     
+    # HuggingFace model settings
+    HF_MODEL_ID: str = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct-v0.2")
+    
+    # API URLs
+    CHATBOT_API_URL: Optional[str] = os.getenv("CHATBOT_API_URL", None)
+    
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-change-this-in-production")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))

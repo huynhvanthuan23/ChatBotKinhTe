@@ -27,6 +27,11 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+        
+        // Kiểm tra vai trò admin và chuyển hướng tương ứng
+        if (Auth::user() && Auth::user()->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
 
         return redirect()->intended(route('chat', absolute: false));
     }

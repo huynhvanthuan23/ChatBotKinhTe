@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.api.endpoints import chat  
 from fastapi.middleware.cors import CORSMiddleware
+from app.services.chatbot import ChatbotService
 
 # Tạo ứng dụng FastAPI
 app = FastAPI(
@@ -51,6 +52,15 @@ async def favicon():
         return FileResponse("app/web/static/img/favicon.ico")
     
     return FileResponse(favicon_path)
+
+# Pre-load model to GPU
+try:
+    # Khởi tạo chatbot service khi server khởi động
+    print("Preloading ChatbotService model to GPU... This may take a moment.")
+    ChatbotService()
+    print("ChatbotService model loaded successfully!")
+except Exception as e:
+    print(f"Error preloading ChatbotService model: {str(e)}")
 
 # Chạy ứng dụng
 if __name__ == "__main__":

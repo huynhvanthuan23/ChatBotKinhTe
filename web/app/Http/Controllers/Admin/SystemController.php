@@ -37,8 +37,11 @@ class SystemController extends Controller
         ];
         
         try {
+            $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
+            $healthUrl = $baseUrl . '/health';
+            
             $client = new Client(['timeout' => 5]);
-            $response = $client->get(env('CHATBOT_API_URL', 'http://localhost:8000/api/v1/chat/health'));
+            $response = $client->get($healthUrl);
             
             if ($response->getStatusCode() == 200) {
                 $result = json_decode($response->getBody()->getContents(), true);

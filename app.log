@@ -58,3 +58,424 @@
 2025-04-04 00:26:02,777 - app.services.chatbot - INFO - ChatbotService components initialized successfully
 2025-04-04 00:27:32,878 - app.services.chatbot - INFO - Answer generated successfully
 2025-04-04 00:27:32,878 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-04 19:26:20,484 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 19:26:20,570 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 19:26:33,193 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 19:26:33,194 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 19:26:38,330 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 19:26:38,336 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 19:26:38,669 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 19:26:38,681 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 19:26:38,683 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 19:26:38,687 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Could not import llama-cpp-python library. Please install the llama-cpp-python library to use this embedding model: pip install llama-cpp-python
+2025-04-04 19:26:38,688 - app.services.chatbot - ERROR - Error generating answer: Could not import llama-cpp-python library. Please install the llama-cpp-python library to use this embedding model: pip install llama-cpp-python
+2025-04-04 19:26:38,689 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-04 22:17:49,313 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled, device: cuda)
+2025-04-04 22:17:49,342 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:17:49,536 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:17:49,536 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:17:54,400 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:17:54,402 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 22:17:54,497 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 22:17:54,503 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 22:17:54,510 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:17:54,510 - app.services.chatbot - INFO - Loading HuggingFace model from mistralai/Mistral-7B-Instruct-v0.2
+2025-04-04 22:17:55,067 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff822-5be73e71101d05e55274c045;932d4f4b-bd57-48c5-be7d-3e8d4161cd79)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:17:55,069 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff822-5be73e71101d05e55274c045;932d4f4b-bd57-48c5-be7d-3e8d4161cd79)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:17:57,086 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:17:57,089 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:17:57,089 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:18:00,152 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:18:00,152 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:18:00,152 - app.services.chatbot - INFO - Loading HuggingFace model from mistralai/Mistral-7B-Instruct-v0.2
+2025-04-04 22:18:00,703 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff828-174472465dd128180ce37de2;cae6e3af-1a44-4947-8ca2-8e36aa348e3f)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:18:00,713 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff828-174472465dd128180ce37de2;cae6e3af-1a44-4947-8ca2-8e36aa348e3f)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:18:02,740 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:18:02,743 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:18:02,744 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:18:06,069 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:18:06,069 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:18:06,069 - app.services.chatbot - INFO - Loading HuggingFace model from mistralai/Mistral-7B-Instruct-v0.2
+2025-04-04 22:18:06,637 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff82e-40da51b64da9d1862805cc2d;f75278d3-45ec-4d6e-b8fc-bc69f7cbbc38)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:18:06,647 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff82e-40da51b64da9d1862805cc2d;f75278d3-45ec-4d6e-b8fc-bc69f7cbbc38)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:18:54,692 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled, device: cuda)
+2025-04-04 22:18:54,703 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:18:54,840 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:18:54,842 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:18:59,136 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:18:59,136 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 22:18:59,168 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 22:18:59,177 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 22:18:59,178 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:18:59,179 - app.services.chatbot - INFO - Loading HuggingFace model from mistralai/Mistral-7B-Instruct-v0.2
+2025-04-04 22:18:59,778 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff863-2798db046dff032d57d73aaa;9006aa35-7c36-476b-8f4a-5a5142580983)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:18:59,780 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff863-2798db046dff032d57d73aaa;9006aa35-7c36-476b-8f4a-5a5142580983)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:19:01,798 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:19:01,802 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:19:01,802 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:19:05,703 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:19:05,703 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:19:05,703 - app.services.chatbot - INFO - Loading HuggingFace model from mistralai/Mistral-7B-Instruct-v0.2
+2025-04-04 22:19:06,260 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff86a-7b792cc55a197ef157e0b769;e15eee3a-c178-4aef-851e-bf7446eb2708)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:19:06,261 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff86a-7b792cc55a197ef157e0b769;e15eee3a-c178-4aef-851e-bf7446eb2708)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:19:08,279 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:19:08,281 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:19:08,281 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:19:11,330 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:19:11,330 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:19:11,330 - app.services.chatbot - INFO - Loading HuggingFace model from mistralai/Mistral-7B-Instruct-v0.2
+2025-04-04 22:19:11,924 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff86f-6e65fedc0775fa09320fa6c9;49523093-ce74-49e7-b9f0-1497ccf05373)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:19:11,931 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2.
+401 Client Error. (Request ID: Root=1-67eff86f-6e65fedc0775fa09320fa6c9;49523093-ce74-49e7-b9f0-1497ccf05373)
+
+Cannot access gated repo for url https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json.
+Access to model mistralai/Mistral-7B-Instruct-v0.2 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:23:28,297 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled, device: cuda)
+2025-04-04 22:23:28,298 - app.services.chatbot - INFO - Processing query: Kinh tế học là gì?
+2025-04-04 22:23:28,298 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:23:28,419 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:23:28,419 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:23:33,102 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:23:33,105 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 22:23:33,127 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 22:23:33,134 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 22:23:33,135 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:23:33,135 - app.services.chatbot - INFO - Loading HuggingFace model from google/gemma-2b-it
+2025-04-04 22:23:33,703 - app.services.chatbot - ERROR - Error initializing ChatbotService components: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/google/gemma-2b-it.
+401 Client Error. (Request ID: Root=1-67eff975-2e5011ca55d6023156a3b206;c274238e-37d8-4151-a98f-840b28c9c70b)
+
+Cannot access gated repo for url https://huggingface.co/google/gemma-2b-it/resolve/main/config.json.
+Access to model google/gemma-2b-it is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:23:33,713 - app.services.chatbot - ERROR - Error generating answer: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/google/gemma-2b-it.
+401 Client Error. (Request ID: Root=1-67eff975-2e5011ca55d6023156a3b206;c274238e-37d8-4151-a98f-840b28c9c70b)
+
+Cannot access gated repo for url https://huggingface.co/google/gemma-2b-it/resolve/main/config.json.
+Access to model google/gemma-2b-it is restricted. You must have access to it and be authenticated to access it. Please log in.
+2025-04-04 22:23:35,719 - app.services.chatbot - INFO - Processing query: Giải thích về lạm phát và ảnh hưởng của nó?
+2025-04-04 22:23:35,724 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:23:35,728 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:23:35,729 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:25:52,945 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled, device: cuda)
+2025-04-04 22:25:52,945 - app.services.chatbot - INFO - Processing query: Kinh tế học là gì?
+2025-04-04 22:25:52,945 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:25:53,217 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:25:53,217 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:25:57,556 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:25:57,560 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 22:25:57,583 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 22:25:57,591 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 22:25:57,593 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:25:57,593 - app.services.chatbot - INFO - Loading HuggingFace model from TinyLlama/TinyLlama-1.1B-Chat-v1.0
+2025-04-04 22:26:01,043 - app.services.chatbot - INFO - Loaded tokenizer
+2025-04-04 22:26:01,043 - app.services.chatbot - INFO - Using CUDA device: NVIDIA GeForce GTX 1650 with Max-Q Design
+2025-04-04 22:27:09,038 - accelerate.utils.modeling - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+2025-04-04 22:27:11,922 - app.services.chatbot - INFO - Loaded model
+2025-04-04 22:27:11,954 - app.services.chatbot - INFO - Created text generation pipeline
+2025-04-04 22:27:11,954 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-04 22:27:42,272 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-04 22:27:44,287 - app.services.chatbot - INFO - Processing query: Giải thích về lạm phát và ảnh hưởng của nó?
+2025-04-04 22:28:17,598 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-04 22:28:19,612 - app.services.chatbot - INFO - Processing query: Thế nào là tăng trưởng kinh tế bền vững?
+2025-04-04 22:28:41,977 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-04 22:34:37,001 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 22:34:37,002 - app.services.chatbot - INFO - Processing query: Kinh tế học là gì?
+2025-04-04 22:34:37,002 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:34:45,633 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:34:45,633 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:34:50,122 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:34:50,129 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 22:34:50,151 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 22:34:50,160 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 22:34:50,161 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:34:50,162 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf with n_gpu_layers=8
+2025-04-04 22:34:55,718 - app.services.chatbot - INFO - Loaded LLM model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-04 22:34:55,761 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-04 22:37:41,363 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 22:37:41,364 - app.services.chatbot - INFO - Processing query: Kinh tế học là gì?
+2025-04-04 22:37:41,365 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 22:37:49,918 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 22:37:49,918 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:37:53,934 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 22:37:53,946 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 22:37:53,970 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 22:37:53,979 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 22:37:53,980 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 22:37:53,980 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-04 22:37:57,690 - app.services.chatbot - INFO - Loaded LLM model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-04 22:37:57,739 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-04 23:48:56,042 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 23:48:56,042 - app.api.endpoints.chat - INFO - Received direct chat request from user None: kinh tế học là gì
+2025-04-04 23:48:56,042 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-04 23:48:56,042 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 23:49:06,285 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 23:49:06,286 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 23:49:11,067 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 23:49:11,071 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 23:49:11,149 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 23:49:11,159 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 23:49:11,162 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 23:49:11,162 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-04 23:49:12,652 - app.services.chatbot - INFO - Loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-04 23:49:12,656 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-04 23:49:18,082 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-04 23:49:18,083 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-04 23:56:54,575 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-04 23:56:54,575 - app.api.endpoints.chat - INFO - Received direct chat request from user None: kinh tế học là gì
+2025-04-04 23:56:54,575 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-04 23:56:54,575 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-04 23:57:00,983 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-04 23:57:00,983 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 23:57:14,633 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-04 23:57:14,635 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-04 23:57:14,649 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-04 23:57:14,654 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-04 23:57:14,655 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-04 23:57:14,655 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-04 23:57:15,909 - app.services.chatbot - INFO - Loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-04 23:57:15,911 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-04 23:57:36,844 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-04 23:57:36,845 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 00:00:58,845 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-05 00:00:58,846 - app.services.chatbot - INFO - Processing query: Kinh tế học là gì?
+2025-04-05 00:00:58,846 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 00:01:02,137 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 00:01:02,138 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 00:01:06,254 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 00:01:06,258 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 00:01:06,279 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 00:01:06,286 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 00:01:06,288 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 00:01:06,288 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-05 00:01:11,762 - app.services.chatbot - INFO - Loaded LLM model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-05 00:01:11,799 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 00:09:36,308 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-05 00:09:36,309 - app.api.endpoints.chat - INFO - Received direct chat request from user None: kinh tế học là gì
+2025-04-05 00:09:36,309 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 00:09:36,309 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 00:09:43,314 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 00:09:43,315 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 00:09:47,711 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 00:09:47,712 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 00:09:47,725 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 00:09:47,736 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 00:09:47,736 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 00:09:47,737 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-05 00:09:49,238 - app.services.chatbot - INFO - Loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-05 00:09:49,241 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 00:10:11,506 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 00:10:11,506 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 00:14:42,350 - app.services.chatbot - INFO - ChatbotService instance created (lazy loading enabled)
+2025-04-05 00:14:42,352 - app.api.endpoints.chat - INFO - Received direct chat request from user None: kinh tế học là gì
+2025-04-05 00:14:42,352 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 00:14:42,352 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 00:14:48,548 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 00:14:48,548 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 00:15:02,873 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 00:15:02,873 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 00:15:02,891 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 00:15:02,895 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 00:15:02,895 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 00:15:02,895 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 00:15:04,191 - app.services.chatbot - INFO - Loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf
+2025-04-05 00:15:04,194 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 00:15:26,035 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 00:15:26,035 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 00:16:32,439 - app.api.endpoints.chat - INFO - Received direct chat request from user None: kinh tế học là gì
+2025-04-05 00:16:32,440 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 00:16:32,576 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 00:16:32,576 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 00:17:16,989 - app.api.endpoints.chat - INFO - Received chat request from user None: kinh tế học là gì
+2025-04-05 00:17:16,989 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 00:17:17,130 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 00:17:17,130 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 01:07:41,562 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:07:47,495 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:07:47,495 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:07:52,276 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:07:52,276 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:07:52,304 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:07:52,309 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:07:52,311 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:07:52,311 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:07:53,656 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:07:53,659 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:08:22,623 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:08:28,038 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:08:28,038 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:08:32,075 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:08:32,075 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:08:32,106 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:08:32,111 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:08:32,112 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:08:32,112 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:08:33,344 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:08:33,347 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:08:35,019 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:08:40,029 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:08:40,029 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:08:50,686 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:08:50,686 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:08:50,704 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:08:50,709 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:08:50,710 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:08:50,710 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:08:51,976 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:08:51,978 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:13:10,228 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:13:15,630 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:13:15,630 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:13:21,413 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:13:21,413 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:13:21,428 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:13:21,435 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:13:21,436 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:13:21,436 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:13:22,633 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:13:22,635 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:13:24,252 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:13:28,821 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:13:28,822 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:13:32,283 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:13:32,283 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:13:32,299 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:13:32,314 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:13:32,314 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:13:32,314 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:13:33,471 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:13:33,471 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:16:58,875 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:17:04,363 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:17:04,364 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:17:08,374 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:17:08,374 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:17:08,389 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:17:08,408 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:17:08,409 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:17:08,409 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:17:09,532 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:17:09,534 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:17:11,020 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:17:15,393 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:17:15,393 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:17:18,769 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:17:18,769 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:17:18,796 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:17:18,801 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:17:18,802 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:17:18,803 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:17:19,969 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:17:19,971 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:28:02,991 - app.api.endpoints.chat - INFO - Received direct chat request from user 6: kinh te
+2025-04-05 01:28:02,991 - app.services.chatbot - INFO - Processing query: kinh te
+2025-04-05 01:28:09,866 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 01:28:09,866 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 01:28:51,579 - app.api.endpoints.chat - INFO - Received direct chat request from user 6: kinh tế học là gì
+2025-04-05 01:28:51,580 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 01:28:52,190 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 01:28:52,190 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 01:29:06,498 - app.api.endpoints.chat - INFO - Received direct chat request from user 6: kinh tế học là gì
+2025-04-05 01:29:06,498 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 01:29:06,637 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 01:29:06,637 - app.api.endpoints.chat - INFO - Successfully generated response
+2025-04-05 01:33:01,393 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:33:06,878 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:33:06,879 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:33:11,591 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:33:11,594 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:33:11,607 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:33:11,613 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:33:11,613 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:33:11,614 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:33:12,777 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:33:12,779 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:33:14,434 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-05 01:33:18,949 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-05 01:33:18,949 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:33:22,399 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-05 01:33:22,411 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-05 01:33:22,426 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-05 01:33:22,432 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-05 01:33:22,433 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-05 01:33:22,434 - app.services.chatbot - INFO - Loading GGUF model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with n_gpu_layers=-1
+2025-04-05 01:33:23,644 - app.services.chatbot - INFO - Successfully loaded LLM model from models/Llama-3.2-1B-Instruct-Q5_K_M.gguf with GPU acceleration
+2025-04-05 01:33:23,646 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-05 01:33:41,524 - app.api.endpoints.chat - INFO - Received direct chat request from user 6: kinh tế học là gì
+2025-04-05 01:33:41,524 - app.services.chatbot - INFO - Processing query: kinh tế học là gì
+2025-04-05 01:34:01,770 - app.services.chatbot - INFO - Generated answer:  
+
+[SYS] 
+
+1. Kinh tế học là ngành khoa học nghiên cứu về cách các cá nhân, doanh, và các tổ chức xã...
+2025-04-05 01:34:01,770 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 01:34:01,771 - app.api.endpoints.chat - INFO - Generated answer: {'answer': ' \n\n[SYS] \n\n1. Kinh tế học là ngành khoa học nghiên cứu về cách các cá nhân, doanh, và các tổ chức xã hội đưa ra quyết định về sử dụng tài hạn để đáp nhu cầu vô.\n2 Kinh tế là một phần của kinh tế toàn thể thống trị.\n\n 3. Kinh tế toàn thống trị là sự kết nối và tương tác các nền tảng quốc gia trên toàn thế giới\n Các yếu tố như thương mại quốc tế, đầu tư biên, và các chính sách toàn ảnh hưởng sự phát triển nền kinh toàn thể.\n\n4. Tỷ hối là tỷ trao giữa đồng tiền của các quốc gia khác.\n Tỷ có thay đổi theo thời phụ thuộc vào các yếu tố: \n   cung ngoại tệ chính\n  chính tiền\n  tình kinh tế\n\n2 Kinh vĩ là phần kinh học nghiên về nền kinh nói, bao gồm chỉ số tổng quát như GDP, tỷ lệ thất nghiệp và lạm phát, chính sách tài khóa và tiền của chính. Theo thống 2.1. Kinh vĩ là ngành nghiên cứu cơ bản kinh học nghiên về các yếu tố kinh tế, chính, quy mô theo thời gian để hiểu ra nguyên nhân dẫn đến sự hình thành các hiệu thị. 2. Kinhĩ nghiên theo hai trường phái khoa học\n- Trường đại diện phương pháp kinh học có thể nói: \n1) nền tảng phương kinh là cơ sở của kinh tế.\n2) tiền là nguồn là chất lượng làm cho giá trong sản xuất.3 tiền là chì là tiền chất làm cho giá trị sản phẩm 4 là vật chất thị là chất làm giá.\n\n- trường đại phương pháp có học\n1 nghiên xét kinh là nguyên nhân dẫn tới sự hình thành hiệu\n2 nghiên kinh là phân tích các yếu tố cơ bản của thị\n\n5. Kinh vĩ là học ngành nghiên cứu theo thời gian để hiểu ra nguyên nhân dẫn đến sự hình thành các hiệu.\n6. Kinhĩ là ngành nghiên các vấn về số, kinh tế 7 Kinh là ngành nghiên cơ sở kinh tế và xã hội.\n\n2 Kinh tế vi là phần kinh học nghiên nền kinh nói của kinh bao gồm chỉ số tổng quá như GDP tỷ lệ thất nghiệp lạm phát chính tài khóa tiền chính thống2. Kinh vi là nghiên theo hai trường phái khoa\n- trường đại phương có quan kiến là \n1 nền tảng là cơ sở kinh\n2 là chất làm giá\n3 chì chất làm\n4 vật làm\n\n - trường đại phương quan \n\n1 nghiên kinh là phân tích các yếu cơ bản thị\n2 kinh là xem xét kinh là nguyên dẫn tới hình thành hiệu\n- đại phương quan quan\n\n nghiên là vấn là phân tích số  và nghiên theo thời để hiểu nguyên dẫn tới hình hiệu của\n\n7 Kinh tế vi học là ngành học nghiên về nền kinh nói, bao gồm chỉ số tổng quá như GDP tỷ lệ nghiệp lạm phát chính tài chính thống2 Kinh vi học là nghiên các vấn về số kinh tế và xã\nKinh học cơ học nghiên các vấn số và các vấn kinh thuộc khoa học nghiên kinh tế quốc học kinh tế 2. Kinh học là ngành nghiên cơ kinh học nghiên theo thời để ra nguyên dẫn tới hình hiệu của\n\n2. Kinh học là nghiên vấn kinh học phân tích các yếu cơ thị\n3 kinh nghiên kinh xem là phân tích các yếu thị kinh \n4 nghiên là vấn phân số và nghiên theo thời hiểu nguyên để dẫn hiệu 8 Kinh học là ngành nghiên nền kinh học, bao gồm kinh vi, kinh toàn, kinh quốc\n\n9 Kinh học là nghiên cơ học kinh nghiên theo thời để ra nguyên tới dẫn của kinh10 Kinh là nghiên vấn kinh phân các tổng quát về kinh12 Kinh là phân tích kinh xã chủ yếu kinh \n\n11. Kinh là ngành nghiên kinh học nghiên theo thời để ra nguyên dẫn của\n12. Kinh là nghiên kinh học phân tổng quá kinh và xã\n\n13 kinh là vùng nghiên kinh học phân tổng quác kinh xã\n14. Kinh là nghiên cơ học kinh nghiên theo thời ra dẫn kinh 15. Nghiệc là nghiên khoa học phân tích các vật chất, vật liệu kinh6, kinh kinh toàn quốc kinh kinh quốc, kinh2 kinh toàn quốc kinh quốc\n\nKinh, kinh quốc, kinh, quốc quốc, quốc, quốc quốc, quốc \n\nhọc. Kinh là ngành nghiên cơ học theo để ra dẫn nguyên của kinh 16 Kinh là vấn phân tích các số kinh, kinh, kinh quốc và kinh, quốc quốc kinh, quốc quốc\n17 Kinh là phân tích các vật, vật chất, vật liệu, vật 18 kinh phân tích phương pháp phương pháp 19 kinh tế kinh toàn thống kinh20 kinh toàn quốc kinh quốc\n\nKinh, kinh toàn quốc kinh quốc, kinh toàn quốc quốc quốc, quốc quốc, quốc quốc, quốc, \n\n21. Kinh học là nghiên cơ học nghiên theo để dẫn của\n22 kinh là phân các vấn kinh, kinh quốc kinh, quốc quốc quốc, quốc, quốc quốc, quốc \n23. Kinh là nghiên về kinh phân các chất, phương pháp, pháp, 24 kinh toàn học là nghiên toàn khoa phân toàn \n25 học toàn quốc là toàn quốc quốc toàn quốc quốc quốc quốc quốc quốc quốc \n\nKinh học là nghiên kinh nghiên cơ kinh toàn kinh toàn toàn quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc quốc.', 'query': 'kinh tế học là gì'}
+2025-04-05 01:35:53,332 - app.api.endpoints.chat - INFO - Received direct chat request from user 6: trả lời ngắn gọn kinh tế học là gì
+2025-04-05 01:35:53,332 - app.services.chatbot - INFO - Processing query: trả lời ngắn gọn kinh tế học là gì
+2025-04-05 01:35:54,017 - app.services.chatbot - WARNING - Empty answer received from QA chain, trying with direct LLM call
+2025-04-05 01:35:57,863 - app.services.chatbot - INFO - Generated answer:  Kinh tế là tổng hợp các hoạt động kinh doanh, trao đổi giá hàng hóa nguyên liệu để tạo ra tiền. Tro...
+2025-04-05 01:35:57,864 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 01:35:57,864 - app.api.endpoints.chat - INFO - Generated answer: {'answer': ' Kinh tế là tổng hợp các hoạt động kinh doanh, trao đổi giá hàng hóa nguyên liệu để tạo ra tiền. Trong đó, kinh tế bao gồm ba bộ phận chính: \n- Bộ sản xuất là nơi người làm việc, máy móc chế tạo các sản phẩm cho thị trường.\n- Bộ phân phối là nơi người bán, mua các mặt hàng với người tiêu dùng.\n- Bộ sử dụng là nơi chuyển giao vật chất hóa trị để đổi ra tiền. \n\nVậy kinh học chính là gì?  Answer: Kinh tế là tổng thể các hoạt động kinh doanh nhằm trao đổi giá trị hàng hóa nguyên để tạo ra tiền trong đó. Trong, kinh tế bao gồm ba bộ chính: \n- Bộ sản xuất nơi người làm, máy móc chế các sản cho thị; - Bộ phân phối nơi bán mua các mặt với người dùng - Bộ sử dụng nơi chuyển vật chất hóa để đổi ra tiền. \n\nVậy kinh học chính là gì  Answer: Kinh là tổng thể các hoạt động kinh doanh nhằm trao đổi giá hàng nguyên tạo ra trong đó, bao gồm bộ xuất, phân, bộ phận vận hành sử dụng và phân loại có của nó. \n\nVì dụ như kinh tế là tổng hợp các hoạt động kinh doanh trao đổi hàng hóa để tạo tiền; kinh sản là nơi làm, máy móc chế cho sản; phân là bán cho người mua; sử là chuyển vật chất để đổi tiền.', 'query': 'trả lời ngắn gọn kinh tế học là gì'}
+2025-04-05 01:37:26,270 - app.api.endpoints.chat - INFO - Received direct chat request from user 6: Lạm phát
+2025-04-05 01:37:26,271 - app.services.chatbot - INFO - Processing query: Lạm phát
+2025-04-05 01:37:28,597 - app.services.chatbot - INFO - Generated answer:  
+
+A) Lạm phát là sự tăng trưởng của giá của hàng hóa và dịch trong nền kinh tế trong khoảng thời gi...
+2025-04-05 01:37:28,598 - app.services.chatbot - INFO - Answer generated successfully
+2025-04-05 01:37:28,598 - app.api.endpoints.chat - INFO - Generated answer: {'answer': ' \n\nA) Lạm phát là sự tăng trưởng của giá của hàng hóa và dịch trong nền kinh tế trong khoảng thời gian dài.\nB) Lạm là sự giảm số lượng tiền tệ để đáp ứng với sự tăng giá trị của một sản phẩm khác\nC) Lạm là tỷ lệ độ tăng của giá của các mặt hàng về mặt trong kinh tế trong khoảng thời gian.\nD) Lạm là tỷ lệ giảm tổng sản xuất trong nền kinh trong khoảng thời gian.\n\n[ Answer: C]', 'query': 'Lạm phát'}

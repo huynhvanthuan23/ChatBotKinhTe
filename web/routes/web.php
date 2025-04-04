@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PostController;
@@ -14,7 +15,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    if (Auth::user() && Auth::user()->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('chat');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -41,16 +45,24 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
     Route::get('/system/api-docs', function () {
         return view('admin.system.api-docs');
     })->name('system.api-docs');
+    
+    // Thêm route chat trong admin
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat');
 });
 
 // API route cho media manager
 Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->name('admin.api.media');
 
 // Cập nhật route dashboard nếu chưa có
-Route::get('/admin', [DashboardController::class, 'index'])->middleware(['auth'])->name('admin.dashboard');
+Route::get('/admin', function () {
+    if (!Auth::user() || !Auth::user()->isAdmin()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('admin.dashboard');
+})->middleware(['auth'])->name('admin.index');
 
 // Route chat
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/test-connection', [ChatController::class, 'testConnection'])->name('chat.test-connection');
