@@ -8,10 +8,10 @@ from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.api.endpoints import chat  
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.chatbot import ChatbotService, check_cuda
+from app.services.chatbot import ChatbotService
+import torch
+import gc
 import time
-import subprocess
-import sys
 
 # Tạo ứng dụng FastAPI
 app = FastAPI(
@@ -25,7 +25,7 @@ app = FastAPI(
 # Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "*"],
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "*"],  # Cho phép Laravel kết nối
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,65 +56,50 @@ async def favicon():
     
     return FileResponse(favicon_path)
 
-# Kiểm tra CUDA version
-def get_cuda_version():
-    try:
-        # Thử lấy thông tin CUDA version
-        if os.name == 'nt':  # Windows
-            result = subprocess.run(['nvcc', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if result.returncode == 0:
-                lines = result.stdout.split('\n')
-                for line in lines:
-                    if 'release' in line:
-                        return line.strip()
-        else:  # Linux
-            result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if result.returncode == 0:
-                lines = result.stdout.split('\n')
-                for line in lines:
-                    if 'CUDA Version' in line:
-                        return line.strip()
-        return "CUDA version could not be determined"
-    except Exception as e:
-        return f"Error getting CUDA version: {str(e)}"
+# Kiểm tra GPU và giải phóng bộ nhớ
+def check_gpu():
+    print("\n===== GPU STATUS =====")
+    if torch.cuda.is_available():
+        print(f"CUDA available: Yes")
+        print(f"CUDA device count: {torch.cuda.device_count()}")
+        print(f"CUDA device name: {torch.cuda.get_device_name(0)}")
+        print(f"CUDA memory allocated: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
+        print(f"CUDA memory reserved: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB")
+        
+        # Giải phóng bộ nhớ GPU
+        torch.cuda.empty_cache()
+        gc.collect()
+        print(f"Memory after cleanup: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
+        return True
+    else:
+        print("CUDA is not available")
+        return False
 
-# Kiểm tra GPU
-@app.get(f"{settings.API_V1_STR}/system/gpu")
+# Create chatbot service endpoint
+@app.get(f"{settings.API_V1_STR}/status/gpu")
 async def gpu_status():
-    """Check GPU status and CUDA information"""
-    has_cuda = check_cuda()
-    
-    gpu_info = {
-        "cuda_available": has_cuda,
-        "cuda_version": get_cuda_version(),
-        "n_gpu_layers": settings.N_GPU_LAYERS,
-        "env_info": {
-            "model_path": settings.MODEL_PATH,
-            "model_exists": os.path.exists(settings.MODEL_PATH),
-            "n_ctx": settings.N_CTX,
-            "max_tokens": settings.MAX_TOKENS
+    """Check GPU status"""
+    if torch.cuda.is_available():
+        return {
+            "cuda_available": True,
+            "device_count": torch.cuda.device_count(),
+            "device_name": torch.cuda.get_device_name(0),
+            "memory_allocated_mb": torch.cuda.memory_allocated(0) / 1024**2,
+            "memory_reserved_mb": torch.cuda.memory_reserved(0) / 1024**2
         }
-    }
-    
-    return gpu_info
+    else:
+        return {
+            "cuda_available": False
+        }
 
 # Pre-load model to GPU
 @app.on_event("startup")
 async def startup_event():
-    # Kiểm tra CUDA
-    print("\n===== CHECKING GPU STATUS =====")
-    has_cuda = check_cuda()
-    if has_cuda:
-        print("CUDA is available! GPU acceleration enabled.")
-    else:
-        print("WARNING: CUDA is not available. Running on CPU only.")
+    # Kiểm tra GPU
+    has_gpu = check_gpu()
     
-    # Hiển thị CUDA version
-    cuda_version = get_cuda_version()
-    print(f"CUDA information: {cuda_version}")
-    
-    # Khởi tạo chatbot service
-    print("\nPreloading ChatbotService model to GPU... This may take a moment.")
+    # Khởi tạo chatbot service khi server khởi động
+    print("Preloading ChatbotService model to GPU... This may take a moment.")
     try:
         start_time = time.time()
         chatbot_service = ChatbotService()
@@ -122,14 +107,18 @@ async def startup_event():
         end_time = time.time()
         
         print(f"ChatbotService model loaded successfully in {end_time - start_time:.2f} seconds!")
+        
+        # Kiểm tra lại GPU sau khi load
+        if has_gpu:
+            print(f"GPU memory after loading model: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
     except Exception as e:
         print(f"Error preloading ChatbotService model: {str(e)}")
 
 # Chạy ứng dụng
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "main:app",  # Sử dụng format "file:app_variable"
         host=settings.API_HOST,
         port=settings.API_PORT,
-        reload=False  # Tắt reload để tránh vấn đề với GPU
+        reload=settings.DEBUG_MODE
     ) 

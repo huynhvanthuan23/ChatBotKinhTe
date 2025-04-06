@@ -3,32 +3,16 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import LlamaCpp
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from app.core.config import settings
 from app.core.logger import get_logger
 import os
 import time
-import ctypes
 import torch
 import gc
 
 # Cấu hình logging
 logger = get_logger(__name__)
-
-# Kiểm tra CUDA được cài đặt hay chưa
-def check_cuda():
-    try:
-        if os.name == 'nt':  # Windows
-            cuda = ctypes.windll.LoadLibrary('cudart64_11.dll')
-        else:  # Linux/Mac
-            cuda = ctypes.cdll.LoadLibrary('libcudart.so')
-        
-        device_count = ctypes.c_int()
-        cuda.cudaGetDeviceCount(ctypes.byref(device_count))
-        return device_count.value > 0
-    except Exception as e:
-        logger.error(f"Error checking CUDA: {e}")
-        return False
 
 class ChatbotService:
     _instance = None
@@ -59,13 +43,6 @@ class ChatbotService:
             if not os.path.exists(settings.MODEL_PATH):
                 raise FileNotFoundError(f"LLM model not found: {settings.MODEL_PATH}")
             
-            # Kiểm tra CUDA
-            has_cuda = check_cuda()
-            if has_cuda:
-                logger.info("CUDA is available. GPU acceleration enabled.")
-            else:
-                logger.warning("CUDA is not available. Running on CPU only.")
-            
             # Khởi tạo embedding model
             self._embeddings = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
             logger.info(f"Loaded embedding model: {settings.EMBEDDING_MODEL}")
@@ -78,8 +55,60 @@ class ChatbotService:
             )
             logger.info(f"Loaded vector store from {settings.DB_FAISS_PATH}")
             
-            # Tải LlamaCpp nhưng trong một process riêng biệt để tránh xung đột GPU/CPU
-            self._load_llama_cpp_model()
+            # Tạo prompt template
+            custom_prompt = """[INST] <<SYS>>
+Bạn là trợ lý AI hữu ích. Hãy trả lời câu hỏi dựa vào thông tin được cung cấp.
+Nếu không biết câu trả lời, hãy nói 'Tôi không tìm thấy thông tin liên quan'.
+Trả lời phải rõ ràng, chi tiết và dễ hiểu.
+<</SYS>>
+
+Context: {context}
+Question: {question} [/INST]"""
+        
+            self._prompt = PromptTemplate(template=custom_prompt, input_variables=["context", "question"])
+            
+            # Tải GGUF model với GPU - Cấu hình tối ưu theo kết quả test
+            n_gpu_layers = 32  # Sử dụng 32 layers để tận dụng GPU tối đa
+            logger.info(f"Loading GGUF model with n_gpu_layers={n_gpu_layers}")
+            
+            try:
+                # Cấu hình LLM theo kết quả test tốt nhất
+                self._llm = LlamaCpp(
+                    model_path=settings.MODEL_PATH,
+                    temperature=0.1,
+                    max_tokens=512,
+                    n_ctx=2048,
+                    n_gpu_layers=n_gpu_layers,
+                    n_batch=512,
+                    f16_kv=True,
+                    verbose=True
+                )
+                
+                # Kiểm tra nhanh xem GPU có hoạt động không
+                test_prompt = "Cho tôi biết 2+2 bằng bao nhiêu."
+                start_time = time.time()
+                test_result = self._llm(test_prompt)
+                end_time = time.time()
+                
+                inference_time = end_time - start_time
+                logger.info(f"Test inference took {inference_time:.4f} seconds")
+                
+                # Kiểm tra thời gian để xác định có đang sử dụng GPU hay không
+                if inference_time < 1.0:
+                    logger.info("GPU acceleration is ACTIVE! (fast inference time)")
+                else:
+                    logger.warning(f"GPU acceleration may NOT be active (slow inference: {inference_time:.4f}s)")
+                
+                logger.info(f"Successfully loaded LLM model")
+                
+            except Exception as e:
+                logger.error(f"Failed to load model: {str(e)}")
+                raise
+            
+            # Cấu hình retriever
+            self._retriever = self._db.as_retriever(search_kwargs={"k": 4})
+            
+            # Đơn giản hóa: KHÔNG dùng QA chain
             
             self._initialized = True
             logger.info("ChatbotService components initialized successfully")
@@ -88,71 +117,58 @@ class ChatbotService:
             logger.error(f"Error initializing ChatbotService components: {str(e)}")
             raise
     
-    def _load_llama_cpp_model(self):
-        """Tải LlamaCpp model với CUDA"""
+    def _determine_optimal_gpu_layers(self):
+        """Xác định số lượng GPU layers tối ưu dựa trên GPU hiện có"""
         try:
-            # Import LlamaCpp
-            from langchain_community.llms import LlamaCpp
-            
-            # Cấu hình tối ưu cho GPU
-            n_gpu_layers = int(settings.N_GPU_LAYERS)
-            
-            # Đảm bảo số lượng GPU layers hợp lý
-            if n_gpu_layers <= 0:
-                n_gpu_layers = 100  # Sử dụng tất cả layers có thể
-            
-            logger.info(f"Loading GGUF model from {settings.MODEL_PATH} with n_gpu_layers={n_gpu_layers}")
-            
-            # Khởi tạo LlamaCpp với cấu hình rõ ràng cho GPU
-            self._llm = LlamaCpp(
-                model_path=settings.MODEL_PATH,
-                temperature=0.1,
-                max_tokens=512,
-                n_ctx=2048,
-                n_gpu_layers=n_gpu_layers,
-                n_batch=512,
-                f16_kv=True,
-                verbose=True,
-                use_mmap=False,  # Tắt mmap để đảm bảo tải vào GPU
-                use_mlock=False  # Tắt mlock cũng vậy
-            )
-            
-            # Test LLM
-            self._test_llm_performance()
-            
-        except Exception as e:
-            logger.error(f"Error loading LlamaCpp model: {e}")
-            raise
-    
-    def _test_llm_performance(self):
-        """Kiểm tra hiệu suất LLM để xác định sử dụng GPU hay CPU"""
-        try:
-            # Prompt test đơn giản
-            test_prompt = "Hello, how are you?"
-            
-            # Thực hiện warm-up
-            logger.info("Warming up LLM...")
-            self._llm(test_prompt)
-            
-            # Test thực sự
-            logger.info("Testing LLM performance...")
-            start_time = time.time()
-            test_result = self._llm(test_prompt)
-            end_time = time.time()
-            
-            inference_time = end_time - start_time
-            logger.info(f"LLM test inference took {inference_time:.4f} seconds")
-            
-            # Đánh giá dựa trên thời gian
-            if inference_time < 1.0:
-                logger.info("GPU ACCELERATION IS ACTIVE (fast inference time)")
-            else:
-                logger.warning(f"LIKELY RUNNING ON CPU (slow inference time: {inference_time:.4f}s)")
+            if not torch.cuda.is_available():
+                logger.warning("CUDA not available. Using CPU only.")
+                return 0
                 
-            logger.info(f"LLM test result: {test_result[:50]}...")
+            # Lấy thông tin GPU
+            total_memory = torch.cuda.get_device_properties(0).total_memory / 1024**2  # MB
+            
+            logger.info(f"Total GPU memory: {total_memory:.2f} MB")
+            
+            # Tính toán số layer phù hợp theo dung lượng GPU
+            # Giả sử mỗi layer cần khoảng 150MB VRAM
+            estimated_layer_size = 150  # MB per layer
+            
+            # Để lại 500MB cho các hoạt động khác
+            usable_memory = max(0, total_memory - 500)
+            
+            # Mỗi layer khoảng 150MB
+            max_layers = int(usable_memory / estimated_layer_size)
+            
+            # Giới hạn số layer tối đa là 32 (đủ cho hầu hết models)
+            n_gpu_layers = min(max_layers, 32)
+            
+            # Đảm bảo ít nhất 1 layer nếu có GPU
+            n_gpu_layers = max(1, n_gpu_layers)
+            
+            # Sử dụng giá trị từ .env nếu được chỉ định
+            env_layers = int(settings.N_GPU_LAYERS)
+            if env_layers > 0:
+                logger.info(f"Using GPU layers from .env: {env_layers}")
+                return env_layers
+                
+            logger.info(f"Determined optimal GPU layers: {n_gpu_layers}")
+            return n_gpu_layers
             
         except Exception as e:
-            logger.error(f"Error testing LLM performance: {e}")
+            logger.error(f"Error determining GPU layers: {str(e)}, falling back to 1")
+            return 1
+    
+    def _clean_gpu_memory(self):
+        """Giải phóng bộ nhớ GPU"""
+        try:
+            if torch.cuda.is_available():
+                # Giải phóng bộ nhớ cached
+                torch.cuda.empty_cache()
+                # Collect garbage
+                gc.collect()
+                logger.info("Cleaned GPU memory")
+        except Exception as e:
+            logger.error(f"Error cleaning GPU memory: {str(e)}")
     
     async def get_answer(self, query: str) -> Dict[str, Any]:
         """
@@ -170,27 +186,28 @@ class ChatbotService:
             if not self._initialized:
                 self._initialize_components()
             
-            # Đo thời gian xử lý
+            # Lưu thời điểm bắt đầu xử lý
             start_time = time.time()
             
-            # Xử lý trực tiếp
+            # PHƯƠNG PHÁP ĐƠN GIẢN NHẤT
             try:
                 # 1. Tìm documents liên quan
-                docs = self._db.similarity_search(query, k=4)
+                docs = self._retriever.get_relevant_documents(query)
                 
-                # 2. Format context
-                context = self._format_context_from_docs(docs)
+                # 2. Tạo context
+                context = "\n\n".join([doc.page_content for doc in docs])
                 
                 # 3. Tạo prompt hoàn chỉnh
-                full_prompt = self._create_prompt(query, context)
+                full_prompt = self._prompt.format(context=context, question=query)
                 
-                # 4. Gọi LLM
+                # 4. Gọi LLM trực tiếp (một lần duy nhất)
                 answer_text = self._llm(full_prompt)
                 
                 # 5. Làm sạch câu trả lời
-                answer_text = self._clean_response(answer_text)
+                answer_text = answer_text.replace("<</SYS>>", "").replace("<<SYS>>", "")
+                answer_text = answer_text.strip()
                 
-                # Đo thời gian xử lý
+                # 6. Tính thời gian xử lý
                 processing_time = time.time() - start_time
                 logger.info(f"Generated answer in {processing_time:.4f} seconds")
                 
@@ -202,18 +219,13 @@ class ChatbotService:
             except Exception as process_error:
                 logger.error(f"Error processing query: {str(process_error)}")
                 
-                # Thử với prompt đơn giản
-                try:
-                    fallback_prompt = f"[INST] Trả lời ngắn gọn: {query} [/INST]"
-                    fallback_answer = self._llm(fallback_prompt)
-                    
-                    return {
-                        "answer": fallback_answer,
-                        "query": query
-                    }
-                except Exception as fallback_error:
-                    logger.error(f"Fallback error: {str(fallback_error)}")
-                    raise
+                # Fallback đơn giản
+                fallback_prompt = f"[INST] Trả lời ngắn gọn: {query} [/INST]"
+                fallback_answer = self._llm(fallback_prompt)
+                return {
+                    "answer": fallback_answer,
+                    "query": query
+                }
                 
         except Exception as e:
             logger.error(f"Error generating answer: {str(e)}")
@@ -221,37 +233,3 @@ class ChatbotService:
                 "answer": f"Xin lỗi, đã xảy ra lỗi khi xử lý câu hỏi của bạn.",
                 "query": query
             }
-    
-    def _format_context_from_docs(self, docs: List) -> str:
-        """Format context từ danh sách documents"""
-        formatted_docs = []
-        for i, doc in enumerate(docs, 1):
-            content = doc.page_content.strip()
-            source = doc.metadata.get('source', 'Không rõ nguồn') if hasattr(doc, 'metadata') else 'Không rõ nguồn'
-            formatted_docs.append(f"[Nguồn {i}] ({source}):\n{content}")
-        
-        return "\n\n".join(formatted_docs)
-    
-    def _create_prompt(self, query: str, context: str) -> str:
-        """Tạo prompt hoàn chỉnh"""
-        return f"""[INST] <<SYS>>
-Bạn là trợ lý AI hữu ích. Hãy trả lời câu hỏi dựa vào thông tin được cung cấp.
-Nếu không biết câu trả lời, hãy nói 'Tôi không tìm thấy thông tin liên quan'.
-Trả lời phải rõ ràng, chi tiết và dễ hiểu.
-<</SYS>>
-
-Context:
-{context}
-
-Question: {query} [/INST]"""
-    
-    def _clean_response(self, response: str) -> str:
-        """Làm sạch câu trả lời từ model"""
-        # Loại bỏ các tag hệ thống
-        response = response.replace("<<SYS>>", "").replace("<</SYS>>", "")
-        response = response.replace("[INST]", "").replace("[/INST]", "")
-        
-        # Loại bỏ dòng trống
-        response = response.strip()
-        
-        return response
