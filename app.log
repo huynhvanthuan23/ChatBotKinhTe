@@ -732,3 +732,82 @@ Answer: I'm just a computer program, so I don't h...
 2025-04-07 01:50:21,924 - app.services.chatbot - INFO - ChatbotService components initialized successfully
 2025-04-07 01:50:41,624 - app.services.chatbot - INFO - Processing query: nhu cầu chính của khách hàng là gì
 2025-04-07 01:51:02,574 - app.services.chatbot - INFO - Generated answer in 20.9495 seconds
+2025-04-07 02:40:22,514 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 02:40:26,068 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-07 02:40:26,068 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:40:30,603 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:40:30,605 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-07 02:40:30,643 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-07 02:40:30,652 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-07 02:40:31,047 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-07 02:40:31,047 - app.services.chatbot - INFO - Loading GGUF model with n_gpu_layers=32
+2025-04-07 02:40:33,472 - app.services.chatbot - INFO - Test inference took 0.8302 seconds
+2025-04-07 02:40:33,473 - app.services.chatbot - INFO - GPU acceleration is ACTIVE! (fast inference time)
+2025-04-07 02:40:33,473 - app.services.chatbot - INFO - Successfully loaded LLM model
+2025-04-07 02:40:33,474 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-07 02:40:45,392 - app.services.chatbot - INFO - Processing query: nhu cầu chính của khách hàng là gì
+2025-04-07 02:41:07,218 - app.services.chatbot - INFO - Generated answer in 21.8245 seconds
+2025-04-07 02:44:52,682 - app.services.chatbot - INFO - Processing query: nhu cầu chính của khách hàng là gì
+2025-04-07 02:45:00,694 - app.services.chatbot - INFO - Generated answer in 8.0108 seconds
+2025-04-07 02:46:22,625 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 02:46:25,663 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-07 02:46:25,663 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:46:29,743 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:46:29,743 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-07 02:46:29,764 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-07 02:46:29,776 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-07 02:46:29,938 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-07 02:46:29,938 - app.services.chatbot - INFO - Loading GGUF model with n_gpu_layers=32
+2025-04-07 02:46:29,938 - app.services.chatbot - ERROR - Failed to load model: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:46:29,953 - app.services.chatbot - ERROR - Error initializing ChatbotService components: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:46:49,296 - app.services.chatbot - INFO - Processing query: nhu cân
+2025-04-07 02:46:49,297 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 02:46:49,299 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-07 02:46:49,299 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:46:52,352 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:46:52,451 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-07 02:46:52,451 - app.services.chatbot - INFO - Loading GGUF model with n_gpu_layers=32
+2025-04-07 02:46:52,452 - app.services.chatbot - ERROR - Failed to load model: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:46:52,452 - app.services.chatbot - ERROR - Error initializing ChatbotService components: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:46:52,453 - app.services.chatbot - ERROR - Error generating answer: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:48:08,396 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 02:48:11,546 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-07 02:48:11,546 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:48:16,010 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:48:16,010 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-07 02:48:16,026 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-07 02:48:16,045 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-07 02:48:16,231 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-07 02:48:16,231 - app.services.chatbot - INFO - Loading GGUF model with n_gpu_layers=32
+2025-04-07 02:48:16,231 - app.services.chatbot - ERROR - Failed to load model: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:48:16,231 - app.services.chatbot - ERROR - Error initializing ChatbotService components: 'Settings' object has no attribute 'N_BATCH'
+2025-04-07 02:55:09,442 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 02:55:33,518 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-07 02:55:33,518 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:55:38,802 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:55:38,817 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-07 02:55:38,956 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-07 02:55:39,016 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-07 02:55:39,228 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-07 02:55:39,229 - app.services.chatbot - INFO - Loading GGUF model with n_gpu_layers=100
+2025-04-07 02:55:41,417 - app.services.chatbot - INFO - Test inference took 0.8121 seconds
+2025-04-07 02:55:41,417 - app.services.chatbot - INFO - ✓ GPU acceleration is ACTIVE! (fast inference time)
+2025-04-07 02:55:41,417 - app.services.chatbot - INFO - Successfully loaded LLM model
+2025-04-07 02:55:41,418 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-07 02:56:11,399 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 02:56:14,330 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cuda
+2025-04-07 02:56:14,330 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:56:18,987 - app.services.chatbot - INFO - Loaded embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 02:56:18,990 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-07 02:56:19,004 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-04-07 02:56:19,009 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes.
+2025-04-07 02:56:19,182 - app.services.chatbot - INFO - Loaded vector store from vector_db
+2025-04-07 02:56:19,195 - app.services.chatbot - INFO - Loading GGUF model with n_gpu_layers=100
+2025-04-07 02:56:21,058 - app.services.chatbot - INFO - Test inference took 0.7527 seconds
+2025-04-07 02:56:21,058 - app.services.chatbot - INFO - ✓ GPU acceleration is ACTIVE! (fast inference time)
+2025-04-07 02:56:21,058 - app.services.chatbot - INFO - Successfully loaded LLM model
+2025-04-07 02:56:21,058 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-07 02:57:51,525 - app.services.chatbot - INFO - Processing query: nhu cầu chính của khách hàng
+2025-04-07 02:58:11,404 - app.services.chatbot - INFO - Generated answer in 19.8773 seconds
+2025-04-07 02:58:39,762 - app.services.chatbot - INFO - Processing query: nhu cầu chính của khách hàng
+2025-04-07 02:58:46,429 - app.services.chatbot - INFO - Generated answer in 6.6652 seconds

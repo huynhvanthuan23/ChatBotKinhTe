@@ -2,6 +2,11 @@ import ctypes
 import os
 from typing import List
 import time
+import torch
+from langchain_community.llms import LlamaCpp
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Tải thư viện CUDA Runtime
 def load_cuda_runtime():
@@ -39,53 +44,85 @@ def check_cuda_devices():
         print(f"Error checking CUDA devices: {e}")
         return False
 
-# Test với llama-cpp
-def test_llama_cpp():
-    from langchain_community.llms import LlamaCpp
+# Lấy các tham số từ .env
+MODEL_PATH = os.getenv("MODEL_PATH", "models/mistral-7b-instruct-v0.1.Q2_K.gguf")
+N_GPU_LAYERS = int(os.getenv("N_GPU_LAYERS", "32"))
+N_BATCH = int(os.getenv("N_BATCH", "512"))
+F16_KV = os.getenv("F16_KV", "true").lower() == "true"
+USE_MMAP = os.getenv("USE_MMAP", "false").lower() == "true"
+USE_MLOCK = os.getenv("USE_MLOCK", "false").lower() == "true"
+
+def check_cuda():
+    """Kiểm tra CUDA khả dụng"""
+    if torch.cuda.is_available():
+        print(f"CUDA khả dụng: {torch.cuda.get_device_name(0)}")
+        print(f"CUDA version: {torch.version.cuda}")
+        print(f"GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**2:.2f} MB")
+        return True
+    else:
+        print("CUDA không khả dụng")
+        return False
+
+def test_model():
+    """Kiểm tra model có sử dụng GPU không"""
+    print(f"Tải model từ {MODEL_PATH}")
+    print(f"Cấu hình: n_gpu_layers={N_GPU_LAYERS}, n_batch={N_BATCH}")
+    print(f"f16_kv={F16_KV}, use_mmap={USE_MMAP}, use_mlock={USE_MLOCK}")
     
-    # Đường dẫn model
-    model_path = "models/mistral-7b-instruct-v0.1.Q2_K.gguf"
-    
-    print("Testing with different GPU layer configurations:")
-    
-    for n_gpu_layers in [1, 8, 16, 32, -1]:
-        print(f"\nTesting with n_gpu_layers={n_gpu_layers}")
+    try:
+        model = LlamaCpp(
+            model_path=MODEL_PATH,
+            temperature=0.1,
+            max_tokens=10,
+            n_ctx=2048,
+            n_gpu_layers=N_GPU_LAYERS,
+            n_batch=N_BATCH,
+            f16_kv=F16_KV,
+            use_mlock=USE_MLOCK,
+            use_mmap=USE_MMAP,
+            verbose=True
+        )
         
-        try:
-            # Khởi tạo model
-            llm = LlamaCpp(
-                model_path=model_path,
-                temperature=0.0,
-                n_gpu_layers=n_gpu_layers,
-                n_batch=512,
-                n_ctx=2048,
-                f16_kv=True,
-                verbose=True
-            )
+        # Chạy một test đơn giản
+        prompt = "Tính 2+2 bằng bao nhiêu?"
+        
+        # Kiểm tra thời gian thực thi
+        start_time = time.time()
+        result = model(prompt)
+        end_time = time.time()
+        
+        print(f"Kết quả: {result}")
+        
+        # Phân tích thời gian
+        inference_time = end_time - start_time
+        print(f"Thời gian thực thi: {inference_time:.4f} giây")
+        
+        if inference_time < 1.0:
+            print("GPU hoạt động tốt! (thời gian thực thi nhanh)")
+        else:
+            print(f"GPU có thể không hoạt động (thời gian thực thi chậm: {inference_time:.4f}s)")
             
-            # Test prompt đơn giản
-            prompt = "Cho tôi biết 2+2 bằng bao nhiêu?"
+        # Kiểm tra thêm
+        if torch.cuda.is_available():
+            mem_allocated = torch.cuda.memory_allocated() / 1024**2
+            mem_reserved = torch.cuda.memory_reserved() / 1024**2
+            print(f"GPU memory allocated: {mem_allocated:.2f} MB")
+            print(f"GPU memory reserved: {mem_reserved:.2f} MB")
             
-            # Đo thời gian
-            start_time = time.time()
-            output = llm(prompt)
-            end_time = time.time()
-            
-            print(f"Output: {output[:50]}...")
-            print(f"Inference time: {end_time - start_time:.4f} seconds")
-            
-            # Nếu dưới 1 giây, có thể đang sử dụng GPU
-            if end_time - start_time < 1.0:
-                print("GPU acceleration appears to be working!")
+            if mem_allocated > 100:  # Nếu sử dụng > 100MB
+                print("GPU đang được sử dụng tích cực!")
             else:
-                print("Seems to be running on CPU (slow inference)")
-                
-        except Exception as e:
-            print(f"Error testing with n_gpu_layers={n_gpu_layers}: {e}")
+                print("GPU không được sử dụng nhiều cho mô hình.")
+        
+    except Exception as e:
+        print(f"Lỗi khi tải model: {str(e)}")
 
 if __name__ == "__main__":
-    has_cuda = check_cuda_devices()
-    if has_cuda:
-        test_llama_cpp()
+    print("===== Kiểm tra GPU =====")
+    cuda_available = check_cuda()
+    
+    if cuda_available:
+        print("\n===== Kiểm tra model =====")
+        test_model()
     else:
-        print("No CUDA devices detected. Cannot proceed with GPU test.") 
+        print("Không thể kiểm tra model vì CUDA không khả dụng") 

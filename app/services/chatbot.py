@@ -67,24 +67,26 @@ Question: {question} [/INST]"""
         
             self._prompt = PromptTemplate(template=custom_prompt, input_variables=["context", "question"])
             
-            # Tải GGUF model với GPU - Cấu hình tối ưu theo kết quả test
-            n_gpu_layers = 32  # Sử dụng 32 layers để tận dụng GPU tối đa
-            logger.info(f"Loading GGUF model with n_gpu_layers={n_gpu_layers}")
+            # Tải GGUF model với GPU
+            logger.info(f"Loading GGUF model with n_gpu_layers={settings.N_GPU_LAYERS}")
             
             try:
                 # Cấu hình LLM theo kết quả test tốt nhất
                 self._llm = LlamaCpp(
                     model_path=settings.MODEL_PATH,
-                    temperature=0.1,
-                    max_tokens=512,
-                    n_ctx=2048,
-                    n_gpu_layers=n_gpu_layers,
-                    n_batch=512,
-                    f16_kv=True,
-                    verbose=True
+                    temperature=settings.TEMPERATURE,
+                    max_tokens=settings.MAX_TOKENS,
+                    n_ctx=settings.N_CTX,
+                    n_gpu_layers=settings.N_GPU_LAYERS,
+                    n_batch=settings.N_BATCH,
+                    f16_kv=settings.F16_KV,
+                    use_mlock=settings.USE_MLOCK,
+                    use_mmap=settings.USE_MMAP,
+                    verbose=True,
+                    seed=42
                 )
                 
-                # Kiểm tra nhanh xem GPU có hoạt động không
+                # Kiểm tra thời gian để xác định GPU hoạt động
                 test_prompt = "Cho tôi biết 2+2 bằng bao nhiêu."
                 start_time = time.time()
                 test_result = self._llm(test_prompt)
@@ -93,11 +95,11 @@ Question: {question} [/INST]"""
                 inference_time = end_time - start_time
                 logger.info(f"Test inference took {inference_time:.4f} seconds")
                 
-                # Kiểm tra thời gian để xác định có đang sử dụng GPU hay không
+                # Xác nhận GPU hoạt động
                 if inference_time < 1.0:
-                    logger.info("GPU acceleration is ACTIVE! (fast inference time)")
+                    logger.info("✓ GPU acceleration is ACTIVE! (fast inference time)")
                 else:
-                    logger.warning(f"GPU acceleration may NOT be active (slow inference: {inference_time:.4f}s)")
+                    logger.warning(f"⚠ GPU acceleration may NOT be active (slow inference: {inference_time:.4f}s)")
                 
                 logger.info(f"Successfully loaded LLM model")
                 
