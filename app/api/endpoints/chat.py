@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends, Request, Body
+from fastapi import APIRouter, HTTPException, Depends, Request, Body, BackgroundTasks
 from pydantic import BaseModel
 from app.services.chatbot import ChatbotService
 from app.core.logger import get_logger
 from app.core.config import settings
 import os
 from typing import Optional, Dict, Any
+import asyncio
 
 class ChatRequest(BaseModel):
     message: str
@@ -16,6 +17,7 @@ class ChatResponse(BaseModel):
 
 router = APIRouter()
 logger = get_logger(__name__)
+chatbot_service = ChatbotService()
 
 def get_chatbot_service():
     """Dependency injection cho ChatbotService."""
@@ -129,38 +131,26 @@ async def ping():
     return {"status": "ok", "message": "API is running"}
 
 @router.post("/chat-direct")
-async def chat_direct(data: Dict[str, Any] = Body(...), chatbot_service: ChatbotService = Depends(get_chatbot_service)):
+async def chat_direct(request: ChatRequest):
     """
-    API endpoint để trò chuyện với chatbot nhận JSON trực tiếp.
-    
-    Args:
-        data: Dict chứa tin nhắn từ người dùng
+    Endpoint trực tiếp cho chatbot, trả lời ngay lập tức.
     """
-    if "message" not in data:
-        raise HTTPException(status_code=400, detail="'message' field is required")
+    if not request.message:
+        raise HTTPException(status_code=400, detail="Message is required")
     
-    message = data["message"]
-    user_id = data.get("user_id")
-    
-    logger.info(f"Received direct chat request from user {user_id}: {message}")
     try:
-        answer = await chatbot_service.get_answer(message)
-        logger.info(f"Generated answer: {answer}")
-        
-        # Kiểm tra không trả về kết quả rỗng
-        if not answer or not answer.get("answer") or answer.get("answer").strip() == "":
-            logger.warning("Empty answer generated, using fallback response")
-            response_text = "Xin lỗi, tôi không thể xử lý câu hỏi này lúc này. Vui lòng thử lại với cách diễn đạt khác."
-        else:
-            response_text = answer.get("answer")
-        
+        # Sử dụng timeout để ngăn chặn xử lý quá lâu
+        response = await asyncio.wait_for(
+            chatbot_service.get_answer(request.message),
+            timeout=45.0  # Giảm timeout xuống 45 giây
+        )
+        return response
+    except asyncio.TimeoutError:
+        logger.error(f"Query processing timed out: {request.message}")
         return {
-            "response": response_text,
-            "query": message
+            "answer": "Xin lỗi, câu hỏi của bạn quá phức tạp và tôi không thể xử lý trong thời gian cho phép. Vui lòng thử hỏi câu ngắn gọn hơn.",
+            "query": request.message
         }
     except Exception as e:
         logger.error(f"Error processing chat request: {str(e)}")
-        return {
-            "response": f"Xin lỗi, đã xảy ra lỗi khi xử lý câu hỏi của bạn: {str(e)}",
-            "query": message
-        } 
+        raise HTTPException(status_code=500, detail=str(e)) 

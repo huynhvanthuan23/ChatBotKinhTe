@@ -158,32 +158,22 @@ class ChatController extends Controller
      * @param string $message
      * @return string
      */
-    private function callChatbotAPI($message)
+    private function callChatAPI($message)
     {
-        // Use the environment variable for API URL
-        $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/'), '/');
-        $apiUrl = $baseUrl . '/chat-direct';
-        
-        $client = new Client([
-            'timeout' => 30,
-            'connect_timeout' => 5,
-        ]);
-        
         try {
-            // Ghi nhật ký yêu cầu để gỡ lỗi
-            Log::info('Sending chat request to API: ' . $apiUrl . ' with message: ' . $message);
-            
-            // Gửi yêu cầu POST đến API
-            $response = $client->post($apiUrl, [
+            $client = new Client([
+                'base_uri' => config('services.chatbot.url'),
+                'timeout' => 90,
+                'connect_timeout' => 5,
+                'http_errors' => false
+            ]);
+
+            $response = $client->post('/chat-direct', [
                 'json' => [
                     'message' => $message
-                ],
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
                 ]
             ]);
-            
+
             $result = json_decode($response->getBody()->getContents(), true);
             
             Log::info('API Response: ' . json_encode($result));
