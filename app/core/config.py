@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     MAX_TOKENS: int = int(os.getenv("MAX_TOKENS", "512"))  # Giảm max tokens
     N_CTX: int = int(os.getenv("N_CTX", "2048"))
     
+    # API Configuration
+    USE_API: bool = os.getenv("USE_API", "False").lower() == "true"
+    API_TYPE: str = os.getenv("API_TYPE", "google")  # google, openai, etc.
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    GOOGLE_MODEL: str = os.getenv("GOOGLE_MODEL", "gemini-pro")
+    API_TIMEOUT: int = int(os.getenv("API_TIMEOUT", "30"))
+    
     # Tăng số GPU layers và thêm fallback logic nếu -1
     @property
     def N_GPU_LAYERS(self) -> int:
@@ -68,6 +75,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
-        extra = "ignore"
+        extra = "allow"
 
 settings = Settings()

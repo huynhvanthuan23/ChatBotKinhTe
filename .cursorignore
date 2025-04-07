@@ -1,3 +1,40 @@
+# Thư mục chứa model lớn (GGUF files)
 models/
+
+# Thư mục môi trường ảo
 venv/
+
+# Vector database và data files
+vector_db/
+data/
+
+# Temporary files
+temp_docs/
+__pycache__/
+app/__pycache__/
+app/*/__pycache__/
+*.pyc
+
+# Log files
+app.log
+*.log
+
+# Git files
+.git/
+
+# GPU testing và benchmark files không cần lập chỉ mục
+test_*.py
+check_gpu*.py
+benchmark_gpu.py
+fix_gpu_usage.py
+reset_gpu.py
+
+# Build và distribution files
+*.egg-info/
+dist/
+build/
+
+# Web static files (nếu có)
+web/public/
+
 

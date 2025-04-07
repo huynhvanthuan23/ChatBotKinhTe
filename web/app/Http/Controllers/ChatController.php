@@ -44,23 +44,27 @@ class ChatController extends Controller
                 'message' => 'required|string|max:1000',
             ]);
 
-            // Sử dụng API endpoint đúng từ .env với port 8080
+            // Ensure we're using the correct API URL from .env
             $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
             $apiUrl = $baseUrl . '/chat-direct';
             
-            // Log thông tin gửi đi
-            Log::info('Sending message to API URL: ' . $apiUrl . ' with message: ' . $request->message);
+            // Log request information for debugging
+            Log::info('Sending message to ChatBot API', [
+                'url' => $apiUrl,
+                'message' => $request->message,
+                'user_id' => Auth::id()
+            ]);
             
             $client = new Client([
-                'timeout' => 60,  // Tăng timeout lên để chờ model xử lý
+                'timeout' => 90,  // Increased timeout for longer model processing
                 'connect_timeout' => 10,
             ]);
             
-            // Gọi API chat-direct
+            // Send request to the FastAPI backend
             $response = $client->post($apiUrl, [
                 'json' => [
                     'message' => $request->message,
-                    'user_id' => Auth::id() ? (string)Auth::id() : null
+                    'user_id' => Auth::id() ?: null
                 ],
                 'headers' => [
                     'Accept' => 'application/json',
@@ -69,44 +73,75 @@ class ChatController extends Controller
             ]);
             
             $responseBody = $response->getBody()->getContents();
-            Log::info('Raw API Response: ' . $responseBody);
-            
             $result = json_decode($responseBody, true);
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('JSON decode error: ' . json_last_error_msg() . ', Raw response: ' . substr($responseBody, 0, 500));
                 return response()->json([
-                    'message' => 'Lỗi phân tích dữ liệu từ server. Vui lòng thử lại sau.'
+                    'success' => false,
+                    'message' => 'Có lỗi khi phân tích dữ liệu từ server. Vui lòng thử lại sau.'
                 ], 500);
             }
             
-            Log::info('Parsed Chat API Response: ' . json_encode($result));
+            // Find the answer field in the response, whatever it's called
+            $answer = null;
+            if (isset($result['answer'])) {
+                $answer = $result['answer'];
+            } elseif (isset($result['response'])) {
+                $answer = $result['response'];
+            } elseif (isset($result['result'])) {
+                $answer = $result['result'];
+            } elseif (isset($result['message'])) {
+                $answer = $result['message'];
+            }
             
-            // Trả về kết quả từ API - kiểm tra các trường có thể có
-            if (isset($result['response']) && !empty(trim($result['response']))) {
+            if (!empty($answer)) {
                 return response()->json([
-                    'message' => $result['response']
-                ]);
-            } elseif (isset($result['answer']) && !empty(trim($result['answer']))) {
-                return response()->json([
-                    'message' => $result['answer']
-                ]);
-            } elseif (isset($result['result']) && !empty(trim($result['result']))) {
-                return response()->json([
-                    'message' => $result['result']
-                ]);
-            } else {
-                // Phản hồi mặc định nếu không có nội dung hợp lệ
-                Log::warning('Empty or unexpected API response structure: ' . $responseBody);
-                return response()->json([
-                    'message' => 'Tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại với cách diễn đạt khác.'
+                    'success' => true,
+                    'message' => $answer
                 ]);
             }
-        } catch (Exception $e) {
-            // Xử lý lỗi
+            
+            // Default response if no valid content found
+            Log::warning('Empty or unexpected API response structure', ['response' => $result]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại với câu hỏi khác.'
+            ]);
+        } catch (RequestException $e) {
+            // Handle Guzzle request exceptions
+            $errorMessage = 'Xin lỗi, không thể kết nối với chatbot.';
+            $statusCode = 500;
+            
+            if ($e->hasResponse()) {
+                $statusCode = $e->getResponse()->getStatusCode();
+                $errorBody = $e->getResponse()->getBody()->getContents();
+                
+                Log::error('Chatbot API error', [
+                    'status' => $statusCode,
+                    'error' => $e->getMessage(),
+                    'response' => $errorBody
+                ]);
+                
+                // Try to extract error message from response
+                $errorData = json_decode($errorBody, true);
+                if (json_last_error() === JSON_ERROR_NONE && isset($errorData['detail'])) {
+                    $errorMessage .= ' Chi tiết: ' . $errorData['detail'];
+                }
+            } else {
+                Log::error('Chatbot connection error: ' . $e->getMessage());
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => $errorMessage
+            ], $statusCode);
+        } catch (\Exception $e) {
+            // Handle general exceptions
             Log::error('Chat Processing Error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Xin lỗi, có lỗi xảy ra trong quá trình xử lý tin nhắn của bạn: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Xin lỗi, có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -273,219 +273,297 @@
             z-index: 101;
         }
     }
+
+    /* Additional styling for chat messages */
+    .chat-message.user .message-content {
+        background-color: #1890ff;
+        color: white;
+        border-radius: 18px 18px 0 18px;
+        padding: 12px 16px;
+        display: inline-block;
+        max-width: 90%;
+        word-wrap: break-word;
+        margin-left: auto;
+    }
+    
+    .chat-message.bot .message-content {
+        background-color: #f1f1f1;
+        color: #333;
+        border-radius: 18px 18px 18px 0;
+        padding: 12px 16px;
+        display: inline-block;
+        max-width: 90%;
+        word-wrap: break-word;
+    }
+    
+    .chat-message.bot.error .message-content {
+        background-color: #fff2f0;
+        border: 1px solid #ffccc7;
+        color: #ff4d4f;
+    }
+    
+    /* Typing indicator */
+    .typing-indicator .message-content {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+    }
+    
+    .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        background-color: #888;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 0 2px;
+        animation: typing-animation 1.4s infinite ease-in-out;
+    }
+    
+    .typing-indicator span:nth-child(1) {
+        animation-delay: 0s;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    
+    @keyframes typing-animation {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    /* Disabled button styling */
+    #send-button.disabled {
+        background-color: #bfbfbf;
+        cursor: not-allowed;
+    }
+    
+    /* Code blocks in bot responses */
+    .chat-message.bot pre {
+        background-color: #f6f8fa;
+        border-radius: 6px;
+        padding: 12px;
+        overflow-x: auto;
+        margin: 8px 0;
+    }
+    
+    .chat-message.bot code {
+        font-family: monospace;
+        font-size: 14px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .chat-sidebar {
+            position: fixed;
+            left: -280px;
+            top: 64px;
+            bottom: 0;
+            transition: left 0.3s ease;
+            z-index: 10;
+        }
+        
+        .chat-sidebar.open {
+            left: 0;
+        }
+        
+        .chat-wrapper {
+            flex-direction: column;
+        }
+        
+        .chat-main {
+            width: 100%;
+        }
+    }
 </style>
 @endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const messageInput = document.getElementById('message-input');
-    const chatForm = document.getElementById('chat-form');
-    const chatMessages = document.getElementById('chat-messages');
-    
-    // Đảm bảo conversationId là chuỗi
-    let conversationId = "session-" + Date.now().toString(); 
-    let isProcessing = false;
-    
-    // Khởi tạo bộ xử lý markdown
-    marked.setOptions({
-        breaks: true,
-        gfm: true,
-        headerIds: false,
-    });
-    
-    // Kiểm tra kết nối với API chatbot khi trang được tải
-    testChatbotConnection();
-    
-    // Xử lý gửi tin nhắn
-    chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (isProcessing) return; // Ngăn gửi khi đang xử lý
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const sendButton = document.getElementById('send-button');
+        let isWaitingForResponse = false;
         
-        const message = messageInput.value.trim();
-        if (message) {
-            sendMessage(message);
-            messageInput.value = '';
-        }
-    });
-    
-    // Xử lý khi nhấn Enter (gửi tin nhắn)
-    messageInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        // Auto-resize text area as user types
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Handle form submission
+        chatForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            chatForm.dispatchEvent(new Event('submit'));
-        }
-    });
-    
-    // Auto resize cho textarea
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-    
-    // Hàm kiểm tra kết nối với chatbot API
-    function testChatbotConnection() {
-        fetch('/chat/test-connection')
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    // Hiện thông báo lỗi nếu không kết nối được
-                    const errorMessage = document.createElement('div');
-                    errorMessage.classList.add('error-message');
-                    errorMessage.innerHTML = '<p>⚠️ ' + data.message + '</p>';
-                    chatMessages.appendChild(errorMessage);
-                }
-            })
-            .catch(error => {
-                console.error('Error testing connection:', error);
-            });
-    }
-    
-    // Hàm gửi tin nhắn
-    function sendMessage(message) {
-        // Hiển thị tin nhắn người dùng
-        appendMessage(message, 'user');
-        
-        // Hiển thị chỉ báo đang nhập
-        showTypingIndicator();
-        
-        // Đánh dấu đang xử lý
-        isProcessing = true;
-        
-        console.log('Sending to:', '/chat/send');
-        console.log('Message payload:', JSON.stringify({
-            message: message
-        }));
-        
-        // Gọi API để lấy phản hồi
-        fetch('/chat/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                message: message
-            })
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
             
-            // Kiểm tra nếu response không okay
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    throw new Error(errorData.message || 'Lỗi từ server');
+            const message = messageInput.value.trim();
+            
+            // Don't send empty messages or when already waiting for a response
+            if (!message || isWaitingForResponse) {
+                return;
+            }
+            
+            // Display user message
+            appendMessage(message, 'user');
+            
+            // Clear input and reset height
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Set loading state
+            isWaitingForResponse = true;
+            toggleSendButtonState(true);
+            
+            // Show typing indicator
+            appendTypingIndicator();
+            
+            try {
+                // Send message to server
+                const response = await fetch('{{ route("chat.send") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
                 });
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                if (!response.ok) {
+                    // Handle HTTP errors
+                    const errorData = await response.json().catch(() => ({ message: 'Có lỗi trong quá trình kết nối với máy chủ' }));
+                    appendErrorMessage(errorData.message || 'Có lỗi trong quá trình kết nối với máy chủ');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success === false) {
+                    // Handle application errors
+                    appendErrorMessage(data.message || 'Có lỗi xảy ra khi xử lý tin nhắn của bạn');
+                } else {
+                    // Display bot response
+                    appendMessage(data.message, 'bot');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                appendErrorMessage('Không thể kết nối với máy chủ. Vui lòng kiểm tra kết nối internet của bạn.');
+            } finally {
+                // Reset state
+                isWaitingForResponse = false;
+                toggleSendButtonState(false);
+                messageInput.focus();
             }
+        });
+        
+        // Add a message to the chat window
+        function appendMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `chat-message ${sender}`;
             
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
             
-            // Ẩn chỉ báo đang nhập
-            hideTypingIndicator();
-            
-            // Kiểm tra phản hồi không rỗng
-            if (data && data.message && data.message.trim() !== '') {
-                // Hiển thị phản hồi từ chatbot
-                appendMessage(data.message, 'bot');
+            if (sender === 'bot') {
+                // Process markdown for bot responses
+                contentElement.innerHTML = marked.parse(message);
             } else {
-                // Phản hồi mặc định nếu không có nội dung
-                appendMessage('Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại sau.', 'bot');
+                contentElement.textContent = message;
             }
             
-            // Đánh dấu đã xử lý xong
-            isProcessing = false;
-        })
-        .catch(error => {
-            console.error('Error details:', error);
+            messageElement.appendChild(contentElement);
+            chatMessages.appendChild(messageElement);
             
-            // Ẩn chỉ báo đang nhập
-            hideTypingIndicator();
+            // Scroll to bottom
+            scrollToBottom();
+        }
+        
+        // Add error message
+        function appendErrorMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message bot error';
             
-            // Hiển thị thông báo lỗi
-            appendMessage('Đã xảy ra lỗi: ' + error.message, 'bot');
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
+            contentElement.textContent = message;
             
-            // Đánh dấu đã xử lý xong
-            isProcessing = false;
+            messageElement.appendChild(contentElement);
+            chatMessages.appendChild(messageElement);
+            
+            // Scroll to bottom
+            scrollToBottom();
+        }
+        
+        // Add typing indicator
+        function appendTypingIndicator() {
+            const indicatorElement = document.createElement('div');
+            indicatorElement.className = 'chat-message bot typing-indicator';
+            indicatorElement.id = 'typing-indicator';
+            
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
+            contentElement.innerHTML = '<span></span><span></span><span></span>';
+            
+            indicatorElement.appendChild(contentElement);
+            chatMessages.appendChild(indicatorElement);
+            
+            // Scroll to bottom
+            scrollToBottom();
+        }
+        
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Toggle send button state
+        function toggleSendButtonState(disabled) {
+            sendButton.disabled = disabled;
+            if (disabled) {
+                sendButton.classList.add('disabled');
+            } else {
+                sendButton.classList.remove('disabled');
+            }
+        }
+        
+        // Scroll chat to bottom
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Start with focus in the input
+        messageInput.focus();
+        
+        // Handle "New chat" button clicks
+        document.querySelector('.btn-new-chat').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Clear chat messages except welcome message
+            while (chatMessages.children.length > 1) {
+                chatMessages.removeChild(chatMessages.lastChild);
+            }
+            
+            // Focus on input
+            messageInput.focus();
         });
-    }
-    
-    // Hàm hiển thị tin nhắn
-    function appendMessage(message, sender) {
-        // Xóa welcome message nếu có tin nhắn đầu tiên
-        if (chatMessages.querySelector('.welcome-message')) {
-            chatMessages.querySelector('.welcome-message').remove();
-        }
-        
-        // Tạo phần tử tin nhắn
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('chat-message', sender);
-        
-        // Phân tích markdown nếu là tin nhắn từ bot
-        if (sender === 'bot') {
-            messageElement.innerHTML = `
-                <div class="message-content">
-                    ${marked.parse(message)}
-                </div>
-            `;
-        } else {
-            messageElement.innerHTML = `
-                <div class="message-content">${message}</div>
-            `;
-        }
-        
-        // Thêm tin nhắn vào khung chat
-        chatMessages.appendChild(messageElement);
-        
-        // Cuộn xuống tin nhắn mới nhất
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    // Hàm hiển thị chỉ báo đang nhập
-    function showTypingIndicator() {
-        let typingIndicator = document.getElementById('typing-indicator');
-        
-        if (!typingIndicator) {
-            typingIndicator = document.createElement('div');
-            typingIndicator.id = 'typing-indicator';
-            typingIndicator.classList.add('chat-message', 'bot');
-            typingIndicator.innerHTML = `
-                <div class="message-content">
-                    <div class="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            `;
-            chatMessages.appendChild(typingIndicator);
-        }
-        
-        typingIndicator.style.display = 'block';
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    // Hàm ẩn chỉ báo đang nhập
-    function hideTypingIndicator() {
-        const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) {
-            typingIndicator.style.display = 'none';
-        }
-    }
-    
-    // Xử lý toggle sidebar trên mobile
-    const toggleSidebarBtn = document.querySelector('.toggle-sidebar-btn');
-    if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener('click', function() {
-            document.querySelector('.chat-sidebar').classList.toggle('active');
-        });
-    }
-});
+    });
 </script>
 @endpush

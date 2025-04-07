@@ -5,13 +5,14 @@ pydantic==2.4.2
 pydantic-settings==2.0.3
 python-dotenv==1.0.0
 python-multipart==0.0.6
+aiohttp==3.9.1  # Hỗ trợ gọi API không đồng bộ
 
 # LLM và xử lý ngôn ngữ
 llama-cpp-python==0.2.19
 langchain==0.0.335
 langchain-community==0.0.13
 sentence-transformers==2.2.2
-faiss-cpu==1.7.4  # Hoặc faiss-gpu nếu cần GPU cho vector search
+faiss-cpu==1.7.4  
 
 # Xử lý văn bản
 regex==2023.10.3
