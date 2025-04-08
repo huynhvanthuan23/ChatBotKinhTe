@@ -1,32 +1,53 @@
-# FastAPI Framework
-fastapi==0.104.1
-uvicorn==0.24.0
-pydantic==2.4.2
-pydantic-settings==2.0.3
-python-dotenv==1.0.0
-python-multipart==0.0.6
-aiohttp==3.9.1  # Hỗ trợ gọi API không đồng bộ
+# FastAPI và các dependencies
+fastapi==0.109.2
+uvicorn==0.27.1
+python-multipart==0.0.9
+python-dotenv==1.0.1
+pydantic==2.6.1
+pydantic-settings==2.1.0
 
-# LLM và xử lý ngôn ngữ
-llama-cpp-python==0.2.19
-langchain==0.0.335
-langchain-community==0.0.13
-sentence-transformers==2.2.2
-faiss-cpu==1.7.4  
+# Google API
+google-generativeai==0.3.2
+google-auth==2.27.0
+google-auth-oauthlib==1.2.0
 
-# Xử lý văn bản
-regex==2023.10.3
-unidecode==1.3.7
-nltk==3.8.1
+# Vector database và embeddings
+faiss-cpu==1.7.4
+sentence-transformers==2.5.1
+numpy==1.26.4
+torch==2.2.0
+transformers==4.37.2
 
-# Hỗ trợ CUDA
-nvidia-ml-py==12.535.108  # Để kiểm tra GPU status
+# Document processing
+langchain==0.1.4
+langchain-community==0.0.16
+langchain-core==0.1.17
+langchain-text-splitters==0.0.1
+langchain-google-genai==0.0.5
+chromadb==0.4.22
+tiktoken==0.5.2
+
+# Local model support
+llama-cpp-python==0.2.23
+ctransformers==0.2.27
 
 # Utilities
-numpy==1.26.1
-pandas==2.1.2
 tqdm==4.66.1
+requests==2.31.0
+aiohttp==3.9.3
+python-jose==3.3.0
+passlib==1.7.4
+bcrypt==4.1.2
 
-# Debug và logging
-rich==13.6.0
+# Logging
 loguru==0.7.2
+
+# Testing
+pytest==8.0.0
+httpx==0.26.0
+
+# Development
+black==24.1.1
+isort==5.13.2
+flake8==7.0.0
+mypy==1.8.0

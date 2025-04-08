@@ -10,6 +10,7 @@ import time
 import torch
 import gc
 import traceback
+import google.generativeai as genai
 
 # Cấu hình logging
 logger = get_logger(__name__)
@@ -23,6 +24,8 @@ class ChatbotService:
             cls._instance._initialized = False
             cls._instance._llm = None
             cls._instance._retry_count = 0
+            cls._instance._gemini_model = None
+            cls._instance._gemini_chat = None
         return cls._instance
     
     def __init__(self):
@@ -31,8 +34,16 @@ class ChatbotService:
     
     def _initialize_components(self):
         """Initialize components at startup"""
-        if self._initialized:
-            return
+        # Reset initialized flag to force reloading components
+        self._initialized = False
+        
+        # Reset các thành phần để tránh sử dụng cache
+        self._llm = None
+        self._embeddings = None
+        self._db = None
+        self._retriever = None
+        self._gemini_model = None
+        self._gemini_chat = None
             
         logger.info("Initializing ChatbotService components...")
         
@@ -40,131 +51,89 @@ class ChatbotService:
             # Đầu tiên, giải phóng bộ nhớ GPU
             self._clean_gpu_memory()
             
-            # Kiểm tra paths
-            if not os.path.exists(settings.DB_FAISS_PATH):
-                raise FileNotFoundError(f"Vector database not found: {settings.DB_FAISS_PATH}")
-                
-            if not os.path.exists(settings.MODEL_PATH):
-                raise FileNotFoundError(f"LLM model not found: {settings.MODEL_PATH}")
+            # Khởi tạo Gemini API nếu có API key
+            if settings.USE_API and settings.GOOGLE_API_KEY:
+                try:
+                    logger.info("Initializing Gemini API...")
+                    
+                    # Cấu hình API
+                    genai.configure(api_key=settings.GOOGLE_API_KEY)
+                    
+                    # Sử dụng model gemini-1.5-pro thay vì gemini-2.0-flash
+                    self._gemini_model = genai.GenerativeModel('gemini-1.5-pro')
+                    self._gemini_chat = self._gemini_model.start_chat(history=[])
+                    logger.info("Gemini API initialized successfully with model gemini-1.5-pro")
+                        
+                except Exception as api_err:
+                    logger.error(f"Error initializing Gemini API: {str(api_err)}")
+                    raise RuntimeError("Failed to initialize Gemini API. Please check your API key and internet connection.")
             
-            # Kiểm tra GPU
-            has_gpu = torch.cuda.is_available()
-            if has_gpu:
-                gpu_name = torch.cuda.get_device_name(0)
-                gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-                logger.info(f"GPU detected: {gpu_name} with {gpu_memory:.2f}GB VRAM")
-            else:
-                logger.info("No GPU detected, using CPU only")
-            
-            # Tối ưu embedding model để sử dụng GPU
-            self._embeddings = HuggingFaceEmbeddings(
-                model_name=settings.EMBEDDING_MODEL,
-                model_kwargs={"device": "cuda"}
-            )
-            logger.info(f"Loaded embedding model: {settings.EMBEDDING_MODEL}")
-            
-            # Tải vector store
-            self._db = FAISS.load_local(
-                settings.DB_FAISS_PATH, 
-                self._embeddings, 
-                allow_dangerous_deserialization=True
-            )
-            logger.info(f"Loaded vector store from {settings.DB_FAISS_PATH}")
-            
-            # Tạo prompt template - cải thiện để đưa ra câu trả lời chính xác hơn
-            custom_prompt = """[INST] <<SYS>>
-Bạn là trợ lý AI chuyên về kinh tế. Hãy trả lời câu hỏi dựa vào thông tin được cung cấp.
-Phân tích thông tin trong ngữ cảnh và tìm nội dung liên quan đến câu hỏi.
-Nếu không tìm thấy thông tin liên quan, hãy nói 'Tôi không tìm thấy thông tin liên quan'.
-<</SYS>>
-
-Ngữ cảnh: {context}
-Câu hỏi: {question} [/INST]"""
-        
-            self._prompt = PromptTemplate(template=custom_prompt, input_variables=["context", "question"])
-            
-            # Tối ưu hóa cấu hình cho GPU
-            if has_gpu:
-                # Cấu hình tối ưu cho GPU hiện đại
-                n_gpu_layers = 32  # Tăng số lớp GPU
-                n_batch = 512      # Tăng batch size
-                n_ctx = 4096       # Tăng context window
-                is_f16 = True      # Sử dụng f16 cho memory efficiency
-                
-                logger.info(f"GPU config: layers={n_gpu_layers}, batch={n_batch}, ctx={n_ctx}, f16={is_f16}")
-            else:
-                # Cấu hình CPU
-                n_gpu_layers = 0
-                n_batch = 512
-                n_ctx = settings.N_CTX
-                is_f16 = False
-                
-                logger.info("Using CPU configuration")
-            
-            # Tải GGUF model
-            logger.info(f"Loading GGUF model from {settings.MODEL_PATH}")
-            
+            # Khởi tạo embedding model và vector store
             try:
-                # Cấu hình LLM với tham số tối ưu cho GPU
-                logger.info(f"Attempting to load model with n_gpu_layers={n_gpu_layers}")
+                # Kiểm tra đường dẫn vector database
+                db_path = settings.DB_FAISS_PATH
+                logger.info(f"Vector store path: {db_path}")
                 
-                # Log thông tin GPU trước khi load model
-                if has_gpu:
-                    logger.info(f"CUDA version: {torch.version.cuda}")
-                    logger.info(f"GPU available: {torch.cuda.is_available()}")
-                    logger.info(f"Total GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.2f}GB")
-                    logger.info(f"Current GPU memory allocated: {torch.cuda.memory_allocated() / 1024**2:.2f}MB")
+                # Kiểm tra xem thư mục và file có tồn tại không
+                if not os.path.exists(db_path):
+                    logger.error(f"Vector store directory does not exist: {db_path}")
+                    raise FileNotFoundError(f"Vector store directory not found: {db_path}")
                 
-                # Cấu hình tham số với tối ưu cho GPU
-                self._llm = LlamaCpp(
-                    model_path=settings.MODEL_PATH,
-                    temperature=0.1,
-                    max_tokens=256,
-                    n_ctx=n_ctx,
-                    n_gpu_layers=n_gpu_layers,
-                    n_batch=n_batch,
-                    f16_kv=is_f16,
-                    use_mlock=True,  # Sử dụng mlock để tăng tốc
-                    use_mmap=True,   # Sử dụng mmap cho model loading
-                    verbose=True,    # Bật verbose khi debug
-                    seed=42,
-                    n_threads=6,     # Số luồng CPU tối ưu
-                    last_n_tokens_size=64,  # Tối ưu cho memory usage
-                    verbose_prompt=False   # Tắt verbose prompt khi xuất logs
+                faiss_index_path = os.path.join(db_path, "index.faiss")
+                pkl_index_path = os.path.join(db_path, "index.pkl")
+                
+                if not os.path.exists(faiss_index_path) or not os.path.exists(pkl_index_path):
+                    logger.error(f"Missing index files in {db_path}, found: {os.listdir(db_path) if os.path.exists(db_path) else 'N/A'}")
+                    raise FileNotFoundError(f"FAISS index files not found in {db_path}")
+                
+                # Khởi tạo embedding model
+                logger.info(f"Loading embedding model: {settings.EMBEDDING_MODEL}")
+                self._embeddings = HuggingFaceEmbeddings(
+                    model_name=settings.EMBEDDING_MODEL,
+                    model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"}
                 )
                 
-                logger.info("Model loaded successfully with GPU acceleration")
+                # Tải vector store với xử lý lỗi cụ thể hơn
+                logger.info(f"Loading vector store from {db_path}")
+                try:
+                    # Sửa lại cách load FAISS index
+                    self._db = FAISS.load_local(
+                        db_path, 
+                        self._embeddings
+                    )
+                    
+                    # Kiểm tra xem vector store có dữ liệu không
+                    if hasattr(self._db, 'index') and hasattr(self._db.index, 'ntotal'):
+                        logger.info(f"Vector store loaded successfully with {self._db.index.ntotal} vectors")
+                    else:
+                        logger.warning("Vector store loaded but may be empty or incorrectly structured")
+                except Exception as e:
+                    logger.error(f"Error loading vector store: {str(e)}")
+                    self._db = None
                 
-                # Kiểm tra nhanh
-                test_prompt = "Trả lời thật ngắn gọn: 2+2 bằng bao nhiêu?"
-                start_time = time.time()
-                test_result = self._llm(test_prompt)
-                end_time = time.time()
+                # Cấu hình retriever
+                logger.info("Configuring retriever")
+                self._retriever = self._db.as_retriever(
+                    search_type="similarity",
+                    search_kwargs={"k": 4}
+                )
+                logger.info("Retriever configured successfully")
                 
-                inference_time = end_time - start_time
-                logger.info(f"Test inference completed in {inference_time:.4f} seconds with result: {test_result[:20]}...")
+                # Thử test retriever với query đơn giản
+                try:
+                    test_query = "test query"
+                    test_docs = self._retriever.get_relevant_documents(test_query, k=1)
+                    logger.info(f"Retriever test successful, found {len(test_docs)} document(s)")
+                except Exception as ret_test_err:
+                    logger.error(f"Error testing retriever: {str(ret_test_err)}")
+                    # Không raise ở đây, chỉ log lỗi để tiếp tục
                 
-                # Kiểm tra bộ nhớ GPU để xác nhận
-                if has_gpu:
-                    allocated_memory = torch.cuda.memory_allocated() / 1024**2
-                    logger.info(f"GPU memory after model load: {allocated_memory:.2f}MB")
-                    logger.info(f"CUDA is being used: {'Yes' if allocated_memory > 0 else 'No'}")
-                
-            except Exception as e:
-                logger.error(f"Failed to load model: {str(e)}")
-                logger.error(traceback.format_exc())
-                raise
+            except Exception as emb_err:
+                logger.error(f"Error loading embeddings/vectorstore: {str(emb_err)}")
+                logger.error(f"Stacktrace: {traceback.format_exc()}")
+                raise RuntimeError(f"Failed to initialize vector database: {str(emb_err)}")
             
-            # Cấu hình retriever - số documents tối ưu và tăng tốc độ
-            self._retriever = self._db.as_retriever(
-                search_type="similarity_score_threshold",  # Tìm theo ngưỡng tương đồng
-                search_kwargs={
-                    "k": 3,  # Giảm số documents để tránh context quá lớn
-                    "score_threshold": 0.5,  # Chỉ lấy documents có độ tương đồng cao
-                    "fetch_k": 15  # Tìm kiếm từ pool lớn hơn rồi lọc sau
-                }
-            )
-            
+            # Đánh dấu là đã khởi tạo xong
             self._initialized = True
             logger.info("ChatbotService components initialized successfully")
             
@@ -182,159 +151,131 @@ Câu hỏi: {question} [/INST]"""
                     del self._llm
                     self._llm = None
                 
-                # Giải phóng memory
+                # Giải phóng embeddings nếu có
+                if hasattr(self, '_embeddings') and self._embeddings is not None:
+                    del self._embeddings
+                    self._embeddings = None
+                
+                # Giải phóng vector store nếu có
+                if hasattr(self, '_db') and self._db is not None:
+                    del self._db
+                    self._db = None
+                
+                # Giải phóng retriever nếu có
+                if hasattr(self, '_retriever') and self._retriever is not None:
+                    del self._retriever
+                    self._retriever = None
+                
+                # Giải phóng Gemini chat nếu có
+                if hasattr(self, '_gemini_chat') and self._gemini_chat is not None:
+                    del self._gemini_chat
+                    self._gemini_chat = None
+                
+                # Giải phóng Gemini model nếu có
+                if hasattr(self, '_gemini_model') and self._gemini_model is not None:
+                    del self._gemini_model
+                    self._gemini_model = None
+                
+                # Giải phóng bộ nhớ GPU
                 torch.cuda.empty_cache()
                 gc.collect()
                 
-                # Ghi log thông tin memory
-                allocated = torch.cuda.memory_allocated() / 1024**2
-                reserved = torch.cuda.memory_reserved() / 1024**2
-                logger.info(f"Cleaned GPU memory: allocated={allocated:.2f}MB, reserved={reserved:.2f}MB")
-                
+                logger.info("GPU memory cleaned successfully")
             except Exception as e:
                 logger.error(f"Error cleaning GPU memory: {str(e)}")
     
     async def get_answer(self, query: str) -> Dict[str, Any]:
-        """
-        Trả lời câu hỏi từ người dùng.
-        
-        Args:
-            query: Câu hỏi của người dùng
-            
-        Returns:
-            Dict chứa kết quả trả lời và metrics
-        """
-        # Đặt mức retry tối đa
-        MAX_RETRIES = 2
-        
-        logger.info(f"Processing query: {query}")
+        """Get answer from chatbot"""
         try:
-            # Lazy loading if needed
+            # Đảm bảo components đã được khởi tạo
             if not self._initialized:
                 self._initialize_components()
             
-            # Nếu mô hình bị lỗi, thử khởi tạo lại
-            if self._llm is None:
-                logger.warning("LLM is None, reinitializing components...")
-                self._initialized = False
-                self._initialize_components()
+            # Tìm kiếm ngữ cảnh từ vector database
+            context = ""
+            relevant_docs = []
+            if self._retriever is not None:
+                try:
+                    # Lấy top 3 documents liên quan
+                    docs = self._retriever.get_relevant_documents(query, k=3)
+                    if docs:
+                        context = "\n\n".join([doc.page_content for doc in docs])
+                        relevant_docs = docs
+                        logger.info(f"Found {len(docs)} relevant documents from vector database")
+                        
+                        # Debug: Hiển thị thông tin các documents tìm được
+                        for i, doc in enumerate(docs):
+                            logger.info(f"Document {i+1} preview: {doc.page_content[:100]}...")
+                    else:
+                        logger.info("No relevant documents found in vector database")
+                        return {
+                            "query": query,
+                            "response": "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu. Vui lòng thử lại với câu hỏi khác.",
+                            "model_info": {
+                                "context_used": False,
+                                "no_relevant_info": True,
+                                "documents_found": 0
+                            }
+                        }
+                except Exception as ret_err:
+                    logger.error(f"Error retrieving context: {str(ret_err)}")
+                    context = ""
             
-            # Lưu thời điểm bắt đầu xử lý
-            start_time = time.time()
+            # Sử dụng Gemini API
+            if not self._gemini_model or not self._gemini_chat:
+                raise RuntimeError("Gemini API is not initialized. Please check your API key and internet connection.")
             
             try:
-                # 1. Tìm documents liên quan
-                docs = self._retriever.get_relevant_documents(query)
-                retrieval_time = time.time() - start_time
+                start_time = time.time()
                 
-                # 2. Log số lượng document tìm được
-                logger.info(f"Found {len(docs)} relevant documents in {retrieval_time:.4f} seconds")
+                # Đảm bảo luôn có một phần của context trong response
+                if relevant_docs:
+                    first_doc = relevant_docs[0].page_content
+                    key_info = first_doc[:100]  # Trích xuất 100 ký tự đầu tiên
+                    logger.info(f"Key information to force in response: {key_info}")
+                else:
+                    key_info = ""
                 
-                if not docs:
-                    logger.warning("No relevant documents found")
-                    end_time = time.time()
+                # Tạo prompt với ngữ cảnh kèm yêu cầu trích dẫn rõ ràng
+                prompt = f"""BẮT BUỘC trả lời dựa HOÀN TOÀN trên thông tin được cung cấp dưới đây.
+KHÔNG ĐƯỢC sử dụng kiến thức bên ngoài dưới bất kỳ hình thức nào.
+Nếu không có thông tin liên quan, hãy nói "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
+
+THÔNG TIN THAM KHẢO:
+{context}
+
+CÂU HỎI: {query}
+
+YÊU CẦU ĐẶC BIỆT:
+1. PHẢI bắt đầu câu trả lời của bạn với "Theo dữ liệu tìm được: " và kèm theo trích dẫn trực tiếp từ thông tin trên.
+2. Nếu có thông tin liên quan, PHẢI trích dẫn ít nhất một đoạn từ thông tin trên.
+3. Nếu không có thông tin liên quan, hãy nói rõ ràng "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
+4. KHÔNG ĐƯỢC thêm bất kỳ thông tin nào không có trong dữ liệu được cung cấp.
+"""
+                # Gửi prompt tới Gemini API
+                response = self._gemini_chat.send_message(prompt)
+                response_time = time.time() - start_time
+                
+                # Xử lý response
+                if response and response.text:
                     return {
-                        "answer": "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu.",
                         "query": query,
-                        "processing_time": end_time - start_time,
-                        "status": "no_documents"
+                        "response": response.text,
+                        "model_info": {
+                            "model": "gemini-1.5-pro",
+                            "response_time": response_time,
+                            "context_used": bool(context),
+                            "documents_found": len(relevant_docs)
+                        }
                     }
-                
-                # 3. Tạo context - giới hạn kích thước để tránh OOM
-                context_parts = []
-                total_length = 0
-                max_context_length = 3000  # Giới hạn kích thước ngữ cảnh
-                
-                for doc in docs:
-                    if total_length + len(doc.page_content) <= max_context_length:
-                        context_parts.append(doc.page_content)
-                        total_length += len(doc.page_content)
-                    else:
-                        break
-                
-                context = "\n\n".join(context_parts)
-                
-                # 4. Tạo prompt hoàn chỉnh
-                full_prompt = self._prompt.format(context=context, question=query)
-                
-                # 5. Gọi LLM - bắt và xử lý exceptions
-                try:
-                    # Lưu thời điểm bắt đầu inference
-                    inference_start = time.time()
+                else:
+                    raise RuntimeError("Empty response from Gemini API")
                     
-                    answer_text = self._llm(full_prompt)
-                    
-                    # Tính thời gian inference
-                    inference_time = time.time() - inference_start
-                    
-                    # 6. Làm sạch câu trả lời
-                    answer_text = answer_text.replace("<</SYS>>", "").replace("<<SYS>>", "")
-                    answer_text = answer_text.strip()
-                    
-                    # 7. Tính thời gian xử lý tổng thể
-                    end_time = time.time()
-                    processing_time = end_time - start_time
-                    
-                    logger.info(f"Generated answer in {processing_time:.4f} seconds (retrieval: {retrieval_time:.4f}s, inference: {inference_time:.4f}s)")
-                    
-                    # Reset retry counter nếu thành công
-                    self._retry_count = 0
-                    
-                    # Trả về kết quả với thông tin metrics
-                    return {
-                        "answer": answer_text,
-                        "query": query,
-                        "processing_time": processing_time,
-                        "retrieval_time": retrieval_time,
-                        "inference_time": inference_time,
-                        "num_docs": len(docs),
-                        "status": "success"
-                    }
-                    
-                except Exception as model_error:
-                    logger.error(f"LLM inference error: {str(model_error)}")
-                    
-                    # Nếu lỗi là do memory, thử giải phóng bộ nhớ và restart
-                    if self._retry_count < MAX_RETRIES:
-                        self._retry_count += 1
-                        logger.warning(f"Retrying ({self._retry_count}/{MAX_RETRIES})...")
-                        
-                        # Giải phóng bộ nhớ
-                        self._clean_gpu_memory()
-                        
-                        # Khởi tạo lại components
-                        self._initialized = False
-                        self._initialize_components()
-                        
-                        # Thử lại
-                        return await self.get_answer(query)
-                    
-                    # Nếu đã retry quá nhiều lần, trả về lỗi
-                    end_time = time.time()
-                    return {
-                        "answer": f"Xin lỗi, tôi gặp lỗi khi xử lý câu hỏi của bạn: {str(model_error)}",
-                        "query": query,
-                        "error": str(model_error),
-                        "processing_time": end_time - start_time,
-                        "status": "model_error"
-                    }
-                
-            except Exception as process_error:
-                logger.error(f"Processing error: {str(process_error)}")
-                end_time = time.time()
-                return {
-                    "answer": "Xin lỗi, tôi gặp lỗi khi xử lý câu hỏi của bạn. Vui lòng thử lại sau.",
-                    "query": query,
-                    "error": str(process_error),
-                    "processing_time": end_time - start_time,
-                    "status": "process_error"
-                }
+            except Exception as api_err:
+                logger.error(f"Error getting response from Gemini API: {str(api_err)}")
+                raise RuntimeError(f"Failed to get response from Gemini API: {str(api_err)}")
                 
         except Exception as e:
-            logger.error(f"Unhandled exception: {str(e)}")
-            return {
-                "answer": "Xin lỗi, hệ thống gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.",
-                "query": query,
-                "error": str(e),
-                "status": "system_error"
-            }
+            logger.error(f"Error in get_answer: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise 

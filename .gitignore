@@ -14,7 +14,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -26,29 +25,15 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Virtual Environment
 venv/
-.env
-
-# Vector databases and temp files
-vector_db/
-vector_db_*/
-temp_docs/
-*.faiss
-*.pkl
-*.index
-
-# Logs
-logs/
-*.log
-app.log
-
-# OS specific
-.DS_Store
-Thumbs.db
-.directory
+ENV/
+env/
 
 # IDE
 .idea/
@@ -56,15 +41,28 @@ Thumbs.db
 *.swp
 *.swo
 
-# Dataset and cached data
-*.jsonl
-*.csv
-*.tsv
-*.db
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Database
 *.sqlite
 *.sqlite3
-*.hdf5
-*.h5
+
+# Vector database
+vector_db/
+
+# Vector databases and temp files
+vector_db_*/
+temp_docs/
+*.faiss
+*.pkl
+*.index
 
 # Large text files
 *.txt.gz
@@ -83,3 +81,39 @@ Thumbs.db
 *.zip
 *.tar.gz
 *.rar
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Laravel
+/vendor/
+/storage/*
+!/storage/.gitkeep
+/bootstrap/cache/*
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+/coverage
+/tests/coverage
+/tests/tmp
+/tests/coverage.xml
+/tests/junit.xml
+
+# OS specific
+.DS_Store
+Thumbs.db
+.directory

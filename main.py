@@ -1,44 +1,70 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
 from fastapi.responses import FileResponse
 from app.core.config import settings
-from app.api.endpoints import chat  
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.chatbot import ChatbotService
+import google.generativeai as genai
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 import torch
 import gc
 import time
+import logging
+import traceback
+import json
+from pydantic import BaseModel
+from typing import Optional, Dict, Any
+from fastapi.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
-# Tạo ứng dụng FastAPI
+# Cấu hình logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Thiết lập các biến môi trường
+os.environ["USE_API"] = "true"  # Luôn sử dụng API
+os.environ["API_TYPE"] = "google"  # Luôn sử dụng Google API
+
+# Middleware để xử lý encoding
+class EncodingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if response.headers.get("content-type", "").startswith("application/json"):
+            response.headers["content-type"] = "application/json; charset=utf-8"
+        return response
+
+# Tạo ứng dụng FastAPI với middleware
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="API cho ChatBotKinhTe",
+    description="API cho ChatBotKinhTe sử dụng Google Gemini API",
     version="1.0.0",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
+    middleware=[Middleware(EncodingMiddleware)]
 )
 
 # Cấu hình CORS
 origins = [
-    "http://localhost:8000",
+    "http://localhost:8000",  # Laravel default port
     "http://127.0.0.1:8000",
-    "http://localhost:5173",  # Vite dev server
-    "http://127.0.0.1:5173",
+    "http://localhost:3000",  # React default port
+    "http://127.0.0.1:3000",
+    "http://localhost:8080",  # FastAPI port
+    "http://127.0.0.1:8080",
 ]
 
 # Thêm origins từ env nếu có
 if os.environ.get("CORS_ORIGINS"):
     try:
-        import json
         custom_origins = json.loads(os.environ.get("CORS_ORIGINS", '["*"]'))
         if isinstance(custom_origins, list):
             origins.extend(custom_origins)
     except Exception as e:
-        print(f"Error parsing CORS_ORIGINS: {e}")
+        logger.error(f"Error parsing CORS_ORIGINS: {e}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,125 +75,297 @@ app.add_middleware(
     expose_headers=["X-Process-Time"],
 )
 
-# Tạo router và đăng ký vào app
-app.include_router(chat.router, prefix=f"{settings.API_V1_STR}/chat", tags=["chat"])
+# Thêm logging cho CORS
+logger.info(f"CORS enabled for origins: {origins}")
 
-# Cấu hình đường dẫn templates và static files
-base_dir = os.path.dirname(os.path.abspath(__file__))
-app.mount("/static", StaticFiles(directory=os.path.join(base_dir, "app", "web", "static")), name="static")
-templates = Jinja2Templates(directory=os.path.join(base_dir, "app", "web", "templates"))
+# Classes cho request và response
+class ChatRequest(BaseModel):
+    query: str
+    user_id: Optional[int] = None
 
-# Sửa route trang chủ để render template HTML
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+class ChatResponse(BaseModel):
+    success: bool
+    answer: str
+    query: str
+    error: Optional[str] = None
 
-# Thêm endpoint này vào ứng dụng FastAPI của bạn
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    # Đường dẫn đến file favicon.ico (tạo file này nếu chưa có)
-    favicon_path = os.path.join(base_dir, "app", "web", "static", "img", "favicon.ico")
-    
-    # Nếu không có file, trả về file mặc định từ thư viện fastapi
-    if not os.path.exists(favicon_path):
-        return FileResponse("app/web/static/img/favicon.ico")
-    
-    return FileResponse(favicon_path)
+# Biến global cho các components
+gemini_model = None
+vector_retriever = None
 
-# Kiểm tra GPU và giải phóng bộ nhớ
-def check_gpu():
-    print("\n===== GPU STATUS =====")
-    if torch.cuda.is_available():
-        print(f"CUDA available: Yes")
-        print(f"CUDA device count: {torch.cuda.device_count()}")
-        print(f"CUDA device name: {torch.cuda.get_device_name(0)}")
-        print(f"CUDA memory allocated: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
-        print(f"CUDA memory reserved: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB")
+# Khởi tạo vector database
+def initialize_vector_db():
+    try:
+        # Khởi tạo embedding model
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info(f"Initializing embedding model on {device}")
         
-        # Giải phóng bộ nhớ GPU
-        torch.cuda.empty_cache()
-        gc.collect()
-        print(f"Memory after cleanup: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
-        return True
-    else:
-        print("CUDA is not available")
-        return False
+        embeddings = HuggingFaceEmbeddings(
+            model_name=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
+            model_kwargs={"device": device}
+        )
+        
+        # Đường dẫn vector database
+        db_path = os.getenv("DB_FAISS_PATH", "vector_db")
+        
+        # Kiểm tra đường dẫn
+        if not os.path.exists(db_path):
+            logger.error(f"Vector store directory does not exist: {db_path}")
+            raise FileNotFoundError(f"Vector store directory not found: {db_path}")
+        
+        # Load vector store
+        db = FAISS.load_local(db_path, embeddings)
+        
+        # Cấu hình retriever
+        retriever = db.as_retriever(
+            search_type="similarity",
+            search_kwargs={"k": 3}
+        )
+        
+        logger.info(f"Vector database initialized successfully with {db.index.ntotal} vectors")
+        return retriever
+    except Exception as e:
+        logger.error(f"Error initializing vector database: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise
 
-# Create chatbot service endpoint
-@app.get(f"{settings.API_V1_STR}/status/gpu")
-async def gpu_status():
-    """Check GPU status"""
-    if torch.cuda.is_available():
+# Khởi tạo Gemini model
+def initialize_gemini():
+    try:
+        # Cấu hình API key
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not found in environment variables")
+        
+        # Cấu hình API
+        genai.configure(api_key=api_key)
+        
+        # Tạo model
+        model_name = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
+        logger.info(f"Initializing Gemini model: {model_name}")
+        model = genai.GenerativeModel(model_name)
+        
+        logger.info("Gemini model initialized successfully")
+        return model
+    except Exception as e:
+        logger.error(f"Error initializing Gemini model: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise
+
+# Xử lý chat
+async def process_chat(query: str, user_id: Optional[int] = None) -> Dict[str, Any]:
+    try:
+        start_time = time.time()
+        
+        # Kiểm tra global variables
+        global gemini_model, vector_retriever
+        if gemini_model is None or vector_retriever is None:
+            raise RuntimeError("Components not initialized. Please restart the server.")
+        
+        # Tìm kiếm ngữ cảnh từ vector database
+        docs = vector_retriever.get_relevant_documents(query)
+        context = "\n\n".join([doc.page_content for doc in docs])
+        
+        # Log context để debug
+        logger.info(f"Found {len(docs)} relevant documents for query: {query}")
+        
+        # Tạo prompt với ngữ cảnh
+        prompt = f"""BẮT BUỘC trả lời dựa HOÀN TOÀN trên thông tin được cung cấp dưới đây.
+KHÔNG ĐƯỢC sử dụng kiến thức bên ngoài dưới bất kỳ hình thức nào.
+Nếu không có thông tin liên quan, hãy nói "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
+
+THÔNG TIN THAM KHẢO:
+{context}
+
+CÂU HỎI: {query}
+
+YÊU CẦU ĐẶC BIỆT:
+1. PHẢI bắt đầu câu trả lời của bạn với "Theo dữ liệu tìm được: " và kèm theo trích dẫn trực tiếp từ thông tin trên.
+2. Nếu có thông tin liên quan, PHẢI trích dẫn ít nhất một đoạn từ thông tin trên.
+3. Nếu không có thông tin liên quan, hãy nói rõ ràng "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
+4. KHÔNG ĐƯỢC thêm bất kỳ thông tin nào không có trong dữ liệu được cung cấp.
+"""
+        
+        # Gửi prompt đến Gemini API
+        response = gemini_model.generate_content(prompt)
+        elapsed_time = time.time() - start_time
+        
+        # Chuẩn bị response
         return {
-            "cuda_available": True,
-            "device_count": torch.cuda.device_count(),
-            "device_name": torch.cuda.get_device_name(0),
-            "memory_allocated_mb": torch.cuda.memory_allocated(0) / 1024**2,
-            "memory_reserved_mb": torch.cuda.memory_reserved(0) / 1024**2
+            "success": True,
+            "answer": response.text,
+            "query": query,
+            "processing_time": f"{elapsed_time:.2f} seconds"
         }
-    else:
+        
+    except Exception as e:
+        logger.error(f"Error in chat processing: {str(e)}")
+        logger.error(traceback.format_exc())
         return {
-            "cuda_available": False
+            "success": False,
+            "answer": "",
+            "query": query,
+            "error": str(e)
         }
 
-# Pre-load model to GPU
+# Endpoints
+@app.get("/api/v1/chat/test-connection")
+async def test_connection():
+    """Test connection endpoint for Laravel"""
+    return {
+        "status": "success",
+        "message": "Connection successful",
+        "server_time": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+@app.post("/api/v1/chat/chat-direct")
+async def chat_direct(request: Request):
+    """Chat endpoint for Laravel integration"""
+    try:
+        # Log request headers
+        logger.info(f"Request headers: {dict(request.headers)}")
+        
+        # Đọc raw body trước
+        raw_body = await request.body()
+        logger.info(f"Raw request body length: {len(raw_body)}")
+        
+        # Thử decode với UTF-8
+        try:
+            body_str = raw_body.decode('utf-8')
+            logger.info("Used utf-8 encoding for request body")
+        except UnicodeDecodeError:
+            # Nếu không decode được UTF-8, thử các encoding khác
+            try:
+                body_str = raw_body.decode('latin-1')
+                logger.info("Used latin-1 encoding for request body")
+            except UnicodeDecodeError:
+                body_str = raw_body.decode('cp1252', errors='ignore')
+                logger.info("Used cp1252 encoding with error ignore for request body")
+        
+        # Parse JSON từ string
+        try:
+            body = json.loads(body_str)
+            logger.info(f"Parsed JSON: {body}")
+        except json.JSONDecodeError as e:
+            # Log một phần của body để debug
+            preview = body_str[:100] if len(body_str) > 100 else body_str
+            logger.error(f"JSON parsing error: {str(e)}, preview: {preview}")
+            return {
+                "success": False,
+                "answer": "Invalid JSON format",
+                "query": "",
+                "error": f"JSON decode error: {str(e)}"
+            }
+        
+        # Extract fields
+        query = body.get("message", "")  # Thay đổi từ "query" thành "message"
+        user_id = body.get("user_id", None)
+        
+        logger.info(f"Extracted message: '{query}', user_id: {user_id}")
+        
+        if not query:
+            return {
+                "success": False,
+                "answer": "Message is required",
+                "query": "",
+                "error": "Missing message parameter"
+            }
+        
+        # Process chat
+        result = await process_chat(query, user_id)
+        
+        # Log response
+        logger.info(f"Chat response: {result}")
+        
+        # Đảm bảo response được encode đúng
+        return {
+            "success": result["success"],
+            "response": result["answer"],  # Thay đổi từ "answer" thành "response"
+            "query": result["query"],
+            "error": result.get("error", None)
+        }
+    except Exception as e:
+        logger.error(f"Error in chat_direct: {str(e)}")
+        logger.error(traceback.format_exc())
+        return {
+            "success": False,
+            "response": "Server error processing request",
+            "query": "",
+            "error": str(e)
+        }
+
+@app.get("/api/v1/chat/service-info")
+async def service_info():
+    """Get service information"""
+    return {
+        "service_type": "API",
+        "api_type": "Google",
+        "model": os.getenv("GOOGLE_MODEL", "gemini-1.5-pro"),
+        "status": "active" if gemini_model else "unavailable"
+    }
+
+@app.get("/api/v1/chat/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "components": {
+            "api": "active" if gemini_model else "inactive",
+            "vector_db": "active" if vector_retriever else "inactive"
+        }
+    }
+
+# Khởi tạo components khi server start
 @app.on_event("startup")
 async def startup_event():
-    # Khởi tạo chatbot service khi server khởi động
-    print("Starting server and initializing components...")
+    global gemini_model, vector_retriever
+    
+    logger.info("Starting server and initializing components...")
     
     # Kiểm tra GPU
     if torch.cuda.is_available():
-        print(f"GPU detected: {torch.cuda.get_device_name(0)}")
-        print(f"CUDA version: {torch.version.cuda}")
+        logger.info(f"GPU detected: {torch.cuda.get_device_name(0)}")
+        logger.info(f"CUDA version: {torch.version.cuda}")
         memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-        print(f"GPU memory: {memory_gb:.2f} GB")
+        logger.info(f"GPU memory: {memory_gb:.2f} GB")
         
         # Giải phóng memory
         torch.cuda.empty_cache()
         gc.collect()
     else:
-        print("No GPU detected - using CPU")
+        logger.info("No GPU detected - using CPU")
     
-    # Khởi tạo chatbot service trong try-except
+    # Khởi tạo components
     try:
-        print("Initializing ChatbotService...")
+        # Khởi tạo vector database
+        logger.info("Initializing vector database...")
+        vector_retriever = initialize_vector_db()
         
-        start_time = time.time()
-        chatbot_service = ChatbotService()
-        chatbot_service._initialize_components()
-        end_time = time.time()
+        # Khởi tạo Gemini model
+        logger.info("Initializing Gemini model...")
+        gemini_model = initialize_gemini()
         
-        print(f"ChatbotService initialized in {end_time - start_time:.2f} seconds")
-        
-        # Thực hiện test nhỏ để kiểm tra hoạt động
-        try:
-            print("Testing chatbot with a simple query...")
-            test_response = await chatbot_service.get_answer("Xin chào")
-            print(f"Test response: {test_response.get('answer', '')[:50]}...")
-            print(f"Chatbot is working correctly")
-            
-            # Add process time metrics
-            if 'processing_time' in test_response:
-                print(f"Processing time: {test_response['processing_time']:.2f} seconds")
-        except Exception as test_err:
-            print(f"Test failed: {str(test_err)}")
+        logger.info("All components initialized successfully")
     except Exception as e:
-        print(f"Error initializing ChatbotService: {str(e)}")
-        print("Server will start but chatbot may not work correctly")
-
-# Thêm route mới vào file main.py
-@app.get(f"{settings.API_V1_STR}/acceleration")
-async def acceleration_info():
-    """Kiểm tra thông tin GPU/CPU đang sử dụng cho model"""
-    chatbot = ChatbotService()
-    return chatbot.get_acceleration_info()
+        logger.error(f"Error initializing components: {str(e)}")
+        logger.error("Server will start but may not function correctly")
 
 # Chạy ứng dụng
 if __name__ == "__main__":
+    port = int(os.getenv("API_PORT", 8080))
+    host = os.getenv("API_HOST", "0.0.0.0")
+    
+    print(f"\n==== STARTING CHATBOT API SERVER ====")
+    print(f"Host: {host}")
+    print(f"Port: {port}")
+    print(f"API documentation: http://localhost:{port}/docs")
+    print(f"Health check: http://localhost:{port}/api/v1/chat/health")
+    print(f"Chat endpoint: http://localhost:{port}/api/v1/chat/chat-direct")
+    print(f"==== SERVER READY ====\n")
+    
     uvicorn.run(
-        "main:app",  # Sử dụng format "file:app_variable"
-        host=settings.API_HOST,
-        port=settings.API_PORT,
-        reload=settings.DEBUG_MODE
+        app,
+        host=host,
+        port=port,
+        log_level="info"
     ) 

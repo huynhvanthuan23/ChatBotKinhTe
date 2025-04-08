@@ -1310,3 +1310,1728 @@ Answer: 4...
 2025-04-07 17:00:09,551 - app.services.chatbot - INFO - Found 3 relevant documents in 0.0156 seconds
 2025-04-07 17:00:22,126 - app.services.chatbot - INFO - Generated answer in 12.5904 seconds (retrieval: 0.0156s, inference: 12.5748s)
 2025-04-07 17:00:22,126 - app.api.endpoints.chat - INFO - Generated response for user 3 in 12.590422630310059 seconds
+2025-04-07 18:59:07,724 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 18:59:07,778 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-07 18:59:07,778 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-07 18:59:09,669 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 18:59:09,857 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to import transformers.models.bert.modeling_bert because of the following error (look up to see its traceback):
+cannot import name 'split_torch_state_dict_into_shards' from 'huggingface_hub' (D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\huggingface_hub\__init__.py)
+2025-04-07 18:59:09,873 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\utils\import_utils.py", line 1086, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+  File "C:\Users\huynh\AppData\Local\Programs\Python\Python310\lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\bert\modeling_bert.py", line 42, in <module>
+    from ...modeling_utils import PreTrainedModel
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\modeling_utils.py", line 85, in <module>
+    from accelerate import __version__ as accelerate_version
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\accelerate\__init__.py", line 16, in <module>
+    from .accelerator import Accelerator
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\accelerate\accelerator.py", line 34, in <module>
+    from huggingface_hub import split_torch_state_dict_into_shards
+ImportError: cannot import name 'split_torch_state_dict_into_shards' from 'huggingface_hub' (D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\huggingface_hub\__init__.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 60, in _initialize_components
+    self._embeddings = HuggingFaceEmbeddings(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\embeddings\huggingface.py", line 65, in __init__
+    self.client = sentence_transformers.SentenceTransformer(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\SentenceTransformer.py", line 95, in __init__
+    modules = self._load_sbert_model(model_path)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\SentenceTransformer.py", line 840, in _load_sbert_model
+    module = module_class.load(os.path.join(model_path, module_config['path']))
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\models\Transformer.py", line 137, in load
+    return Transformer(model_name_or_path=input_path, **config)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\models\Transformer.py", line 29, in __init__
+    self._load_model(model_name_or_path, config, cache_dir)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\models\Transformer.py", line 49, in _load_model
+    self.auto_model = AutoModel.from_pretrained(model_name_or_path, config=config, cache_dir=cache_dir)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 483, in from_pretrained
+    model_class = _get_model_class(config, cls._model_mapping)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 375, in _get_model_class
+    supported_models = model_mapping[type(config)]
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 657, in __getitem__
+    return self._load_attr_from_module(model_type, model_name)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 671, in _load_attr_from_module
+    return getattribute_from_module(self._modules[module_name], attr)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 616, in getattribute_from_module
+    if hasattr(module, attr):
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\utils\import_utils.py", line 1076, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\utils\import_utils.py", line 1088, in _get_module
+    raise RuntimeError(
+RuntimeError: Failed to import transformers.models.bert.modeling_bert because of the following error (look up to see its traceback):
+cannot import name 'split_torch_state_dict_into_shards' from 'huggingface_hub' (D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\huggingface_hub\__init__.py)
+
+2025-04-07 19:01:54,678 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-07 19:01:54,742 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-07 19:01:54,743 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-07 19:01:56,554 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-07 19:01:56,730 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to import transformers.models.bert.modeling_bert because of the following error (look up to see its traceback):
+cannot import name 'split_torch_state_dict_into_shards' from 'huggingface_hub' (D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\huggingface_hub\__init__.py)
+2025-04-07 19:01:56,734 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\utils\import_utils.py", line 1086, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+  File "C:\Users\huynh\AppData\Local\Programs\Python\Python310\lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\bert\modeling_bert.py", line 42, in <module>
+    from ...modeling_utils import PreTrainedModel
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\modeling_utils.py", line 85, in <module>
+    from accelerate import __version__ as accelerate_version
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\accelerate\__init__.py", line 16, in <module>
+    from .accelerator import Accelerator
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\accelerate\accelerator.py", line 34, in <module>
+    from huggingface_hub import split_torch_state_dict_into_shards
+ImportError: cannot import name 'split_torch_state_dict_into_shards' from 'huggingface_hub' (D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\huggingface_hub\__init__.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 60, in _initialize_components
+    self._embeddings = HuggingFaceEmbeddings(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\embeddings\huggingface.py", line 65, in __init__
+    self.client = sentence_transformers.SentenceTransformer(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\SentenceTransformer.py", line 95, in __init__
+    modules = self._load_sbert_model(model_path)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\SentenceTransformer.py", line 840, in _load_sbert_model
+    module = module_class.load(os.path.join(model_path, module_config['path']))
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\models\Transformer.py", line 137, in load
+    return Transformer(model_name_or_path=input_path, **config)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\models\Transformer.py", line 29, in __init__
+    self._load_model(model_name_or_path, config, cache_dir)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\sentence_transformers\models\Transformer.py", line 49, in _load_model
+    self.auto_model = AutoModel.from_pretrained(model_name_or_path, config=config, cache_dir=cache_dir)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 483, in from_pretrained
+    model_class = _get_model_class(config, cls._model_mapping)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 375, in _get_model_class
+    supported_models = model_mapping[type(config)]
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 657, in __getitem__
+    return self._load_attr_from_module(model_type, model_name)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 671, in _load_attr_from_module
+    return getattribute_from_module(self._modules[module_name], attr)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\models\auto\auto_factory.py", line 616, in getattribute_from_module
+    if hasattr(module, attr):
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\utils\import_utils.py", line 1076, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\transformers\utils\import_utils.py", line 1088, in _get_module
+    raise RuntimeError(
+RuntimeError: Failed to import transformers.models.bert.modeling_bert because of the following error (look up to see its traceback):
+cannot import name 'split_torch_state_dict_into_shards' from 'huggingface_hub' (D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\huggingface_hub\__init__.py)
+
+2025-04-08 12:00:53,522 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:00:53,587 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:00:53,588 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:00:53,588 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:01,445 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:04,863 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:01:04,863 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:01:04,863 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:01:04,863 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:01:05,115 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:01:05,141 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:01:05,141 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:01:05,155 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:01:05,156 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:01:05,156 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:01:05,157 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:01:05,157 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:01:08,717 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:01:08,718 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:01:08,718 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:01:12,659 - app.services.chatbot - INFO - Test inference took 3.9403 seconds with result: 
+Answer: 4...
+2025-04-08 12:01:12,659 - app.services.chatbot - WARNING - ⚠️ Slow inference time (3.94s) suggests GPU may not be utilized properly
+2025-04-08 12:01:12,659 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:01:12,659 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:01:12,659 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:01:12,659 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:01:12,659 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:01:12,659 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:01:12,995 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:01:12,995 - app.services.chatbot - INFO - Retrying with reinitialized components...
+2025-04-08 12:01:12,995 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:01:13,089 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:01:13,089 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:01:13,089 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:13,089 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:13,172 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:01:13,196 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:01:13,196 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:01:13,206 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:01:13,206 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:01:13,206 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:01:13,215 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:01:13,215 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:01:14,739 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:01:14,739 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:01:14,739 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:01:18,702 - app.services.chatbot - INFO - Test inference took 3.9632 seconds with result: 
+Answer: 4...
+2025-04-08 12:01:18,702 - app.services.chatbot - WARNING - ⚠️ Slow inference time (3.96s) suggests GPU may not be utilized properly
+2025-04-08 12:01:18,702 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:01:18,702 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:01:18,702 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:01:18,702 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:01:18,718 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:01:18,718 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:01:19,029 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:01:19,029 - app.services.chatbot - INFO - Retrying with reinitialized components...
+2025-04-08 12:01:19,029 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:01:19,139 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:01:19,139 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:01:19,139 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:19,139 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:19,238 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:01:19,238 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:01:19,238 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:01:19,257 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:01:19,258 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:01:19,258 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:01:19,258 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:01:19,259 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:01:20,690 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:01:20,690 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:01:20,690 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:01:24,682 - app.services.chatbot - INFO - Test inference took 3.9905 seconds with result: 
+Answer: 4...
+2025-04-08 12:01:24,682 - app.services.chatbot - WARNING - ⚠️ Slow inference time (3.99s) suggests GPU may not be utilized properly
+2025-04-08 12:01:24,682 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:01:24,682 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:01:24,682 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:01:24,682 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:01:24,682 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:01:24,682 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:01:24,995 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:01:24,995 - app.services.chatbot - INFO - Retrying with reinitialized components...
+2025-04-08 12:01:24,995 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:01:25,089 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:01:25,089 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:01:25,089 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:25,089 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:01:25,187 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:01:25,198 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:01:25,198 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:01:25,202 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:01:25,203 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:01:25,203 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:01:25,204 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:01:25,204 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:01:26,586 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:01:26,586 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:01:26,587 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:01:30,770 - app.services.chatbot - INFO - Test inference took 4.1833 seconds with result: 
+Answer: 4...
+2025-04-08 12:01:30,770 - app.services.chatbot - WARNING - ⚠️ Slow inference time (4.18s) suggests GPU may not be utilized properly
+2025-04-08 12:01:30,770 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:01:30,770 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:01:30,770 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:01:30,770 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:01:30,770 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:01:30,770 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:03:22,741 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:03:22,794 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:22,794 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:03:22,794 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:24,679 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:26,357 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:03:26,357 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:03:26,357 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:03:26,357 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:03:26,379 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:03:26,394 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:03:26,394 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:03:26,404 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:03:26,405 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:03:26,405 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:03:26,406 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:03:26,406 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:03:27,726 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:03:27,727 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:03:27,727 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:03:31,816 - app.services.chatbot - INFO - Test inference took 4.0896 seconds with result: 
+Answer: 4...
+2025-04-08 12:03:31,817 - app.services.chatbot - WARNING - ⚠️ Slow inference time (4.09s) suggests GPU may not be utilized properly
+2025-04-08 12:03:31,817 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:03:31,817 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:03:31,818 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:03:31,818 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:03:31,818 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:03:31,818 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:03:32,113 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:32,113 - app.services.chatbot - INFO - Retrying with reinitialized components...
+2025-04-08 12:03:32,114 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:03:32,218 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:32,219 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:03:32,219 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:32,219 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:32,351 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:03:32,363 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:03:32,364 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:03:32,369 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:03:32,370 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:03:32,370 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:03:32,370 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:03:32,371 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:03:33,679 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:03:33,679 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:03:33,680 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:03:37,686 - app.services.chatbot - INFO - Test inference took 4.0063 seconds with result: 
+Answer: 4...
+2025-04-08 12:03:37,686 - app.services.chatbot - WARNING - ⚠️ Slow inference time (4.01s) suggests GPU may not be utilized properly
+2025-04-08 12:03:37,686 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:03:37,686 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:03:37,686 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:03:37,686 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:03:37,686 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:03:37,686 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:03:37,946 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:37,946 - app.services.chatbot - INFO - Retrying with reinitialized components...
+2025-04-08 12:03:37,946 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:03:38,057 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:38,057 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:03:38,058 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:38,058 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:38,188 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:03:38,206 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:03:38,206 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:03:38,212 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:03:38,212 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:03:38,213 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:03:38,213 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:03:38,214 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:03:39,513 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:03:39,514 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:03:39,514 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:03:43,543 - app.services.chatbot - INFO - Test inference took 4.0280 seconds with result: 
+Answer: 4...
+2025-04-08 12:03:43,543 - app.services.chatbot - WARNING - ⚠️ Slow inference time (4.03s) suggests GPU may not be utilized properly
+2025-04-08 12:03:43,543 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:03:43,543 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:03:43,543 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:03:43,543 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:03:43,543 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:03:43,543 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:03:43,816 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:43,816 - app.services.chatbot - INFO - Retrying with reinitialized components...
+2025-04-08 12:03:43,816 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:03:44,034 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:03:44,034 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:03:44,034 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:44,034 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:03:44,138 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:03:44,138 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:03:44,138 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:03:44,162 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:03:44,162 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:03:44,163 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:03:44,163 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:03:44,163 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:03:45,474 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:03:45,474 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:03:45,474 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:03:49,533 - app.services.chatbot - INFO - Test inference took 4.0596 seconds with result: 
+Answer: 4...
+2025-04-08 12:03:49,533 - app.services.chatbot - WARNING - ⚠️ Slow inference time (4.06s) suggests GPU may not be utilized properly
+2025-04-08 12:03:49,533 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:03:49,533 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:03:49,533 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:03:49,533 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:03:49,533 - app.services.chatbot - ERROR - Error getting answer: 'ChatbotService' object has no attribute '_prompt'
+2025-04-08 12:03:49,533 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 254, in get_answer
+    prompt = self._prompt.format(context=context, question=query)
+AttributeError: 'ChatbotService' object has no attribute '_prompt'
+
+2025-04-08 12:06:30,988 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:06:31,040 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:06:31,040 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:06:31,040 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:06:32,956 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:06:34,637 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:06:34,641 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:06:34,642 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:06:34,642 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:06:34,657 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:06:34,674 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:06:34,674 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:06:34,676 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:06:34,677 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:06:34,677 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:06:34,678 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:06:34,678 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:06:36,005 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:06:36,006 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:06:36,006 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Test inference took 3.5427 seconds with result: 
+Answer: 4...
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Fast inference time confirms GPU acceleration!
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Created prompt template
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:06:39,550 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 12:06:59,249 - app.services.chatbot - INFO - LLM processing time: 19.70s
+2025-04-08 12:06:59,249 - app.services.chatbot - INFO - Total processing time: 19.70s
+2025-04-08 12:07:05,011 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:07:05,071 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:07:05,071 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:07:05,071 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:07:07,109 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:07:08,888 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:07:08,892 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:07:08,892 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:07:08,892 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:07:08,909 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:07:08,922 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:07:08,922 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:07:08,924 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:07:08,924 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:07:08,925 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:07:08,925 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:07:08,926 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:07:10,282 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:07:10,282 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:07:10,283 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Test inference took 3.7304 seconds with result: 
+Answer: 4...
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Fast inference time confirms GPU acceleration!
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Created prompt template
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:07:14,013 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 12:07:34,404 - app.services.chatbot - INFO - LLM processing time: 20.39s
+2025-04-08 12:07:34,404 - app.services.chatbot - INFO - Total processing time: 20.39s
+2025-04-08 12:08:10,367 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:08:10,421 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:08:10,421 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:08:10,421 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:08:12,248 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:08:13,985 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:08:13,985 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:08:13,985 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:08:13,985 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:08:14,015 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:08:14,029 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:08:14,030 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:08:14,032 - app.services.chatbot - INFO - GPU config: layers=32, batch=512, ctx=4096, f16=True
+2025-04-08 12:08:14,032 - app.services.chatbot - INFO - Loading GGUF model from models/mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 12:08:14,032 - app.services.chatbot - INFO - Initializing LlamaCpp with n_gpu_layers=32
+2025-04-08 12:08:14,033 - app.services.chatbot - INFO - GPU memory before loading model: 0.00 MB
+2025-04-08 12:08:14,033 - app.services.chatbot - INFO - FORCE_GPU=true: Using maximum GPU layers and optimized parameters
+2025-04-08 12:08:15,390 - app.services.chatbot - INFO - GPU memory after loading model: 0.00 MB
+2025-04-08 12:08:15,390 - app.services.chatbot - INFO - GPU memory used by model: 0.00 MB
+2025-04-08 12:08:15,390 - app.services.chatbot - WARNING - ⚠️ Model may not be fully loaded to GPU (low memory usage)
+2025-04-08 12:08:19,309 - app.services.chatbot - INFO - Test inference took 3.9178 seconds with result: 
+Answer: 4...
+2025-04-08 12:08:19,309 - app.services.chatbot - INFO - Fast inference time confirms GPU acceleration!
+2025-04-08 12:08:19,309 - app.services.chatbot - INFO - Created prompt template
+2025-04-08 12:08:19,309 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:08:19,310 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:08:19,310 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:08:19,310 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:08:19,310 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 12:08:40,988 - app.services.chatbot - INFO - LLM processing time: 21.68s
+2025-04-08 12:08:40,988 - app.services.chatbot - INFO - Total processing time: 21.68s
+2025-04-08 12:12:30,045 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:12:30,094 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:12:30,094 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:12:30,103 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 12:12:30,103 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:12:31,929 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:12:33,608 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:12:33,608 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:12:33,623 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:12:33,623 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:12:33,623 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:12:33,653 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:12:33,653 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:12:33,655 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 12:12:33,655 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 12:12:33,655 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 12:12:33,656 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 12:12:33,656 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 12:12:34,971 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 12:12:34,971 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 12:12:34,971 - app.services.chatbot - INFO - Testing model with a simple query...
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Test response completed in 3.04 seconds
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Test response: 
+A: 4...
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Fast inference time (3.04s) - GPU acceleration confirmed
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Created prompt template
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:12:38,028 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 12:12:59,606 - app.services.chatbot - INFO - LLM processing time: 21.58s
+2025-04-08 12:12:59,606 - app.services.chatbot - INFO - Total processing time: 21.58s
+2025-04-08 12:14:11,625 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:14:11,680 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:14:11,680 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:14:11,688 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 12:14:11,688 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:14:13,546 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:14:15,343 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:14:15,359 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:14:15,359 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:14:15,359 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:14:15,359 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:14:15,388 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:14:15,388 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:14:15,390 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 12:14:15,390 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 12:14:15,391 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 12:14:15,391 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 12:14:15,391 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 12:14:16,737 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 12:14:16,737 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 12:14:16,738 - app.services.chatbot - INFO - Testing model with a simple query...
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Test response completed in 3.44 seconds
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Test response: 
+A: 4...
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Fast inference time (3.44s) - GPU acceleration confirmed
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Created prompt template
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Processing query: Xin chào
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 12:14:20,175 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 12:14:42,237 - app.services.chatbot - INFO - LLM processing time: 22.06s
+2025-04-08 12:14:42,237 - app.services.chatbot - INFO - Total processing time: 22.06s
+2025-04-08 12:20:11,600 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:20:11,654 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:20:11,654 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:20:11,654 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 12:20:11,654 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:20:13,522 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:20:15,409 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:20:15,412 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:20:15,412 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:20:15,413 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:20:15,425 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:20:15,442 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:20:15,443 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:20:15,445 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 12:20:15,445 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 12:20:15,445 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 12:20:15,445 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 12:20:15,445 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 12:20:16,801 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 12:20:16,801 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 12:20:16,802 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 12:21:57,003 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 12:21:57,086 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 12:21:57,086 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 12:21:57,086 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 12:21:57,086 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:21:59,070 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 12:22:00,886 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 12:22:00,902 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 12:22:00,902 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 12:22:00,903 - faiss.loader - INFO - Loading faiss.
+2025-04-08 12:22:00,920 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 12:22:00,936 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 12:22:00,936 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 12:22:00,936 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 12:22:00,936 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 12:22:00,936 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 12:22:00,936 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 12:22:00,936 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 12:22:02,354 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 12:22:02,354 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 12:22:02,354 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 19:53:25,897 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 19:53:25,955 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 19:53:25,955 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 19:53:25,955 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 19:53:25,955 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 19:53:34,266 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 19:53:36,737 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 19:53:36,737 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 19:53:36,737 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 19:53:36,737 - faiss.loader - INFO - Loading faiss.
+2025-04-08 19:53:37,003 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 19:53:37,026 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 19:53:37,033 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 19:53:37,034 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 19:53:37,035 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 19:53:37,035 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 19:53:37,035 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 19:53:37,035 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 19:53:40,274 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 19:53:40,274 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 19:53:40,274 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 19:57:09,650 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 19:57:09,710 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 19:57:09,711 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 19:57:09,711 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 19:57:09,712 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 19:57:11,532 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 19:57:13,178 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 19:57:13,178 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 19:57:13,178 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 19:57:13,178 - faiss.loader - INFO - Loading faiss.
+2025-04-08 19:57:13,204 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 19:57:13,217 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 19:57:13,217 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 19:57:13,219 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 19:57:13,219 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 19:57:13,219 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 19:57:13,219 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 19:57:13,219 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 19:57:14,416 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 19:57:14,417 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 19:57:14,417 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 20:06:11,517 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 20:06:11,583 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 20:06:11,584 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 20:06:11,585 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 20:06:11,585 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:06:13,391 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:06:15,096 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 20:06:15,096 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 20:06:15,096 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 20:06:15,096 - faiss.loader - INFO - Loading faiss.
+2025-04-08 20:06:15,115 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 20:06:15,126 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 20:06:15,126 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 20:06:15,133 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 20:06:15,133 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 20:06:15,133 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 20:06:15,133 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 20:06:15,133 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 20:06:16,483 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 20:06:16,483 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 20:06:16,483 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 20:12:16,480 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'nhu cầu chính của khách hàng là gì'
+2025-04-08 20:12:16,492 - app.api.endpoints.chat - INFO - Using Local model with model: mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 20:12:16,492 - app.services.chatbot - INFO - Processing query: nhu cầu chính của khách hàng là gì
+2025-04-08 20:12:16,492 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 20:12:16,492 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 20:12:16,493 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 20:12:43,516 - app.services.chatbot - INFO - LLM processing time: 27.02s
+2025-04-08 20:12:43,516 - app.services.chatbot - INFO - Total processing time: 27.02s
+2025-04-08 20:12:43,516 - app.api.endpoints.chat - INFO - Generated response for user 3 in 27.0244300365448 seconds
+2025-04-08 20:14:43,642 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào'
+2025-04-08 20:14:43,642 - app.api.endpoints.chat - INFO - Using Local model with model: mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 20:14:43,642 - app.services.chatbot - INFO - Processing query: Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào
+2025-04-08 20:14:43,642 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 20:14:43,642 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 20:14:43,642 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 20:14:58,482 - app.services.chatbot - INFO - LLM processing time: 14.84s
+2025-04-08 20:14:58,482 - app.services.chatbot - INFO - Total processing time: 14.84s
+2025-04-08 20:14:58,482 - app.api.endpoints.chat - INFO - Generated response for user 3 in 14.840807437896729 seconds
+2025-04-08 20:18:00,918 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 20:18:00,983 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 20:18:00,983 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 20:18:00,984 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 20:18:00,984 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:18:03,456 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:18:05,689 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 20:18:05,689 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 20:18:05,689 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 20:18:05,689 - faiss.loader - INFO - Loading faiss.
+2025-04-08 20:18:05,715 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 20:18:05,728 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 20:18:05,728 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 20:18:05,732 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 20:18:05,732 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 20:18:05,733 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 20:18:05,733 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 20:18:05,733 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 20:18:08,748 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 20:18:08,748 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 20:18:08,748 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 20:18:45,589 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào'
+2025-04-08 20:18:45,590 - app.api.endpoints.chat - INFO - Using Local model with model: mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 20:18:45,590 - app.services.chatbot - INFO - Processing query: Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào
+2025-04-08 20:18:45,591 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 20:18:45,591 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 20:18:45,591 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 20:19:17,933 - app.services.chatbot - INFO - LLM processing time: 32.34s
+2025-04-08 20:19:17,933 - app.services.chatbot - INFO - Total processing time: 32.34s
+2025-04-08 20:19:17,933 - app.api.endpoints.chat - INFO - Generated response for user 3 in 32.343019008636475 seconds
+2025-04-08 20:25:30,328 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 20:25:30,380 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 20:25:30,380 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 20:25:30,381 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 20:25:30,381 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:25:39,526 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:25:41,683 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 20:25:41,688 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 20:25:41,688 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 20:25:41,688 - faiss.loader - INFO - Loading faiss.
+2025-04-08 20:25:41,711 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 20:25:41,728 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 20:25:41,729 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 20:25:41,730 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 20:25:41,731 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 20:25:41,731 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 20:25:41,731 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 20:25:41,732 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 20:25:44,947 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 20:25:44,947 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 20:25:44,948 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 20:26:30,179 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 20:26:30,229 - app.services.chatbot - INFO - Cleaned GPU memory: allocated=0.00MB, reserved=0.00MB
+2025-04-08 20:26:30,230 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 20:26:30,231 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 20:26:30,231 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:26:32,751 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 20:26:42,350 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 20:26:42,355 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 20:26:42,356 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 20:26:42,356 - faiss.loader - INFO - Loading faiss.
+2025-04-08 20:26:42,470 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 20:26:42,485 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: '__fields_set__'
+2025-04-08 20:26:42,485 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 20:26:42,486 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 20:26:42,487 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 20:26:42,487 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 20:26:42,487 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 20:26:42,487 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 20:26:46,082 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 20:26:46,082 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 20:26:46,082 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 20:27:41,211 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào'
+2025-04-08 20:27:41,212 - app.api.endpoints.chat - INFO - Using Local model with model: mistral-7b-instruct-v0.1.Q2_K.gguf
+2025-04-08 20:27:41,212 - app.services.chatbot - INFO - Processing query: Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào
+2025-04-08 20:27:41,213 - app.services.chatbot - INFO - Retriever not available, skipping document retrieval
+2025-04-08 20:27:41,213 - app.services.chatbot - INFO - Generating prompt...
+2025-04-08 20:27:41,213 - app.services.chatbot - INFO - Calling LLM for answer...
+2025-04-08 20:28:23,861 - app.services.chatbot - INFO - LLM processing time: 42.65s
+2025-04-08 20:28:23,861 - app.services.chatbot - INFO - Total processing time: 42.65s
+2025-04-08 20:28:23,861 - app.api.endpoints.chat - INFO - Generated response for user 3 in 42.649189710617065 seconds
+2025-04-08 21:10:47,962 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:10:47,962 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:10:51,538 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:10:51,539 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:10:52,682 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:10:52,745 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:10:52,745 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:10:52,746 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:10:52,746 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:11:36,912 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào'
+2025-04-08 21:11:36,912 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:11:36,917 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:11:37,976 - app.services.api_service - INFO - Google API response received in 1.06 seconds
+2025-04-08 21:11:37,977 - app.api.endpoints.chat - INFO - Generated response for user 3 in 1.0643019676208496 seconds
+2025-04-08 21:14:30,364 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:14:30,364 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:14:33,792 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:14:33,792 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:14:34,920 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:14:34,989 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:14:34,989 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:14:34,989 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:14:34,989 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:15:06,198 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kết phiên giao dịch ngày 10-2, chỉ số VN-Index như thế nào'
+2025-04-08 21:15:06,198 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:15:06,198 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:15:08,025 - app.services.api_service - INFO - Google API response received in 1.83 seconds
+2025-04-08 21:15:08,026 - app.api.endpoints.chat - INFO - Generated response for user 3 in 1.828434705734253 seconds
+2025-04-08 21:28:42,173 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:28:42,236 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:28:42,236 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:28:42,236 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:28:42,236 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:28:44,089 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:28:45,987 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:28:45,990 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:28:45,990 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:28:45,991 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:28:46,009 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:28:46,016 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:28:46,016 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:28:46,017 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 21:28:46,017 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 21:28:46,017 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 21:28:46,017 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 21:28:46,018 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 21:28:49,441 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 21:28:49,441 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 21:28:49,442 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:29:26,408 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:29:26,473 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:29:26,473 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:29:26,473 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:29:26,473 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:29:28,881 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:29:31,393 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:29:31,397 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:29:31,397 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:29:31,397 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:29:31,416 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:29:31,418 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:29:31,418 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:29:31,418 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 21:29:31,418 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 21:29:31,418 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 21:29:31,418 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 21:29:31,418 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 21:29:34,718 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 21:29:34,718 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 21:29:34,726 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:30:00,927 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:30:00,927 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:30:04,598 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:30:04,598 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:30:05,762 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:30:05,826 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:30:05,826 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:30:05,826 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:30:05,826 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:30:34,833 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'kinh tế học là gì'
+2025-04-08 21:30:34,834 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:30:34,835 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:30:39,067 - app.services.api_service - INFO - Google API response received in 4.23 seconds
+2025-04-08 21:30:39,067 - app.api.endpoints.chat - INFO - Generated response for user 3 in 4.233837366104126 seconds
+2025-04-08 21:35:31,350 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:35:31,350 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:35:34,897 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:35:34,897 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:35:36,017 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:35:36,082 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:35:36,083 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:35:36,083 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:35:36,083 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:35:38,497 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:35:40,947 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:35:40,947 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:35:40,947 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:35:40,947 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:35:40,972 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:35:40,980 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:35:40,980 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:35:40,981 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:35:40,981 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:35:40,981 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:36:06,220 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'kinh tế học là gì'
+2025-04-08 21:36:06,221 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:36:06,221 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:36:10,657 - app.services.api_service - INFO - Google API response received in 4.44 seconds
+2025-04-08 21:36:10,657 - app.api.endpoints.chat - INFO - Generated response for user 3 in 4.435338973999023 seconds
+2025-04-08 21:37:31,076 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:37:31,076 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:37:34,659 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:37:34,659 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:37:35,771 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:37:35,827 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:37:35,827 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:37:35,827 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:37:35,827 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:37:37,709 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:37:39,736 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:37:39,736 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:37:39,736 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:37:39,736 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:37:39,755 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:37:39,762 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:37:39,763 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:37:39,763 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:37:39,763 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:37:39,763 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:38:01,860 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'kinh tế học là gì'
+2025-04-08 21:38:01,860 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:38:01,861 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:38:05,916 - app.services.api_service - INFO - Google API response received in 4.06 seconds
+2025-04-08 21:38:05,916 - app.api.endpoints.chat - INFO - Generated response for user 3 in 4.0557050704956055 seconds
+2025-04-08 21:38:39,011 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học phát triển là gì'
+2025-04-08 21:38:39,011 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:38:39,011 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:38:42,536 - app.services.api_service - INFO - Google API response received in 3.53 seconds
+2025-04-08 21:38:42,536 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.5255239009857178 seconds
+2025-04-08 21:39:27,225 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:39:27,286 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:39:27,286 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:39:27,286 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:39:27,286 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:39:29,104 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:39:30,966 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:39:30,966 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:39:30,976 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:39:30,976 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:39:30,986 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:39:30,997 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:39:30,997 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:39:30,997 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 21:39:30,998 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 21:39:30,998 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 21:39:30,998 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 21:39:30,998 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 21:39:34,293 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 21:39:34,293 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 21:39:34,293 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:39:57,640 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học phát triển là gì'
+2025-04-08 21:39:57,640 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:39:57,640 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:40:02,014 - app.services.api_service - INFO - Google API response received in 4.37 seconds
+2025-04-08 21:40:02,014 - app.api.endpoints.chat - INFO - Generated response for user 3 in 4.374788522720337 seconds
+2025-04-08 21:40:32,569 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:40:32,569 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:40:36,221 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:40:36,221 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:40:37,350 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:40:37,407 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:40:37,407 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:40:37,407 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:40:37,407 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:40:39,786 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:40:42,276 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:40:42,281 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:40:42,281 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:40:42,281 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:40:42,301 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:40:42,310 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:40:42,311 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:40:42,311 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:40:42,312 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:40:42,312 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:41:33,523 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 21:41:33,523 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:41:33,523 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:41:36,977 - app.services.api_service - INFO - Google API response received in 3.45 seconds
+2025-04-08 21:41:36,978 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.4557113647460938 seconds
+2025-04-08 21:45:58,509 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:45:58,510 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:45:59,322 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:45:59,381 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:45:59,382 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:45:59,382 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:45:59,382 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:01,296 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:03,150 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:46:03,150 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:46:03,155 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:46:03,155 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:46:03,165 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:46:03,174 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:46:03,175 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:46:03,175 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:46:03,176 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:46:03,176 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:46:08,325 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:46:08,325 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:46:09,145 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:46:09,211 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:46:09,211 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:46:09,212 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:46:09,212 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:11,065 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:12,974 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:46:12,978 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:46:12,978 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:46:12,979 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:46:12,996 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:46:13,003 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:46:13,003 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:46:13,004 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:46:13,004 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:46:13,004 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:46:18,195 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:46:18,195 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:46:19,015 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:46:19,074 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:46:19,074 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:46:19,075 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:46:19,075 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:20,895 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:51,315 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:46:51,315 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:46:54,895 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:46:54,895 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:46:56,015 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:46:56,075 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:46:56,075 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:46:56,080 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:46:56,080 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:57,995 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:46:59,945 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:46:59,948 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:46:59,948 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:46:59,948 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:46:59,965 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:46:59,969 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:46:59,970 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:46:59,970 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:46:59,970 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:46:59,971 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:47:19,570 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 21:47:19,571 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:47:19,571 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:47:19,985 - app.services.api_service - INFO - Google API response received in 0.41 seconds
+2025-04-08 21:47:19,985 - app.services.api_service - ERROR - API error: 400 - {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key not valid. Please pass a valid API key.'}]}}
+2025-04-08 21:47:19,985 - app.api.endpoints.chat - INFO - Generated response for user 3 in 0.4135434627532959 seconds
+2025-04-08 21:47:44,477 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 21:47:44,477 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:47:44,477 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:47:44,835 - app.services.api_service - INFO - Google API response received in 0.36 seconds
+2025-04-08 21:47:44,835 - app.services.api_service - ERROR - API error: 400 - {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key not valid. Please pass a valid API key.'}]}}
+2025-04-08 21:47:44,835 - app.api.endpoints.chat - INFO - Generated response for user 3 in 0.35782885551452637 seconds
+2025-04-08 21:48:22,405 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:48:22,405 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:48:23,239 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:48:23,304 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:48:23,304 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:48:23,304 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:48:23,308 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:48:25,184 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:48:27,075 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:48:27,083 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:48:27,083 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:48:27,085 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:48:27,100 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:48:27,105 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:48:27,105 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:48:27,105 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:48:27,106 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:48:27,106 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:48:41,294 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:48:41,294 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:48:44,900 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:48:44,900 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:48:46,021 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:48:46,082 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:48:46,083 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 21:48:46,083 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 21:48:46,083 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:48:47,973 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 21:48:49,835 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 21:48:49,838 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 21:48:49,839 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 21:48:49,839 - faiss.loader - INFO - Loading faiss.
+2025-04-08 21:48:49,848 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 21:48:49,860 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 21:48:49,860 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 21:48:49,860 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:48:49,861 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:48:49,861 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:49:12,504 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 21:49:12,504 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:49:12,504 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:49:12,855 - app.services.api_service - INFO - Google API response received in 0.35 seconds
+2025-04-08 21:49:12,855 - app.services.api_service - ERROR - API error: 400 - {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key not valid. Please pass a valid API key.'}]}}
+2025-04-08 21:49:12,855 - app.api.endpoints.chat - INFO - Generated response for user 3 in 0.3504343032836914 seconds
+2025-04-08 21:51:05,361 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:51:05,361 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:51:08,958 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:51:08,958 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:51:10,074 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:51:10,134 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:51:10,134 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:51:10,134 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:51:10,141 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:51:45,778 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 21:51:45,778 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:51:45,779 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:51:46,137 - app.services.api_service - INFO - Google API response received in 0.36 seconds
+2025-04-08 21:51:46,137 - app.services.api_service - ERROR - API error: 400 - {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key not valid. Please pass a valid API key.'}]}}
+2025-04-08 21:51:46,137 - app.api.endpoints.chat - INFO - Generated response for user 3 in 0.3582160472869873 seconds
+2025-04-08 21:52:36,841 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:52:36,841 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:52:40,433 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 21:52:40,433 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 21:52:41,541 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 21:52:41,606 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 21:52:41,606 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 21:52:41,606 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 21:52:41,607 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 21:53:07,851 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 21:53:07,851 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 21:53:07,851 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 21:53:11,191 - app.services.api_service - INFO - Google API response received in 3.34 seconds
+2025-04-08 21:53:11,191 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.33966326713562 seconds
+2025-04-08 22:05:52,476 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:05:52,476 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:05:56,095 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:05:56,095 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:05:57,205 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:05:57,271 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:05:57,271 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:05:57,272 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:05:57,272 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:06:13,587 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 22:06:13,587 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:06:13,589 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:06:16,950 - app.services.api_service - INFO - Google API response received in 3.36 seconds
+2025-04-08 22:06:16,950 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.3630588054656982 seconds
+2025-04-08 22:13:13,228 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:13:13,229 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:13:16,909 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:13:16,910 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:13:18,013 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:13:18,077 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:13:18,083 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:13:19,590 - app.services.chatbot - ERROR - Error initializing Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-04-08 22:13:19,591 - app.services.chatbot - WARNING - Falling back to local model
+2025-04-08 22:13:19,591 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 22:13:19,592 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 22:13:19,592 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:13:21,512 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:13:23,415 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 22:13:23,425 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:13:23,425 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:13:23,426 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:13:23,447 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:13:23,456 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:13:23,457 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 22:13:23,457 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 22:13:23,458 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 22:13:23,458 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 22:13:23,458 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 22:13:23,458 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 22:13:27,017 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 22:13:27,017 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 22:13:27,017 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:14:07,561 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 22:14:07,561 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:14:07,563 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:14:11,873 - app.services.api_service - INFO - Google API response received in 4.31 seconds
+2025-04-08 22:14:11,880 - app.api.endpoints.chat - INFO - Generated response for user 3 in 4.318709135055542 seconds
+2025-04-08 22:15:57,373 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:15:57,373 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:16:01,025 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:16:01,025 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:16:02,177 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:16:02,242 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:16:02,242 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:16:03,592 - app.services.chatbot - ERROR - Error initializing Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-04-08 22:16:03,592 - app.services.chatbot - WARNING - Falling back to local model
+2025-04-08 22:16:03,592 - app.services.chatbot - INFO - GPU detected: NVIDIA GeForce GTX 1650 with Max-Q Design with 4.00GB VRAM
+2025-04-08 22:16:03,593 - app.services.chatbot - INFO - Free GPU memory: 0.00MB reserved, 0.00MB allocated
+2025-04-08 22:16:03,593 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:16:06,062 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:16:08,502 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 22:16:08,502 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:16:08,502 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:16:08,502 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:16:08,532 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:16:08,542 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:16:08,542 - app.services.chatbot - WARNING - Continuing without embeddings/vectorstore
+2025-04-08 22:16:08,543 - app.services.chatbot - INFO - Detected VRAM: 4.00 GB
+2025-04-08 22:16:08,543 - app.services.chatbot - INFO - FORCE_GPU enabled: Using maximum GPU layers
+2025-04-08 22:16:08,543 - app.services.chatbot - INFO - Using n_gpu_layers=32
+2025-04-08 22:16:08,543 - app.services.chatbot - INFO - Using optimized GPU parameters
+2025-04-08 22:16:08,544 - app.services.chatbot - INFO - Creating LlamaCpp model with parameters: n_gpu_layers=32, n_batch=512, use_mmap=False
+2025-04-08 22:16:11,731 - app.services.chatbot - INFO - After model loading: 0.00MB allocated, 0.00MB reserved
+2025-04-08 22:16:11,732 - app.services.chatbot - WARNING - Warning: Model might not be using GPU (low VRAM usage)
+2025-04-08 22:16:11,733 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:20:34,239 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:20:34,239 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:20:37,741 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:20:37,741 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:20:38,900 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:20:38,962 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:20:38,962 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:20:39,700 - app.services.chatbot - ERROR - Error initializing Gemini API: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-04-08 22:20:39,700 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to initialize Gemini API. Please check your API key and internet connection.
+2025-04-08 22:20:39,759 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 68, in _initialize_components
+    test_response = test_chat.send_message("Test connection")
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\generativeai\generative_models.py", line 578, in send_message
+    response = self.model.generate_content(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\generativeai\generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 835, in generate_content
+    response = rpc(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\retry\retry_unary.py", line 293, in retry_wrapped_func
+    return retry_target(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\retry\retry_unary.py", line 153, in retry_target
+    _retry_error_helper(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\retry\retry_base.py", line 212, in _retry_error_helper
+    raise final_exc from source_exc
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\retry\retry_unary.py", line 144, in retry_target
+    result = target()
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 81, in _initialize_components
+    raise RuntimeError("Failed to initialize Gemini API. Please check your API key and internet connection.")
+RuntimeError: Failed to initialize Gemini API. Please check your API key and internet connection.
+
+2025-04-08 22:22:07,627 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 22:22:07,627 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:22:07,629 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:22:11,199 - app.services.api_service - INFO - Google API response received in 3.57 seconds
+2025-04-08 22:22:11,199 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.5716397762298584 seconds
+2025-04-08 22:27:04,468 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:27:04,468 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:27:08,138 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:27:08,138 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:27:09,268 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:27:09,328 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:27:09,328 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:27:09,328 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:27:09,328 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:27:11,772 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:27:14,274 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 22:27:14,278 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:27:14,278 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:27:14,278 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:27:14,299 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:27:14,309 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:27:14,309 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to initialize vector database. Please check your vector store files.
+2025-04-08 22:27:14,327 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 82, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 97, in _initialize_components
+    raise RuntimeError("Failed to initialize vector database. Please check your vector store files.")
+RuntimeError: Failed to initialize vector database. Please check your vector store files.
+
+2025-04-08 22:29:14,060 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 22:29:14,061 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:29:14,061 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:29:17,731 - app.services.api_service - INFO - Google API response received in 3.67 seconds
+2025-04-08 22:29:17,732 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.6702089309692383 seconds
+2025-04-08 22:31:13,805 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:31:13,805 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:31:17,302 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:31:17,302 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:31:18,416 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:31:18,482 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:31:18,483 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:31:18,483 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:31:18,483 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:31:20,355 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:31:22,278 - app.services.chatbot - INFO - Loading vector store from vector_db
+2025-04-08 22:31:22,282 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:31:22,282 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:31:22,283 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:31:22,299 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:31:22,305 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:31:22,306 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to initialize vector database. Please check your vector store files.
+2025-04-08 22:31:22,306 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 82, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 97, in _initialize_components
+    raise RuntimeError("Failed to initialize vector database. Please check your vector store files.")
+RuntimeError: Failed to initialize vector database. Please check your vector store files.
+
+2025-04-08 22:37:12,201 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:37:12,201 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:37:15,826 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:37:15,826 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:37:16,961 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:37:17,046 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:37:17,046 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:37:17,046 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:37:17,046 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:37:17,046 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:37:18,943 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:37:20,821 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:37:20,826 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:37:20,826 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:37:20,826 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:37:20,848 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:37:20,854 - app.services.chatbot - ERROR - Error loading FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:37:20,854 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:37:20,855 - app.services.chatbot - ERROR - Stacktrace: Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 99, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 113, in _initialize_components
+    raise RuntimeError(f"Failed to load FAISS index: {str(faiss_err)}")
+RuntimeError: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+2025-04-08 22:37:20,857 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to initialize vector database: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:37:20,858 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 99, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 113, in _initialize_components
+    raise RuntimeError(f"Failed to load FAISS index: {str(faiss_err)}")
+RuntimeError: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 135, in _initialize_components
+    raise RuntimeError(f"Failed to initialize vector database: {str(emb_err)}")
+RuntimeError: Failed to initialize vector database: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+2025-04-08 22:41:04,209 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:41:04,210 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:41:07,830 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:41:07,830 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:41:08,942 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:41:09,004 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:41:09,004 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:41:09,004 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:41:09,004 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:41:09,004 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:41:10,916 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:41:12,815 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:41:12,819 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:41:12,819 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:41:12,819 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:41:12,834 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:41:12,840 - app.services.chatbot - ERROR - Error loading FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:41:12,840 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:41:12,842 - app.services.chatbot - ERROR - Stacktrace: Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 99, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 113, in _initialize_components
+    raise RuntimeError(f"Failed to load FAISS index: {str(faiss_err)}")
+RuntimeError: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+2025-04-08 22:41:12,842 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to initialize vector database: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:41:12,843 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 99, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 113, in _initialize_components
+    raise RuntimeError(f"Failed to load FAISS index: {str(faiss_err)}")
+RuntimeError: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 135, in _initialize_components
+    raise RuntimeError(f"Failed to initialize vector database: {str(emb_err)}")
+RuntimeError: Failed to initialize vector database: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+2025-04-08 22:41:56,325 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:41:56,325 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:41:59,815 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:41:59,815 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:42:00,935 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:42:00,995 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:42:00,995 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:42:00,995 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:42:00,995 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:42:00,995 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:42:02,837 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:42:04,671 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:42:04,675 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:42:04,675 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:42:04,675 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:42:04,691 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:42:04,696 - app.services.chatbot - ERROR - Error loading FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:42:04,696 - app.services.chatbot - ERROR - Error loading embeddings/vectorstore: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:42:04,696 - app.services.chatbot - ERROR - Stacktrace: Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 99, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 113, in _initialize_components
+    raise RuntimeError(f"Failed to load FAISS index: {str(faiss_err)}")
+RuntimeError: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+2025-04-08 22:42:04,696 - app.services.chatbot - ERROR - Error initializing ChatbotService components: Failed to initialize vector database: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+2025-04-08 22:42:04,696 - app.services.chatbot - ERROR - Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 99, in _initialize_components
+    self._db = FAISS.load_local(
+  File "D:\ThucTap\ChatBotKinhTe\venv\lib\site-packages\langchain_community\vectorstores\faiss.py", line 1065, in load_local
+    return cls(embeddings, index, docstore, index_to_docstore_id, **kwargs)
+TypeError: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 113, in _initialize_components
+    raise RuntimeError(f"Failed to load FAISS index: {str(faiss_err)}")
+RuntimeError: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ThucTap\ChatBotKinhTe\app\services\chatbot.py", line 135, in _initialize_components
+    raise RuntimeError(f"Failed to initialize vector database: {str(emb_err)}")
+RuntimeError: Failed to initialize vector database: Failed to load FAISS index: FAISS.__init__() got an unexpected keyword argument 'allow_dangerous_deserialization'
+
+2025-04-08 22:44:08,567 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:44:08,568 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:44:09,382 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:44:09,455 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:44:09,456 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:44:09,456 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:44:09,456 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:44:09,457 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:44:11,315 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:44:13,252 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:44:13,255 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:44:13,255 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:44:13,255 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:44:13,268 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:44:13,275 - app.services.chatbot - INFO - Vector store loaded successfully with 27 vectors
+2025-04-08 22:44:13,275 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 22:44:13,275 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 22:44:14,844 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 22:44:14,844 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:44:49,725 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:44:49,725 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:44:53,357 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:44:53,357 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:44:54,176 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:44:54,238 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:44:54,238 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:44:54,239 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:44:54,239 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:44:54,240 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:44:56,035 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:44:57,909 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:44:57,914 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:44:57,914 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:44:57,914 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:44:57,942 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:44:57,951 - app.services.chatbot - INFO - Vector store loaded successfully with 27 vectors
+2025-04-08 22:44:57,951 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 22:44:57,952 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 22:44:59,001 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 22:44:59,001 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:45:26,192 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:45:26,192 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:45:29,705 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:45:29,705 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:45:30,803 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:45:30,865 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:45:30,865 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:45:30,865 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:45:30,865 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:45:30,865 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:45:32,720 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:45:34,555 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:45:34,558 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:45:34,558 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:45:34,559 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:45:34,572 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:45:34,577 - app.services.chatbot - INFO - Vector store loaded successfully with 27 vectors
+2025-04-08 22:45:34,577 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 22:45:34,577 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 22:45:34,974 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 22:45:34,974 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:46:28,527 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô'
+2025-04-08 22:46:28,527 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:46:28,528 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:46:32,045 - app.services.api_service - INFO - Google API response received in 3.52 seconds
+2025-04-08 22:46:32,045 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.5170860290527344 seconds
+2025-04-08 22:49:26,374 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:49:26,374 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:49:29,899 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:49:29,899 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:49:31,014 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:49:31,074 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:49:31,074 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:49:31,074 - app.services.chatbot - INFO - Gemini API initialized successfully
+2025-04-08 22:49:31,074 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:49:31,074 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:49:32,860 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:49:34,694 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:49:34,698 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:49:34,698 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:49:34,698 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:49:34,716 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:49:34,722 - app.services.chatbot - INFO - Vector store loaded successfully with 27 vectors
+2025-04-08 22:49:34,723 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 22:49:34,724 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 22:49:35,729 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 22:49:35,729 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:51:13,884 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học là một ngành học rộng và phức tạp'
+2025-04-08 22:51:13,884 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:51:13,884 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:51:17,184 - app.services.api_service - INFO - Google API response received in 3.30 seconds
+2025-04-08 22:51:17,184 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.3002734184265137 seconds
+2025-04-08 22:51:46,464 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô nghiên cứu gì'
+2025-04-08 22:51:46,464 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:51:46,464 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:51:49,435 - app.services.api_service - INFO - Google API response received in 2.97 seconds
+2025-04-08 22:51:49,435 - app.api.endpoints.chat - INFO - Generated response for user 3 in 2.9706661701202393 seconds
+2025-04-08 22:55:47,631 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:55:47,631 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:55:51,554 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 22:55:51,554 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 22:55:52,693 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 22:55:52,763 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 22:55:52,763 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 22:55:52,763 - app.services.chatbot - INFO - Gemini API initialized successfully with model gemini-1.5-pro
+2025-04-08 22:55:52,763 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 22:55:52,763 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:55:54,634 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 22:55:56,493 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 22:55:56,496 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 22:55:56,496 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 22:55:56,497 - faiss.loader - INFO - Loading faiss.
+2025-04-08 22:55:56,512 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 22:55:56,518 - app.services.chatbot - INFO - Vector store loaded successfully with 27 vectors
+2025-04-08 22:55:56,518 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 22:55:56,518 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 22:55:57,614 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 22:55:57,614 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 22:57:01,073 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô nghiên cứu gì'
+2025-04-08 22:57:01,073 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 22:57:01,073 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 22:57:04,632 - app.services.api_service - INFO - Google API response received in 3.56 seconds
+2025-04-08 22:57:04,632 - app.api.endpoints.chat - INFO - Generated response for user 3 in 3.559831380844116 seconds
+2025-04-08 23:00:39,451 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 23:00:39,451 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 23:00:43,262 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 23:00:43,262 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 23:00:44,372 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 23:00:44,442 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 23:00:44,442 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 23:00:44,442 - app.services.chatbot - INFO - Gemini API initialized successfully with model gemini-1.5-pro
+2025-04-08 23:00:44,442 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 23:00:44,442 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 23:00:46,473 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 23:00:48,477 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 23:00:48,477 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 23:00:48,477 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 23:00:48,482 - faiss.loader - INFO - Loading faiss.
+2025-04-08 23:00:48,492 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 23:00:48,517 - app.services.chatbot - INFO - Vector store loaded successfully with 6 vectors
+2025-04-08 23:00:48,517 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 23:00:48,519 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 23:00:49,647 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 23:00:49,647 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 23:01:13,753 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Kinh tế học vĩ mô nghiên cứu gì'
+2025-04-08 23:01:13,753 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 23:01:13,753 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 23:01:16,502 - app.services.api_service - INFO - Google API response received in 2.75 seconds
+2025-04-08 23:01:16,507 - app.api.endpoints.chat - INFO - Generated response for user 3 in 2.7540957927703857 seconds
+2025-04-08 23:50:11,385 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 23:50:11,386 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 23:50:15,141 - app.api.endpoints.chat - INFO - Initializing API service with type: google
+2025-04-08 23:50:15,141 - app.services.api_service - INFO - Initialized Google API service with model: gemini-2.0-flash
+2025-04-08 23:50:16,261 - app.services.chatbot - INFO - Initializing ChatbotService components...
+2025-04-08 23:50:16,327 - app.services.chatbot - INFO - GPU memory cleaned successfully
+2025-04-08 23:50:16,328 - app.services.chatbot - INFO - Initializing Gemini API...
+2025-04-08 23:50:16,328 - app.services.chatbot - INFO - Gemini API initialized successfully with model gemini-1.5-pro
+2025-04-08 23:50:16,329 - app.services.chatbot - INFO - Vector store path: ./vector_db
+2025-04-08 23:50:16,329 - app.services.chatbot - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 23:50:18,299 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-04-08 23:50:20,245 - app.services.chatbot - INFO - Loading vector store from ./vector_db
+2025-04-08 23:50:20,248 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-04-08 23:50:20,249 - faiss.loader - INFO - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+2025-04-08 23:50:20,249 - faiss.loader - INFO - Loading faiss.
+2025-04-08 23:50:20,263 - faiss.loader - INFO - Successfully loaded faiss.
+2025-04-08 23:50:20,270 - app.services.chatbot - INFO - Vector store loaded successfully with 6 vectors
+2025-04-08 23:50:20,270 - app.services.chatbot - INFO - Configuring retriever
+2025-04-08 23:50:20,270 - app.services.chatbot - INFO - Retriever configured successfully
+2025-04-08 23:50:21,285 - app.services.chatbot - INFO - Retriever test successful, found 4 document(s)
+2025-04-08 23:50:21,286 - app.services.chatbot - INFO - ChatbotService components initialized successfully
+2025-04-08 23:50:51,544 - app.api.endpoints.chat - INFO - Received chat-direct request from user 3: 'Lý thuyết tiêu dùng'
+2025-04-08 23:50:51,545 - app.api.endpoints.chat - INFO - Using API with model: gemini-2.0-flash
+2025-04-08 23:50:51,546 - app.services.api_service - INFO - Sending request to Google API: gemini-2.0-flash
+2025-04-08 23:50:56,130 - app.services.api_service - INFO - Google API response received in 4.58 seconds
+2025-04-08 23:50:56,130 - app.api.endpoints.chat - INFO - Generated response for user 3 in 4.5840277671813965 seconds

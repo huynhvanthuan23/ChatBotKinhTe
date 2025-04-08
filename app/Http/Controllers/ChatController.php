@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Http;
 
 class ChatController extends Controller
 {
@@ -141,6 +142,36 @@ class ChatController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể kết nối với Chatbot API.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sendChat(Request $request)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json; charset=utf-8',
+                'Accept' => 'application/json',
+            ])->post('http://localhost:8080/chat/send', [
+                'query' => $request->input('query'),
+                'user_id' => $request->input('user_id', 1)
+            ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'answer' => 'Error from chat service',
+                    'error' => $response->body()
+                ], $response->status());
+            }
+        } catch (\Exception $e) {
+            \Log::error('Chat error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'answer' => 'Error connecting to chat service',
                 'error' => $e->getMessage()
             ], 500);
         }
