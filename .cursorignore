@@ -1,9 +1,0 @@
-# Thư mục chứa model lớn (GGUF files)
-models/
-
-# Thư mục môi trường ảo
-venv/
-
-# Vector database và data files
-vector_db/
-data/
