@@ -183,6 +183,17 @@
                     <a href="{{ route('admin.pages.index') }}" class="btn btn-secondary">Hủy</a>
                 </div>
             </form>
+
+            <div class="mt-4 bg-white p-4 rounded shadow">
+                <h3 class="font-semibold mb-2">Import từ file text</h3>
+                <p class="text-sm text-gray-500 mb-3">Nếu bạn có nội dung từ file text, dán vào đây để chuyển đổi thành HTML</p>
+                
+                <textarea id="raw-content" class="w-full h-32 border rounded p-2 mb-2" placeholder="Dán nội dung văn bản thô vào đây..."></textarea>
+                
+                <button type="button" id="convert-btn" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    Chuyển đổi thành HTML
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -352,6 +363,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error(error);
             });
     }
+
+    const rawContentEl = document.getElementById('raw-content');
+    const contentEditorEl = document.querySelector('#content'); // Thay bằng ID thực tế của editor
+    const convertBtn = document.getElementById('convert-btn');
+    
+    convertBtn.addEventListener('click', function() {
+        const rawText = rawContentEl.value.trim();
+        if (!rawText) return;
+        
+        // Chuẩn hóa xuống dòng
+        const normalizedText = rawText.replace(/\r\n|\r/g, '\n');
+        
+        // Tách đoạn văn theo khoảng trống giữa các dòng
+        const paragraphs = normalizedText.split(/\n\s*\n/);
+        
+        // Tạo HTML
+        let htmlContent = '';
+        
+        paragraphs.forEach(paragraph => {
+            paragraph = paragraph.trim();
+            
+            // Bỏ qua đoạn trống
+            if (!paragraph) return;
+            
+            // Loại bỏ khoảng trắng/xuống dòng thừa
+            paragraph = paragraph.replace(/\s+/g, ' ');
+            
+            // Đoạn ngắn có thể là tiêu đề
+            if (paragraph.length < 100 && paragraph.split('.').length <= 2) {
+                htmlContent += `<h2>${paragraph}</h2>\n\n`;
+            } else {
+                htmlContent += `<p>${paragraph}</p>\n\n`;
+            }
+        });
+        
+        // Đưa vào editor
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.content) {
+            // Nếu dùng CKEditor
+            CKEDITOR.instances.content.setData(htmlContent);
+        } else if (typeof tinymce !== 'undefined' && tinymce.get('content')) {
+            // Nếu dùng TinyMCE
+            tinymce.get('content').setContent(htmlContent);
+        } else {
+            // Nếu là textarea thông thường
+            contentEditorEl.value = htmlContent;
+        }
+        
+        // Xóa nội dung nhập
+        rawContentEl.value = '';
+        
+        alert('Đã chuyển đổi văn bản thành HTML!');
+    });
 });
 </script>
 @endpush

@@ -89,14 +89,29 @@ class PostController extends Controller
         }
         
         $validated['slug'] = $slug;
+        $validated['user_id'] = auth()->id();
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('posts', 'public');
-            $validated['image'] = $path;
+        // Xử lý upload ảnh - DEBUGGING
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            try {
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('posts', $filename, 'public');
+                
+                if ($path) {
+                    $validated['image'] = $path;
+                } else {
+                    \Log::error('Không thể lưu file');
+                    return redirect()->back()->withInput()->withErrors(['image' => 'Không thể tải lên hình ảnh']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Lỗi upload ảnh: ' . $e->getMessage());
+                return redirect()->back()->withInput()->withErrors(['image' => 'Lỗi khi tải lên: ' . $e->getMessage()]);
+            }
         }
 
-        $validated['user_id'] = auth()->id();
-        Post::create($validated);
+        // Tạo post
+        $post = Post::create($validated);
 
         return redirect()->route('admin.posts.index')
             ->with('success', 'Bài đăng đã được tạo thành công.');
@@ -152,14 +167,34 @@ class PostController extends Controller
             $validated['slug'] = $slug;
         }
 
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($post->image) {
+        // Xử lý upload ảnh - DEBUGGING
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            try {
+                // Xóa ảnh cũ nếu có
+                if ($post->image && Storage::disk('public')->exists($post->image)) {
+                    Storage::disk('public')->delete($post->image);
+                }
+                
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('posts', $filename, 'public');
+                
+                if ($path) {
+                    $validated['image'] = $path;
+                } else {
+                    \Log::error('Không thể lưu file');
+                    return redirect()->back()->withInput()->withErrors(['image' => 'Không thể tải lên hình ảnh']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Lỗi upload ảnh: ' . $e->getMessage());
+                return redirect()->back()->withInput()->withErrors(['image' => 'Lỗi khi tải lên: ' . $e->getMessage()]);
+            }
+        } else if ($request->has('remove_image') && $request->remove_image) {
+            // Xóa ảnh nếu checkbox được chọn
+            if ($post->image && Storage::disk('public')->exists($post->image)) {
                 Storage::disk('public')->delete($post->image);
             }
-            
-            $path = $request->file('image')->store('posts', 'public');
-            $validated['image'] = $path;
+            $validated['image'] = null;
         }
 
         $post->update($validated);

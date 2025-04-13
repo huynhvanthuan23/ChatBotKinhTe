@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  chatbot:
+    build: .
+    container_name: hvt_2110359
+    ports:
+      - "55050:55050"
+    volumes:
+      - ./data:/app/data
+      - ./vector_db:/app/vector_db
+    environment:
+      - CHATBOT_API_URL=http://host.docker.internal:8000/api/v1/chat/chat-direct
+      - DB_FAISS_PATH=vector_db
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

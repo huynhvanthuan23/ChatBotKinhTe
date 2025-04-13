@@ -15,19 +15,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Lấy trang chủ đã thiết lập hoặc sử dụng view mặc định
-        $homepage = Page::where('is_homepage', true)->first();
-        
-        // Lấy bài viết mới nhất
+        // Lấy 6 bài viết mới nhất đã xuất bản
         $latestPosts = Post::where('status', 'published')
-                          ->orderBy('created_at', 'desc')
-                          ->take(3)
-                          ->get();
+                        ->latest()
+                        ->take(6)
+                        ->get();
         
-        if ($homepage) {
-            return view('pages.homepage', compact('homepage', 'latestPosts'));
-        }
-        
-        return view('home', compact('latestPosts'));
+        return view('welcome', compact('latestPosts'));
     }
 } 

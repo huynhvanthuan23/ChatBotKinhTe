@@ -36,5 +36,10 @@ class AppServiceProvider extends ServiceProvider
                 }
             });
         });
+
+        // Đảm bảo đã tạo symbolic link cho storage
+        if (app()->environment() !== 'production' && !file_exists(public_path('storage'))) {
+            \Artisan::call('storage:link');
+        }
     }
 }

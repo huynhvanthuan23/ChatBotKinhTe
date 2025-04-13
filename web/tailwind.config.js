@@ -14,8 +14,17 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            height: {
+                '18': '4.5rem',
+                '14': '3.5rem',
+            },
         },
     },
 
-    plugins: [forms],
+    plugins: [
+        require('@tailwindcss/line-clamp'),
+        forms,
+        require('@tailwindcss/typography'),
+        require('@tailwindcss/aspect-ratio'),
+    ],
 };

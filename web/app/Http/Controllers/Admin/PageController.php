@@ -81,51 +81,71 @@ class PageController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|max:255|unique:pages,title',
-            'slug' => 'nullable|max:255|unique:pages,slug',
-            'content' => 'required',
-            'meta_title' => 'nullable|max:70',
-            'meta_description' => 'nullable|max:160',
-            'meta_keywords' => 'nullable|max:255',
-            'parent_id' => 'nullable|exists:pages,id',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'slug' => 'nullable|string|max:255|unique:pages,slug',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
             'status' => 'required|in:draft,published',
-            'show_in_menu' => 'sometimes|boolean',
-            'is_homepage' => 'sometimes|boolean',
-            'order' => 'required|integer|min:1',
+            'parent_id' => 'nullable|exists:pages,id',
+            'show_in_menu' => 'boolean',
+            'is_homepage' => 'boolean',
+            'order' => 'nullable|integer',
             'published_at' => 'nullable|date',
         ]);
-
-        // Tạo slug từ title nếu không được cung cấp
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($request->title);
-        } else {
-            $validated['slug'] = Str::slug($validated['slug']);
+        
+        // Xử lý nội dung nếu là dạng văn bản thô
+        $validated['content'] = $this->formatContentIfNeeded($validated['content']);
+        
+        $page = Page::create($validated);
+        
+        // Xử lý trang chủ nếu cần
+        if ($request->input('is_homepage')) {
+            // Đặt tất cả các trang khác thành không phải trang chủ
+            Page::where('id', '!=', $page->id)->update(['is_homepage' => false]);
         }
         
-        // Chuyển đổi checkbox thành boolean
-        $validated['show_in_menu'] = $request->has('show_in_menu');
-        $validated['is_homepage'] = $request->has('is_homepage');
-        
-        // Nếu đặt làm trang chủ, cập nhật các trang khác
-        if ($validated['is_homepage']) {
-            Page::where('is_homepage', true)->update(['is_homepage' => false]);
-        }
-        
-        // Xử lý published_at
-        if ($validated['status'] == 'published') {
-            if (!empty($validated['published_at'])) {
-                $validated['published_at'] = Carbon::parse($validated['published_at']);
-            } else {
-                $validated['published_at'] = now();
-            }
-        } else {
-            $validated['published_at'] = null;
-        }
-        
-        Page::create($validated);
-
         return redirect()->route('admin.pages.index')
-            ->with('success', 'Trang đã được tạo thành công.');
+                         ->with('success', 'Trang đã được tạo thành công.');
+    }
+
+    /**
+     * Định dạng nội dung nếu cần
+     */
+    protected function formatContentIfNeeded($content)
+    {
+        // Kiểm tra xem nội dung có dán từ văn bản thuần không (không có HTML)
+        if (!Str::contains($content, ['<p>', '<div>', '<h1>', '<h2>', '<h3>'])) {
+            // Chuẩn hóa xuống dòng
+            $content = str_replace(["\r\n", "\r"], "\n", $content);
+            
+            // Tách các đoạn văn
+            $paragraphs = explode("\n\n", $content);
+            $paragraphs = array_filter($paragraphs, function($p) {
+                return trim($p) !== '';
+            });
+            
+            // Chuyển đổi mỗi đoạn thành thẻ <p>
+            $formattedContent = '';
+            foreach ($paragraphs as $paragraph) {
+                $paragraph = trim($paragraph);
+                
+                // Loại bỏ khoảng trắng/xuống dòng thừa
+                $paragraph = preg_replace('/\s+/', ' ', $paragraph);
+                
+                // Đoạn ngắn và có dấu hiệu là tiêu đề thì dùng thẻ <h2>
+                if (strlen($paragraph) < 100 && substr_count($paragraph, '.') <= 1) {
+                    $formattedContent .= "<h2>$paragraph</h2>\n\n";
+                } else {
+                    $formattedContent .= "<p>$paragraph</p>\n\n";
+                }
+            }
+            
+            return $formattedContent;
+        }
+        
+        return $content;
     }
 
     /**

@@ -37,8 +37,8 @@ class SystemController extends Controller
         ];
         
         try {
-            $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
-            $healthUrl = $baseUrl . '/health';
+            // Use direct health URL
+            $healthUrl = 'http://localhost:8080/health';
             
             $client = new Client(['timeout' => 5]);
             $response = $client->get($healthUrl);
@@ -73,7 +73,9 @@ class SystemController extends Controller
         ]);
         
         try {
-            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8000/api/v1/chat/chat');
+            // Use the full API URL directly
+            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/chat-direct');
+            
             $client = new Client(['timeout' => 30]);
             
             $response = $client->post($apiUrl, [

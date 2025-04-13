@@ -20,6 +20,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from fastapi.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from dotenv import load_dotenv
 
 # Cấu hình logging
 logging.basicConfig(level=logging.INFO)
@@ -132,10 +133,15 @@ def initialize_vector_db():
 # Khởi tạo Gemini model
 def initialize_gemini():
     try:
+        # Tải lại biến môi trường từ file .env để đảm bảo lấy giá trị mới nhất
+        load_dotenv(override=True)
+        
         # Cấu hình API key
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
+        
+        logger.info(f"Using API key: {api_key[:5]}...{api_key[-5:]} (middle part hidden)")
         
         # Cấu hình API
         genai.configure(api_key=api_key)
@@ -145,7 +151,9 @@ def initialize_gemini():
         logger.info(f"Initializing Gemini model: {model_name}")
         model = genai.GenerativeModel(model_name)
         
-        logger.info("Gemini model initialized successfully")
+        # Kiểm tra xem model có hoạt động không bằng cách gọi một request đơn giản
+        test_response = model.generate_content("Test connection")
+        logger.info("Gemini model initialized and tested successfully")
         return model
     except Exception as e:
         logger.error(f"Error initializing Gemini model: {str(e)}")
@@ -160,8 +168,14 @@ async def process_chat(query: str, user_id: Optional[int] = None) -> Dict[str, A
         # Kiểm tra global variables
         global gemini_model, vector_retriever
         if gemini_model is None or vector_retriever is None:
-            raise RuntimeError("Components not initialized. Please restart the server.")
-        
+            # Thử khởi tạo lại nếu cần
+            if gemini_model is None:
+                logger.info("Gemini model not initialized, trying to reinitialize...")
+                gemini_model = initialize_gemini()
+            if vector_retriever is None:
+                logger.info("Vector retriever not initialized, trying to reinitialize...")
+                vector_retriever = initialize_vector_db()
+                
         # Tìm kiếm ngữ cảnh từ vector database
         docs = vector_retriever.get_relevant_documents(query)
         context = "\n\n".join([doc.page_content for doc in docs])
@@ -315,40 +329,58 @@ async def health_check():
         }
     }
 
+@app.get("/health")
+async def root_health_check():
+    """Root health check endpoint for Laravel admin integration"""
+    return {
+        "status": "healthy",
+        "api_version": "1.0.0",
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "resources": {
+            "api": "online",
+            "model": "available",
+            "vector_db": "available"
+        }
+    }
+
+@app.post("/chat-direct")
+async def chat_direct_redirect(request: Request):
+    """Redirect endpoint for Laravel integration"""
+    logger.info("Request received at /chat-direct - redirecting to /api/v1/chat/chat-direct")
+    return await chat_direct(request)
+
+@app.post("/api/chat/send")
+async def chat_send_redirect(request: Request):
+    """Redirect endpoint for Laravel integration"""
+    logger.info("Request received at /api/chat/send - redirecting to /api/v1/chat/chat-direct")
+    return await chat_direct(request)
+
+@app.post("/")
+async def root_redirect(request: Request):
+    """Root endpoint to handle requests to /"""
+    logger.info("Request received at root (/) - redirecting to /api/v1/chat/chat-direct")
+    return await chat_direct(request)
+
 # Khởi tạo components khi server start
 @app.on_event("startup")
 async def startup_event():
-    global gemini_model, vector_retriever
-    
-    logger.info("Starting server and initializing components...")
-    
-    # Kiểm tra GPU
-    if torch.cuda.is_available():
-        logger.info(f"GPU detected: {torch.cuda.get_device_name(0)}")
-        logger.info(f"CUDA version: {torch.version.cuda}")
-        memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-        logger.info(f"GPU memory: {memory_gb:.2f} GB")
-        
-        # Giải phóng memory
-        torch.cuda.empty_cache()
-        gc.collect()
-    else:
-        logger.info("No GPU detected - using CPU")
-    
-    # Khởi tạo components
     try:
-        # Khởi tạo vector database
+        # Tải lại biến môi trường
+        load_dotenv(override=True)
+        
+        # Khởi tạo components
+        global gemini_model, vector_retriever
+        
         logger.info("Initializing vector database...")
         vector_retriever = initialize_vector_db()
         
-        # Khởi tạo Gemini model
         logger.info("Initializing Gemini model...")
         gemini_model = initialize_gemini()
         
-        logger.info("All components initialized successfully")
+        logger.info("All components initialized successfully!")
     except Exception as e:
-        logger.error(f"Error initializing components: {str(e)}")
-        logger.error("Server will start but may not function correctly")
+        logger.error(f"Error during startup: {str(e)}")
+        logger.error(traceback.format_exc())
 
 # Chạy ứng dụng
 if __name__ == "__main__":

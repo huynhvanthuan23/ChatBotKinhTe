@@ -56,18 +56,38 @@
                     @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label for="image" class="form-label">Hình ảnh</label>
-                    @if($post->image)
-                        <div class="mb-2">
-                            <img src="{{ Storage::url($post->image) }}" alt="Current image" style="max-width: 200px">
+                <div class="form-group mb-4">
+                    <label for="image" class="block mb-2 text-sm font-medium text-gray-700">Hình ảnh</label>
+                    
+                    <div class="flex items-center">
+                        @if($post->image && file_exists(public_path('storage/' . $post->image)))
+                            <div class="mr-4">
+                                <img src="{{ asset('storage/' . $post->image) }}" alt="{{ $post->title }}" class="w-32 h-32 object-cover rounded-md">
+                            </div>
+                        @endif
+                        
+                        <div class="flex-1">
+                            <label class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 cursor-pointer hover:bg-gray-50">
+                                <input type="file" id="image" name="image" accept="image/*" class="sr-only" />
+                                <span class="text-sm text-gray-600">{{ $post->image ? 'Thay đổi ảnh...' : 'Chọn ảnh...' }}</span>
+                            </label>
+                            
+                            <div class="text-xs text-gray-500 mt-1">PNG, JPG, GIF tối đa 2MB</div>
+                            
+                            @if($post->image)
+                                <div class="mt-2">
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" name="remove_image" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                        <span class="ml-2 text-sm text-gray-600">Xóa hình ảnh hiện tại</span>
+                                    </label>
+                                </div>
+                            @endif
+                            
+                            @error('image')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
-                    @endif
-                    <input type="file" class="form-control @error('image') is-invalid @enderror" 
-                           id="image" name="image">
-                    @error('image')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -148,6 +168,43 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.redirected ? window.location = response.url : null);
         }
     });
+
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('image-preview');
+    const placeholderIcon = document.getElementById('placeholder-icon');
+    
+    imageInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                placeholderIcon.style.display = 'none';
+            }
+            
+            reader.readAsDataURL(e.target.files[0]);
+        } else {
+            @if(!$post->image)
+                imagePreview.style.display = 'none';
+                placeholderIcon.style.display = 'block';
+            @endif
+        }
+    });
+    
+    // Handle image remove checkbox
+    const removeCheckbox = document.querySelector('input[name="remove_image"]');
+    if (removeCheckbox) {
+        removeCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                imagePreview.style.display = 'none';
+                placeholderIcon.style.display = 'block';
+            } else {
+                imagePreview.style.display = 'block';
+                placeholderIcon.style.display = 'none';
+            }
+        });
+    }
 });
 </script>
 @endpush 

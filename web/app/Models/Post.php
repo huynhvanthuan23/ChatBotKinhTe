@@ -76,4 +76,10 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
+    // Kiểm tra có ảnh hay không
+    public function hasImage()
+    {
+        return !empty($this->image) && file_exists(public_path('storage/' . $this->image));
+    }
 }

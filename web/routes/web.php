@@ -9,10 +9,9 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
     if (Auth::user() && Auth::user()->isAdmin()) {
@@ -70,6 +69,12 @@ Route::middleware(['auth'])->group(function () {
 
 // Frontend page routes
 Route::get('/page/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
+
+// Route cho hiển thị chi tiết bài viết
+Route::get('/post/{slug}', [App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
+
+// Route cho danh sách tất cả bài viết
+Route::get('/posts', [App\Http\Controllers\PostController::class, 'index'])->name('posts.index');
 
 require __DIR__.'/auth.php';
 

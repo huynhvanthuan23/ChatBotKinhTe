@@ -44,9 +44,8 @@ class ChatController extends Controller
                 'message' => 'required|string|max:1000',
             ]);
 
-            // Ensure we're using the correct API URL from .env
-            $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
-            $apiUrl = $baseUrl . '/chat-direct';
+            // Use the full URL directly
+            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/chat-direct');
             
             // Log request information for debugging
             Log::info('Sending message to ChatBot API', [
@@ -154,9 +153,8 @@ class ChatController extends Controller
     public function testConnection(Request $request)
     {
         try {
-            // Make sure to use the correct port 8080 where our API is running
-            $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat'), '/');
-            $apiUrl = $baseUrl . '/ping';
+            // Use direct health endpoint
+            $apiUrl = 'http://localhost:8080/health';
             
             // Log the URL we're trying to connect to for debugging
             Log::info('Testing connection to API URL: ' . $apiUrl);
@@ -196,16 +194,23 @@ class ChatController extends Controller
     private function callChatAPI($message)
     {
         try {
+            // Use the full URL from env
+            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/chat-direct');
+            
             $client = new Client([
-                'base_uri' => config('services.chatbot.url'),
                 'timeout' => 90,
                 'connect_timeout' => 5,
                 'http_errors' => false
             ]);
 
-            $response = $client->post('/chat-direct', [
+            $response = $client->post($apiUrl, [
                 'json' => [
-                    'message' => $message
+                    'message' => $message,
+                    'user_id' => Auth::id() ?: null
+                ],
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
                 ]
             ]);
 

@@ -269,7 +269,7 @@ YÊU CẦU ĐẶC BIỆT:
                         }
                     }
                 else:
-                    raise RuntimeError("Empty response from Gemini API")
+                 raise RuntimeError("Empty response from Gemini API")
                     
             except Exception as api_err:
                 logger.error(f"Error getting response from Gemini API: {str(api_err)}")
