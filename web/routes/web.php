@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -27,7 +28,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin routes
-Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class);
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
@@ -45,12 +46,27 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
         return view('admin.system.api-docs');
     })->name('system.api-docs');
     
+    // API Configuration routes
+    Route::get('/system/api-config', [\App\Http\Controllers\Admin\SystemController::class, 'showApiConfig'])->name('system.api-config');
+    Route::post('/system/api-config', [\App\Http\Controllers\Admin\SystemController::class, 'updateApiConfig'])->name('system.update-api-config');
+    Route::post('/system/test-api-connection', [\App\Http\Controllers\Admin\SystemController::class, 'testApiConnection'])->name('system.test-api-connection');
+    Route::post('/system/reload-api-config', [\App\Http\Controllers\Admin\SystemController::class, 'reloadApiConfig'])->name('system.reload-api-config');
+    
+    // Website settings routes
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings/general', [\App\Http\Controllers\Admin\SettingController::class, 'updateGeneral'])->name('settings.update-general');
+    Route::post('/settings/seo', [\App\Http\Controllers\Admin\SettingController::class, 'updateSeo'])->name('settings.update-seo');
+    Route::post('/settings/contact', [\App\Http\Controllers\Admin\SettingController::class, 'updateContact'])->name('settings.update-contact');
+    Route::post('/settings/social', [\App\Http\Controllers\Admin\SettingController::class, 'updateSocial'])->name('settings.update-social');
+    Route::post('/settings/logo', [\App\Http\Controllers\Admin\SettingController::class, 'updateLogo'])->name('settings.update-logo');
+    Route::post('/settings/initialize', [\App\Http\Controllers\Admin\SettingController::class, 'initializeDefaults'])->name('settings.initialize');
+    
     // Thêm route chat trong admin
     Route::get('/chat', [ChatController::class, 'index'])->name('chat');
 });
 
 // API route cho media manager
-Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->name('admin.api.media');
+Route::get('admin/api/media', [Admin\MediaController::class, 'getMedia'])->middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->name('admin.api.media');
 
 // Cập nhật route dashboard nếu chưa có
 Route::get('/admin', function () {
@@ -58,14 +74,35 @@ Route::get('/admin', function () {
         return redirect()->route('dashboard');
     }
     return redirect()->route('admin.dashboard');
-})->middleware(['auth'])->name('admin.index');
+})->middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->name('admin.index');
 
 // Route chat
 Route::middleware(['auth'])->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/test-connection', [ChatController::class, 'testConnection'])->name('chat.test-connection');
+    
+    // Thêm routes cho quản lý tài liệu
+    Route::prefix('documents')->group(function () {
+        Route::get('/', [App\Http\Controllers\DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/create', [App\Http\Controllers\DocumentController::class, 'create'])->name('documents.create');
+        Route::post('/', [App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
+        Route::get('/{id}', [App\Http\Controllers\DocumentController::class, 'show'])->name('documents.show');
+        Route::delete('/{id}', [App\Http\Controllers\DocumentController::class, 'destroy'])->name('documents.destroy');
+        
+        // Chat với document
+        Route::get('/{id}/chat', [App\Http\Controllers\DocumentController::class, 'showChat'])->name('documents.chat');
+        Route::post('/ask-selected', [App\Http\Controllers\DocumentController::class, 'askSelected'])->name('documents.ask-selected');
+        Route::post('/save-selection', [App\Http\Controllers\DocumentController::class, 'saveSelection'])->name('documents.save-selection');
+        
+        // Vector creation routes
+        Route::post('/{id}/create-vector', [App\Http\Controllers\DocumentController::class, 'createVector'])->name('documents.createVector');
+        Route::post('/create-all-vectors', [App\Http\Controllers\DocumentController::class, 'createAllVectors'])->name('documents.create-all-vectors');
+    });
 });
+
+// API Callback route for vector processing (doesn't require auth as it's from our backend)
+Route::post('/api/document/update-vector-status', [App\Http\Controllers\DocumentController::class, 'updateVectorStatus'])->name('api.document.update-vector-status');
 
 // Frontend page routes
 Route::get('/page/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');

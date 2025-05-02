@@ -26,9 +26,29 @@ class ChatController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('chat.index');
+        // Nếu có tham số clear=1, xóa session
+        if ($request->has('clear') && $request->input('clear') == 1) {
+            $request->session()->forget('selected_document_ids');
+            Log::info('Cleared document selection from session', [
+                'session_id' => $request->session()->getId()
+            ]);
+            return redirect()->route('chat');
+        }
+        
+        // Kiểm tra xem có session selected_document_ids không
+        $selectedDocumentIds = $request->session()->get('selected_document_ids', []);
+        
+        if (!empty($selectedDocumentIds)) {
+            Log::info('Chat with selected documents', [
+                'session_id' => $request->session()->getId(),
+                'document_ids' => $selectedDocumentIds,
+                'count' => count($selectedDocumentIds)
+            ]);
+        }
+        
+        return view('chat.index', compact('selectedDocumentIds'));
     }
 
     /**
@@ -45,26 +65,93 @@ class ChatController extends Controller
             ]);
 
             // Use the full URL directly
-            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/chat-direct');
+            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/simple-chat');
+            
+            // Lấy selected_document_ids từ session nếu có
+            $selectedDocumentIds = $request->session()->get('selected_document_ids', []);
+            
+            // Kiểm tra xem có tham số doc_ids từ query string không
+            $queryDocIds = $request->query('doc_ids');
+            if ($queryDocIds) {
+                // Nếu là chuỗi đơn, chuyển thành mảng
+                if (!is_array($queryDocIds)) {
+                    $queryDocIds = explode(',', $queryDocIds);
+                }
+                
+                // Chuyển đổi từ string sang integer
+                $queryDocIds = array_map('intval', $queryDocIds);
+                
+                // Nếu có document IDs từ query string, ưu tiên dùng chúng thay vì session
+                $selectedDocumentIds = $queryDocIds;
+                Log::info('Using document IDs from query string', [
+                    'doc_ids' => $queryDocIds
+                ]);
+            }
             
             // Log request information for debugging
             Log::info('Sending message to ChatBot API', [
                 'url' => $apiUrl,
                 'message' => $request->message,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
+                'selected_document_ids' => $selectedDocumentIds,
+                'query_doc_ids' => $queryDocIds ?? null
             ]);
+            
+            // Test if API is accessible before sending actual request
+            try {
+                // Extract base URL without the endpoint part
+                $baseUrl = preg_replace('#/api/v1/chat/.*$#', '', $apiUrl);
+                $healthUrl = $baseUrl . '/api/v1/chat/health';
+                
+                Log::info('Checking health at: ' . $healthUrl);
+                
+                $healthClient = new Client(['timeout' => 3]);
+                $healthResponse = $healthClient->get($healthUrl);
+                Log::info('Health check response: ' . $healthResponse->getStatusCode());
+            } catch (\Exception $e) {
+                Log::error('Health check failed: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể kết nối với chatbot. Vui lòng kiểm tra xem máy chủ chatbot đã khởi động chưa.'
+                ], 503);
+            }
             
             $client = new Client([
                 'timeout' => 90,  // Increased timeout for longer model processing
                 'connect_timeout' => 10,
             ]);
             
+            // Prepare request data
+            $requestData = [
+                'message' => $request->message,
+                'user_id' => Auth::id() ?: null
+            ];
+            
+            // Thêm document_ids vào request nếu có, sử dụng nhiều tham số khác nhau cho các model
+            if (!empty($selectedDocumentIds)) {
+                // Tham số chung
+                $requestData['document_ids'] = $selectedDocumentIds;
+                
+                // Tham số cho Google PaLM/Gemini
+                $requestData['documentIds'] = $selectedDocumentIds;
+                
+                // Tham số cho OpenAI
+                $requestData['context_document_ids'] = $selectedDocumentIds;
+                
+                // Tham số cũ
+                $requestData['support_doc_ids'] = $selectedDocumentIds;
+                
+                Log::info('Using selected documents for chat', [
+                    'document_ids' => $selectedDocumentIds,
+                    'count' => count($selectedDocumentIds)
+                ]);
+            }
+            
+            Log::info('Request data: ' . json_encode($requestData));
+            
             // Send request to the FastAPI backend
             $response = $client->post($apiUrl, [
-                'json' => [
-                    'message' => $request->message,
-                    'user_id' => Auth::id() ?: null
-                ],
+                'json' => $requestData,
                 'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
@@ -72,7 +159,10 @@ class ChatController extends Controller
             ]);
             
             $responseBody = $response->getBody()->getContents();
+            Log::info('Raw API Response: ' . $responseBody);
+            $response->getBody()->rewind();
             $result = json_decode($responseBody, true);
+            Log::info('Decoded JSON: ' . json_encode($result));
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('JSON decode error: ' . json_last_error_msg() . ', Raw response: ' . substr($responseBody, 0, 500));
@@ -84,14 +174,20 @@ class ChatController extends Controller
             
             // Find the answer field in the response, whatever it's called
             $answer = null;
-            if (isset($result['answer'])) {
-                $answer = $result['answer'];
-            } elseif (isset($result['response'])) {
+            if (isset($result['response'])) {
                 $answer = $result['response'];
+            } elseif (isset($result['answer'])) {
+                $answer = $result['answer'];
             } elseif (isset($result['result'])) {
                 $answer = $result['result'];
             } elseif (isset($result['message'])) {
                 $answer = $result['message'];
+            } elseif (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                // Google API response format
+                $answer = $result['candidates'][0]['content']['parts'][0]['text'];
+            } elseif (isset($result['error'])) {
+                // Return error as answer for debugging
+                $answer = 'API error: ' . $result['error'];
             }
             
             if (!empty($answer)) {
@@ -153,28 +249,61 @@ class ChatController extends Controller
     public function testConnection(Request $request)
     {
         try {
-            // Use direct health endpoint
-            $apiUrl = 'http://localhost:8080/health';
+            // Use health endpoint for testing connection
+            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/simple-chat');
+            // Extract base URL without the endpoint part
+            $baseUrl = preg_replace('#/api/v1/chat/.*$#', '', $apiUrl); 
+            $healthUrl = $baseUrl . '/health';
+            $apiHealthUrl = $baseUrl . '/api/v1/chat/health';
             
-            // Log the URL we're trying to connect to for debugging
-            Log::info('Testing connection to API URL: ' . $apiUrl);
-            
-            $client = new Client(['timeout' => 5]);
-            $response = $client->get($apiUrl, [
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ]
+            // Log the URLs we're trying to connect to for debugging
+            Log::info('Testing connection to API URLs:', [
+                'baseUrl' => $baseUrl,
+                'healthUrl' => $healthUrl,
+                'apiHealthUrl' => $apiHealthUrl
             ]);
             
-            $result = json_decode($response->getBody()->getContents(), true);
-            Log::info('API Test Response: ' . json_encode($result));
+            $client = new Client(['timeout' => 5]);
+            $results = [];
+            $success = false;
             
+            // Try the root health endpoint
+            try {
+                $response = $client->get($healthUrl);
+                $result = json_decode($response->getBody()->getContents(), true);
+                Log::info('Root health endpoint response: ' . json_encode($result));
+                $results['root_health'] = $result;
+                $success = true;
+            } catch (\Exception $e) {
+                Log::warning('Root health endpoint error: ' . $e->getMessage());
+                $results['root_health_error'] = $e->getMessage();
+            }
+            
+            // Try the API health endpoint
+            try {
+                $response = $client->get($apiHealthUrl);
+            $result = json_decode($response->getBody()->getContents(), true);
+                Log::info('API health endpoint response: ' . json_encode($result));
+                $results['api_health'] = $result;
+                $success = true;
+            } catch (\Exception $e) {
+                Log::warning('API health endpoint error: ' . $e->getMessage());
+                $results['api_health_error'] = $e->getMessage();
+            }
+            
+            if ($success) {
             return response()->json([
                 'success' => true,
                 'message' => 'Kết nối thành công với Chatbot API.',
-                'response' => $result
+                    'response' => $results
             ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể kết nối với bất kỳ endpoint nào của Chatbot API.',
+                    'attempts' => $results
+                ], 500);
+            }
         } catch (\Exception $e) {
             Log::error('Chatbot API Test Connection Error: ' . $e->getMessage());
             return response()->json([
@@ -194,8 +323,12 @@ class ChatController extends Controller
     private function callChatAPI($message)
     {
         try {
-            // Use the full URL from env
-            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/chat-direct');
+            // Sử dụng địa chỉ hardcoded để đảm bảo kết nối
+            $apiUrl = 'http://localhost:55050/api/v1/chat/chat-direct';
+            
+            // Ghi log thông tin đầy đủ
+            Log::info("Calling API at: " . $apiUrl);
+            Log::info("Message: " . $message);
             
             $client = new Client([
                 'timeout' => 90,
@@ -214,9 +347,14 @@ class ChatController extends Controller
                 ]
             ]);
 
-            $result = json_decode($response->getBody()->getContents(), true);
+            // Ghi log phản hồi chi tiết
+            $responseBody = $response->getBody()->getContents();
+            Log::info("API Response raw: " . $responseBody);
+            $response->getBody()->rewind();
             
-            Log::info('API Response: ' . json_encode($result));
+            $result = json_decode($responseBody, true);
+            
+            Log::info('API Response decoded: ' . json_encode($result));
             
             // Kiểm tra cấu trúc phản hồi từ API
             if (isset($result['response'])) {
@@ -229,24 +367,12 @@ class ChatController extends Controller
             }
         } catch (RequestException $e) {
             // Log lỗi chi tiết
-            if ($e->hasResponse()) {
-                $statusCode = $e->getResponse()->getStatusCode();
-                $responseBody = $e->getResponse()->getBody()->getContents();
-                Log::error("Chatbot API Error: Status Code: {$statusCode}, Message: {$e->getMessage()}, Response: {$responseBody}");
-                
-                // Kiểm tra lỗi cụ thể
-                if ($statusCode == 422) {
-                    Log::error("Validation error in request format. Trying with different format.");
-                    return $this->callChatbotAPIAlternative($message);
-                }
-            } else {
-                Log::error('Chatbot API Error: ' . $e->getMessage());
-            }
-            return 'Xin lỗi, có lỗi trong quá trình kết nối với chatbot.';
+            Log::error('Chatbot API Error: ' . $e->getMessage());
+            return 'Xin lỗi, có lỗi trong quá trình kết nối với chatbot: ' . $e->getMessage();
         } catch (\Exception $e) {
             // Log lỗi
             Log::error('Chatbot API Error: ' . $e->getMessage());
-            return 'Xin lỗi, có lỗi không xác định trong quá trình xử lý yêu cầu của bạn.';
+            return 'Xin lỗi, có lỗi không xác định: ' . $e->getMessage();
         }
     }
 
@@ -258,9 +384,8 @@ class ChatController extends Controller
      */
     private function callChatbotAPIAlternative($message)
     {
-        // Use the environment variable for API URL
-        $baseUrl = rtrim(env('CHATBOT_API_URL', 'http://localhost:8080/api/v1/chat/'), '/');
-        $apiUrl = $baseUrl . '/chat-direct';
+        // Đường dẫn API đã cấu hình trong file .env
+        $apiUrl = env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/chat-direct');
         
         $client = new Client([
             'timeout' => 30,
@@ -268,9 +393,8 @@ class ChatController extends Controller
         ]);
         
         try {
-            Log::info('Trying alternative API request format to: ' . $apiUrl);
+            Log::info('Calling chatbot API at: ' . $apiUrl . ' with message: ' . $message);
             
-            // Sử dụng body trực tiếp thay vì json
             $response = $client->post($apiUrl, [
                 'body' => json_encode(['message' => $message]),
                 'headers' => [
@@ -279,20 +403,29 @@ class ChatController extends Controller
                 ]
             ]);
             
+            $responseBody = $response->getBody()->getContents();
+            $result = json_decode($responseBody, true);
+            
+            Log::info('Raw API Response: ' . $responseBody);
+            $response->getBody()->rewind();
             $result = json_decode($response->getBody()->getContents(), true);
             
-            Log::info('Alternative API Response: ' . json_encode($result));
+            Log::info('Decoded JSON: ' . json_encode($result));
             
             if (isset($result['response'])) {
                 return $result['response'];
             } elseif (isset($result['answer'])) {
                 return $result['answer'];
+            } elseif (isset($result['result'])) {
+                return $result['result'];
+            } elseif (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                return $result['candidates'][0]['content']['parts'][0]['text'];
             } else {
                 Log::warning('Unexpected API response structure: ' . json_encode($result));
                 return 'Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.';
             }
         } catch (\Exception $e) {
-            Log::error('Alternative Chatbot API Error: ' . $e->getMessage());
+            Log::error('Chatbot API Error: ' . $e->getMessage());
             return 'Xin lỗi, có lỗi trong quá trình kết nối với chatbot.';
         }
     }
@@ -306,7 +439,7 @@ class ChatController extends Controller
     private function processWithChatbot($message)
     {
         // URL cho endpoint chat thực sự - sẽ được dùng sau khi xác nhận kết nối ổn định
-        $chatUrl = str_replace('/ping', '/chat-model', env('CHATBOT_API_URL'));
+        $chatUrl = str_replace('/ping', '/chat-direct', env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/chat-direct'));
         
         $client = new Client([
             'timeout' => 60, // Thời gian timeout lâu hơn cho xử lý chat

@@ -56,7 +56,7 @@ logs/
 
 # database
 vector_db/
-data/
+/data/
 
 # Vector databases and temp files
 vector_db_*/

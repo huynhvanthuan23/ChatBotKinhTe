@@ -6,30 +6,28 @@ python-dotenv==1.0.1
 pydantic==2.6.1
 pydantic-settings==2.1.0
 
-# Google API
+# Google API và OpenAI API
 google-generativeai==0.3.2
 google-auth==2.27.0
 google-auth-oauthlib==1.2.0
+openai==1.12.0
 
 # Vector database và embeddings
 faiss-cpu==1.7.4
 sentence-transformers==2.5.1
 numpy==1.26.4
-torch==2.2.0
-transformers==4.37.2
 
 # Document processing
-langchain==0.1.4
-langchain-community==0.0.16
-langchain-core==0.1.17
-langchain-text-splitters==0.0.1
-langchain-google-genai==0.0.5
-chromadb==0.4.22
+langchain>=0.1.4
+langchain-community>=0.0.16
+langchain-core>=0.1.28
+langchain-text-splitters>=0.0.1
+langchain-google-genai>=0.0.5
+langchain-openai>=0.0.5
 tiktoken==0.5.2
+docx2txt==0.9
+pdfplumber==0.11.6
 
-# Local model support
-llama-cpp-python==0.2.23
-ctransformers==0.2.27
 
 # Utilities
 tqdm==4.66.1
@@ -41,13 +39,3 @@ bcrypt==4.1.2
 
 # Logging
 loguru==0.7.2
-
-# Testing
-pytest==8.0.0
-httpx==0.26.0
-
-# Development
-black==24.1.1
-isort==5.13.2
-flake8==7.0.0
-mypy==1.8.0

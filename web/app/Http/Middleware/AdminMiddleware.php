@@ -15,8 +15,12 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
-            abort(403, 'Bạn không có quyền truy cập trang này.');
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để truy cập.');
+        }
+        
+        if (!auth()->user()->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập vào trang quản trị.');
         }
 
         return $next($request);

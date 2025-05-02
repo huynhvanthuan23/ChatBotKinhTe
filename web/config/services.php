@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'chatbot' => [
+        'url' => env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/chat-direct'),
+        'process_url' => env('CHATBOT_PROCESS_URL', 'http://localhost:55050/api/v1/documents/process'),
+        'integrate_url' => env('CHATBOT_INTEGRATE_URL', 'http://localhost:55050/api/v1/documents/integrate'),
+        'timeout' => env('CHATBOT_TIMEOUT', 90),
+    ],
+
 ];

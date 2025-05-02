@@ -32,6 +32,37 @@
                 </header>
             @endif
 
+            <!-- Flash Messages -->
+            <div class="max-w-7xl mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+                @if (session('success'))
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">Thành công!</p>
+                        <p>{{ session('success') }}</p>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">Lỗi!</p>
+                        <p>{{ session('error') }}</p>
+                    </div>
+                @endif
+
+                @if (session('warning'))
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">Cảnh báo!</p>
+                        <p>{{ session('warning') }}</p>
+                    </div>
+                @endif
+
+                @if (session('info'))
+                    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">Thông tin!</p>
+                        <p>{{ session('info') }}</p>
+                    </div>
+                @endif
+            </div>
+
             <!-- Page Content -->
             <main>
                 @yield('content')

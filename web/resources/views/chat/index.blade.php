@@ -14,6 +14,11 @@
                 <i class="fas fa-plus"></i> <span class="btn-text">New chat</span>
             </a>
         </div>
+        <div class="my-documents-btn">
+            <a href="{{ route('documents.index') }}" class="btn-my-documents">
+                <i class="fas fa-file-alt"></i> <span class="btn-text">Tài liệu của tôi</span>
+            </a>
+        </div>
         <div class="conversations">
             <!-- Danh sách cuộc trò chuyện sẽ được thêm vào đây -->
         </div>
@@ -25,6 +30,26 @@
         <div class="chat-messages" id="chat-messages">
             <div class="welcome-message">
                 <h1>Tôi có thể giúp gì cho bạn?</h1>
+                @if(isset($selectedDocumentIds) && !empty($selectedDocumentIds))
+                <div class="selected-documents-info">
+                    <div class="alert alert-info mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-info-circle me-2"></i> Bạn đang chat với {{ count($selectedDocumentIds) }} tài liệu đã chọn</span>
+                            <a href="{{ route('chat') }}?clear=1" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-times me-1"></i> Bỏ chọn
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mb-3 text-center">
+                        <div class="p-3 bg-light border rounded">
+                            <h5 class="text-primary"><i class="fas fa-lightbulb me-2"></i> Chế độ hỏi đáp tài liệu</h5>
+                            <p>Hãy đặt câu hỏi liên quan đến nội dung của các tài liệu đã chọn.</p>
+                            <p><strong>Các câu trả lời sẽ dựa trên thông tin từ tài liệu bạn đã chọn.</strong></p>
+                            <p class="small mb-0 text-muted">Hệ thống sẽ tìm kiếm thông tin từ các tài liệu đã chọn để trả lời câu hỏi của bạn.</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -82,7 +107,8 @@
     }
     
     /* Keep visible and adjust styling */
-    .chat-wrapper.sidebar-collapsed .btn-new-chat {
+    .chat-wrapper.sidebar-collapsed .btn-new-chat,
+    .chat-wrapper.sidebar-collapsed .btn-my-documents {
         width: 40px;
         height: 40px;
         overflow: hidden;
@@ -93,11 +119,13 @@
         margin: 0 auto;
     }
     
-    .chat-wrapper.sidebar-collapsed .btn-new-chat i {
+    .chat-wrapper.sidebar-collapsed .btn-new-chat i,
+    .chat-wrapper.sidebar-collapsed .btn-my-documents i {
         margin-right: 0;
     }
     
-    .chat-wrapper.sidebar-collapsed .new-chat-btn {
+    .chat-wrapper.sidebar-collapsed .new-chat-btn,
+    .chat-wrapper.sidebar-collapsed .my-documents-btn {
         padding: 10px;
         display: flex;
         justify-content: center;
@@ -143,16 +171,19 @@
         color: #333;
     }
 
-    .new-chat-btn {
+    .new-chat-btn, .my-documents-btn {
         padding: 16px;
     }
 
-    .btn-new-chat {
+    .my-documents-btn {
+        padding-top: 0;
+    }
+
+    .btn-new-chat, .btn-my-documents {
         display: flex;
         align-items: center;
         gap: 8px;
-        background-color: #e6f7ff;
-        color: #1890ff;
+        width: 100%;
         text-decoration: none;
         padding: 10px 16px;
         border-radius: 4px;
@@ -160,8 +191,22 @@
         transition: background-color 0.2s;
     }
 
+    .btn-new-chat {
+        background-color: #e6f7ff;
+        color: #1890ff;
+    }
+
+    .btn-my-documents {
+        background-color: #f0f5ff;
+        color: #2f54eb;
+    }
+
     .btn-new-chat:hover {
         background-color: #cceeff;
+    }
+
+    .btn-my-documents:hover {
+        background-color: #d6e4ff;
     }
 
     .conversations {
@@ -513,6 +558,36 @@ document.addEventListener('DOMContentLoaded', function() {
         let isWaitingForResponse = false;
         let currentChatId = Date.now();
         let chatHistory = loadChatHistory();
+        let docIdsFromUrl = null;
+        
+        // Kiểm tra xem có tham số doc_ids trong URL không
+        function getDocIdsFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const docIdsParam = urlParams.get('doc_ids');
+            if (docIdsParam) {
+                return docIdsParam.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+            }
+            return null;
+        }
+        
+        // Lưu doc_ids từ URL nếu có
+        docIdsFromUrl = getDocIdsFromUrl();
+        if (docIdsFromUrl && docIdsFromUrl.length > 0) {
+            console.log('Detected doc_ids in URL:', docIdsFromUrl);
+            // Hiển thị thông báo cho người dùng
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                const docIdsInfo = document.createElement('div');
+                docIdsInfo.className = 'alert alert-info mt-3';
+                docIdsInfo.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-info-circle me-2"></i> Bạn đang chat với tài liệu ID: ${docIdsFromUrl.join(', ')}</span>
+                    </div>
+                    <p class="mt-2 mb-0">Hãy đặt câu hỏi liên quan đến nội dung của tài liệu.</p>
+                `;
+                welcomeMessage.appendChild(docIdsInfo);
+            }
+        }
         
         // Toggle sidebar functionality
         toggleBtn.addEventListener('click', function() {
@@ -573,7 +648,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 // Send message to server - use full URL
-                const chatEndpoint = '{{ route("chat.send") }}';
+                let chatEndpoint = '{{ route("chat.send") }}';
+                
+                // Thêm tham số doc_ids vào URL nếu có
+                if (docIdsFromUrl && docIdsFromUrl.length > 0) {
+                    // Kiểm tra xem URL đã có tham số chưa
+                    if (chatEndpoint.includes('?')) {
+                        chatEndpoint += '&doc_ids=' + docIdsFromUrl.join(',');
+                    } else {
+                        chatEndpoint += '?doc_ids=' + docIdsFromUrl.join(',');
+                    }
+                }
+                
                 console.log('Sending request to:', chatEndpoint);
                 
                 const response = await fetch(chatEndpoint, {
@@ -593,14 +679,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (!response.ok) {
                     // Handle HTTP errors
-                    const errorData = await response.json().catch(() => ({ message: 'Có lỗi trong quá trình kết nối với máy chủ' }));
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                        console.error('Error response data:', errorData);
+                    } catch (jsonError) {
+                        console.error('Failed to parse error response as JSON:', jsonError);
+                        errorData = { message: 'Có lỗi trong quá trình kết nối với máy chủ' };
+                    }
                     const errorMessage = errorData.message || 'Có lỗi trong quá trình kết nối với máy chủ';
                     appendErrorMessage(errorMessage);
                     saveChatMessage(currentChatId, errorMessage, 'error');
                     return;
                 }
                 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                    console.log('Response data:', data);
+                } catch (jsonError) {
+                    console.error('Failed to parse response as JSON:', jsonError);
+                    appendErrorMessage('Có lỗi khi xử lý phản hồi từ máy chủ');
+                    return;
+                }
                 
                 if (data.success === false) {
                     // Handle application errors
@@ -618,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Network error:', error);
                 removeTypingIndicator();
                 const errorMessage = 'Không thể kết nối với máy chủ. Vui lòng kiểm tra kết nối internet của bạn.';
                 appendErrorMessage(errorMessage);

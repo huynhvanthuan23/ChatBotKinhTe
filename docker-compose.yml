@@ -2,17 +2,33 @@ version: '3'
 
 services:
   chatbot:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: chatbot-kinhte:latest
     container_name: hvt_2110359
     ports:
       - "55050:55050"
     volumes:
-      - ./data:/app/data
       - ./vector_db:/app/vector_db
+      - ./app.log:/app/app.log
+      - ./main.py:/app/main.py  # Mount main.py directly to update it without rebuilding
+      - ./.env:/app/.env  # Mount .env file directly
+      - ./web/storage/app/public:/app/storage  # Chia sẻ thư mục storage của Laravel
+    env_file:
+      - .env
     environment:
-      - CHATBOT_API_URL=http://host.docker.internal:8000/api/v1/chat/chat-direct
-      - DB_FAISS_PATH=vector_db
+      - DB_FAISS_PATH=/app/vector_db
       - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      - ALLOW_PICKLE=true
+      - STORAGE_PATH=/app/storage
     restart: unless-stopped
+    networks:
+      - app-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    user: "0:0"
+
+networks:
+  app-network:
+    driver: bridge

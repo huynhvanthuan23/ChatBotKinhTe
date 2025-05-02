@@ -62,12 +62,6 @@ def get_env_str(key: str, default: str = "") -> str:
     
     return clean_env_value(value)
 
-class GPUSettings(BaseSettings):
-    N_BATCH: int = get_env_int("N_BATCH", 512)
-    F16_KV: bool = get_env_bool("F16_KV", True)
-    USE_MMAP: bool = get_env_bool("USE_MMAP", False)
-    USE_MLOCK: bool = get_env_bool("USE_MLOCK", False)
-
 class Settings(BaseSettings):
     # API
     API_HOST: str = get_env_str("API_HOST", "0.0.0.0")
@@ -78,36 +72,23 @@ class Settings(BaseSettings):
     
     # Chatbot settings
     DB_FAISS_PATH: str = get_env_str("DB_FAISS_PATH", "vector_db")
-    MODEL_PATH: str = get_env_str("MODEL_PATH", "models/mistral-7b-instruct-v0.1.Q2_K.gguf")
     EMBEDDING_MODEL: str = get_env_str("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
     TEMPERATURE: float = get_env_float("TEMPERATURE", 0.2)
     MAX_TOKENS: int = get_env_int("MAX_TOKENS", 512)
-    N_CTX: int = get_env_int("N_CTX", 2048)
     
     # API Configuration
-    USE_API: bool = get_env_bool("USE_API", False)
-    API_TYPE: str = get_env_str("API_TYPE", "google")
+    USE_API: bool = get_env_bool("USE_API", True)  # Mặc định là True
+    API_TYPE: str = get_env_str("API_TYPE", "google")  # google hoặc openai
+    
+    # Google API settings
     GOOGLE_API_KEY: str = get_env_str("GOOGLE_API_KEY", "")
-    GOOGLE_MODEL: str = get_env_str("GOOGLE_MODEL", "gemini-pro")
+    GOOGLE_MODEL: str = get_env_str("GOOGLE_MODEL", "gemini-1.5-pro")
+    
+    # OpenAI API settings
+    OPENAI_API_KEY: str = get_env_str("OPENAI_API_KEY", "")
+    OPENAI_MODEL: str = get_env_str("OPENAI_MODEL", "gpt-4o-mini")
+    
     API_TIMEOUT: int = get_env_int("API_TIMEOUT", 30)
-    
-    # Tăng số GPU layers và thêm fallback logic nếu -1
-    @property
-    def N_GPU_LAYERS(self) -> int:
-        n_layers = get_env_int("N_GPU_LAYERS", 32)
-        # Nếu giá trị là -1, sử dụng tất cả các layer có sẵn
-        if n_layers == -1:
-            return 100  # Một số đủ lớn để đại diện cho "tất cả các layer"
-        return n_layers
-    
-    # Thêm tham số mới để ép buộc sử dụng GPU
-    USE_MMAP: bool = get_env_bool("USE_MMAP", False)
-    USE_MLOCK: bool = get_env_bool("USE_MLOCK", False)
-    N_BATCH: int = get_env_int("N_BATCH", 512)
-    F16_KV: bool = get_env_bool("F16_KV", True)
-    
-    # HuggingFace model settings
-    HF_MODEL_ID: str = get_env_str("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct-v0.2")
     
     # API URLs
     CHATBOT_API_URL: Optional[str] = get_env_str("CHATBOT_API_URL", None)

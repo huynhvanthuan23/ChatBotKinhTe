@@ -85,6 +85,15 @@
             padding: 1rem 0;
             border-top: 1px solid #dee2e6;
         }
+        .submenu {
+            padding-left: 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .submenu.show {
+            max-height: 300px;
+        }
     </style>
     @stack('styles')
 </head>
@@ -130,6 +139,28 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ Request::routeIs('admin.system.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cogs"></i> Hệ thống
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.system.index') ? 'active' : '' }}" href="{{ route('admin.system.index') }}">
+                                    <i class="fas fa-tachometer-alt"></i> Trạng thái
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.system.api-config') ? 'active' : '' }}" href="{{ route('admin.system.api-config') }}">
+                                    <i class="fas fa-key"></i> Cấu hình API
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ Request::routeIs('admin.system.api-docs') ? 'active' : '' }}" href="{{ route('admin.system.api-docs') }}">
+                                    <i class="fas fa-book"></i> Tài liệu API
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('home') }}" target="_blank">
                             <i class="fas fa-home"></i> Xem trang chủ
@@ -162,6 +193,41 @@
             </div>
         </div>
     </nav>
+
+    <!-- Flash Messages -->
+    <div class="container-fluid mt-4">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <h5><i class="icon fas fa-check"></i> Thành công!</h5>
+                <p>{{ session('success') }}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h5><i class="icon fas fa-ban"></i> Lỗi!</h5>
+                <p>{{ session('error') }}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('warning'))
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <h5><i class="icon fas fa-exclamation-triangle"></i> Cảnh báo!</h5>
+                <p>{{ session('warning') }}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <h5><i class="icon fas fa-info"></i> Thông tin!</h5>
+                <p>{{ session('info') }}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
 
     <!-- Main Content -->
     <div class="container-fluid content-wrapper">
@@ -196,13 +262,43 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ Request::routeIs('admin.system.index') ? 'active' : '' }}" href="{{ route('admin.system.index') }}">
-                                <i class="fas fa-server"></i> Trạng thái hệ thống
+                            <a class="nav-link dropdown-toggle {{ Request::routeIs('admin.system.*') ? 'active' : '' }}" href="#" id="systemDropdown">
+                                <i class="fas fa-cogs"></i> Hệ thống
                             </a>
+                            <ul class="nav flex-column submenu {{ Request::routeIs('admin.system.*') ? 'show' : '' }}">
+                                <li class="nav-item">
+                                    <a class="nav-link {{ Request::routeIs('admin.system.index') ? 'active' : '' }}" href="{{ route('admin.system.index') }}">
+                                        <i class="fas fa-tachometer-alt"></i> Trạng thái
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{ Request::routeIs('admin.system.api-config') ? 'active' : '' }}" href="{{ route('admin.system.api-config') }}">
+                                        <i class="fas fa-key"></i> Cấu hình API
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{ Request::routeIs('admin.system.api-docs') ? 'active' : '' }}" href="{{ route('admin.system.api-docs') }}">
+                                        <i class="fas fa-book"></i> Tài liệu API
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="nav-item mt-3">
                             <a class="nav-link" href="{{ route('home') }}" target="_blank">
                                 <i class="fas fa-home"></i> Xem trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.system.index') }}" class="nav-link {{ request()->routeIs('admin.system.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-server"></i>
+                                <p>Quản lý hệ thống</p>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <p>Cấu hình website</p>
                             </a>
                         </li>
                     </ul>
@@ -225,6 +321,17 @@
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS for sidebar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle sidebar dropdown
+            document.getElementById('systemDropdown').addEventListener('click', function(e) {
+                e.preventDefault();
+                const submenu = this.nextElementSibling;
+                submenu.classList.toggle('show');
+            });
+        });
+    </script>
     @stack('scripts')
     
     <!-- Thêm Media Manager Modal nếu cần -->

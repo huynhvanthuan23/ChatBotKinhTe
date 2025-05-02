@@ -1,7 +1,6 @@
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
-from langchain_community.llms import LlamaCpp
 from typing import Dict, Any, Optional, Tuple
 from app.core.config import settings
 from app.core.logger import get_logger
@@ -11,6 +10,8 @@ import torch
 import gc
 import traceback
 import google.generativeai as genai
+import openai
+from openai import OpenAI
 
 # Cấu hình logging
 logger = get_logger(__name__)
@@ -22,10 +23,10 @@ class ChatbotService:
         if cls._instance is None:
             cls._instance = super(ChatbotService, cls).__new__(cls)
             cls._instance._initialized = False
-            cls._instance._llm = None
             cls._instance._retry_count = 0
             cls._instance._gemini_model = None
             cls._instance._gemini_chat = None
+            cls._instance._openai_client = None
         return cls._instance
     
     def __init__(self):
@@ -38,12 +39,12 @@ class ChatbotService:
         self._initialized = False
         
         # Reset các thành phần để tránh sử dụng cache
-        self._llm = None
         self._embeddings = None
         self._db = None
         self._retriever = None
         self._gemini_model = None
         self._gemini_chat = None
+        self._openai_client = None
             
         logger.info("Initializing ChatbotService components...")
         
@@ -51,22 +52,44 @@ class ChatbotService:
             # Đầu tiên, giải phóng bộ nhớ GPU
             self._clean_gpu_memory()
             
-            # Khởi tạo Gemini API nếu có API key
-            if settings.USE_API and settings.GOOGLE_API_KEY:
-                try:
-                    logger.info("Initializing Gemini API...")
+            # Khởi tạo model dựa vào API_TYPE
+            if settings.USE_API:
+                if settings.API_TYPE.lower() == "google" and settings.GOOGLE_API_KEY:
+                    try:
+                        logger.info("Initializing Gemini API...")
                     
-                    # Cấu hình API
-                    genai.configure(api_key=settings.GOOGLE_API_KEY)
+                        # Cấu hình API
+                        genai.configure(api_key=settings.GOOGLE_API_KEY)
                     
-                    # Sử dụng model gemini-1.5-pro thay vì gemini-2.0-flash
-                    self._gemini_model = genai.GenerativeModel('gemini-1.5-pro')
-                    self._gemini_chat = self._gemini_model.start_chat(history=[])
-                    logger.info("Gemini API initialized successfully with model gemini-1.5-pro")
+                        # Sử dụng model gemini-1.5-pro
+                        self._gemini_model = genai.GenerativeModel(settings.GOOGLE_MODEL)
+                        self._gemini_chat = self._gemini_model.start_chat(history=[])
+                        logger.info(f"Gemini API initialized successfully with model {settings.GOOGLE_MODEL}")
                         
-                except Exception as api_err:
-                    logger.error(f"Error initializing Gemini API: {str(api_err)}")
-                    raise RuntimeError("Failed to initialize Gemini API. Please check your API key and internet connection.")
+                    except Exception as api_err:
+                        logger.error(f"Error initializing Gemini API: {str(api_err)}")
+                        raise RuntimeError("Failed to initialize Gemini API. Please check your API key and internet connection.")
+                
+                elif settings.API_TYPE.lower() == "openai" and settings.OPENAI_API_KEY:
+                    try:
+                        logger.info("Initializing OpenAI API...")
+                        
+                        # Cấu hình API
+                        self._openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
+                        
+                        # Test kết nối
+                        response = self._openai_client.chat.completions.create(
+                            model=settings.OPENAI_MODEL,
+                            messages=[{"role": "system", "content": "Test connection"}],
+                            max_tokens=5
+                        )
+                        logger.info(f"OpenAI API initialized successfully with model {settings.OPENAI_MODEL}")
+                        
+                    except Exception as api_err:
+                        logger.error(f"Error initializing OpenAI API: {str(api_err)}")
+                        raise RuntimeError("Failed to initialize OpenAI API. Please check your API key and internet connection.")
+                else:
+                    logger.warning(f"No valid API configuration found. API_TYPE: {settings.API_TYPE}")
             
             # Khởi tạo embedding model và vector store
             try:
@@ -103,7 +126,7 @@ class ChatbotService:
                     )
                     
                     # Kiểm tra xem vector store có dữ liệu không
-                    if hasattr(self._db, 'index') and hasattr(self._db.index, 'ntotal'):
+                    if hasattr(self, '_db') and self._db is not None:
                         logger.info(f"Vector store loaded successfully with {self._db.index.ntotal} vectors")
                     else:
                         logger.warning("Vector store loaded but may be empty or incorrectly structured")
@@ -111,7 +134,7 @@ class ChatbotService:
                     logger.error(f"Error loading vector store: {str(e)}")
                     self._db = None
                 
-                # Cấu hình retriever
+                # Cấ hình retriever
                 logger.info("Configuring retriever")
                 self._retriever = self._db.as_retriever(
                     search_type="similarity",
@@ -146,11 +169,6 @@ class ChatbotService:
         """Giải phóng bộ nhớ GPU triệt để"""
         if torch.cuda.is_available():
             try:
-                # Giải phóng model hiện tại nếu có
-                if hasattr(self, '_llm') and self._llm is not None:
-                    del self._llm
-                    self._llm = None
-                
                 # Giải phóng embeddings nếu có
                 if hasattr(self, '_embeddings') and self._embeddings is not None:
                     del self._embeddings
@@ -165,16 +183,6 @@ class ChatbotService:
                 if hasattr(self, '_retriever') and self._retriever is not None:
                     del self._retriever
                     self._retriever = None
-                
-                # Giải phóng Gemini chat nếu có
-                if hasattr(self, '_gemini_chat') and self._gemini_chat is not None:
-                    del self._gemini_chat
-                    self._gemini_chat = None
-                
-                # Giải phóng Gemini model nếu có
-                if hasattr(self, '_gemini_model') and self._gemini_model is not None:
-                    del self._gemini_model
-                    self._gemini_model = None
                 
                 # Giải phóng bộ nhớ GPU
                 torch.cuda.empty_cache()
@@ -220,21 +228,6 @@ class ChatbotService:
                 except Exception as ret_err:
                     logger.error(f"Error retrieving context: {str(ret_err)}")
                     context = ""
-            
-            # Sử dụng Gemini API
-            if not self._gemini_model or not self._gemini_chat:
-                raise RuntimeError("Gemini API is not initialized. Please check your API key and internet connection.")
-            
-            try:
-                start_time = time.time()
-                
-                # Đảm bảo luôn có một phần của context trong response
-                if relevant_docs:
-                    first_doc = relevant_docs[0].page_content
-                    key_info = first_doc[:100]  # Trích xuất 100 ký tự đầu tiên
-                    logger.info(f"Key information to force in response: {key_info}")
-                else:
-                    key_info = ""
                 
                 # Tạo prompt với ngữ cảnh kèm yêu cầu trích dẫn rõ ràng
                 prompt = f"""BẮT BUỘC trả lời dựa HOÀN TOÀN trên thông tin được cung cấp dưới đây.
@@ -252,30 +245,95 @@ YÊU CẦU ĐẶC BIỆT:
 3. Nếu không có thông tin liên quan, hãy nói rõ ràng "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
 4. KHÔNG ĐƯỢC thêm bất kỳ thông tin nào không có trong dữ liệu được cung cấp.
 """
-                # Gửi prompt tới Gemini API
-                response = self._gemini_chat.send_message(prompt)
-                response_time = time.time() - start_time
-                
-                # Xử lý response
-                if response and response.text:
-                    return {
-                        "query": query,
-                        "response": response.text,
-                        "model_info": {
-                            "model": "gemini-1.5-pro",
-                            "response_time": response_time,
-                            "context_used": bool(context),
-                            "documents_found": len(relevant_docs)
-                        }
-                    }
-                else:
-                 raise RuntimeError("Empty response from Gemini API")
+            
+            start_time = time.time()
+            answer = ""
+            model_used = ""
+            
+            # Sử dụng API dựa trên cấu hình
+            if settings.API_TYPE.lower() == "google" and self._gemini_model and self._gemini_chat:
+                try:
+                    # Gửi prompt đến Gemini API
+                    response = self._gemini_chat.send_message(prompt)
+                    answer = response.text
+                    model_used = settings.GOOGLE_MODEL
+                    logger.info("Using Gemini API for response generation")
+                except Exception as api_err:
+                    logger.error(f"Error getting answer from Gemini API: {str(api_err)}")
+                    logger.error(traceback.format_exc())
+                    raise RuntimeError(f"Failed to get response from Gemini API: {str(api_err)}")
                     
-            except Exception as api_err:
-                logger.error(f"Error getting response from Gemini API: {str(api_err)}")
-                raise RuntimeError(f"Failed to get response from Gemini API: {str(api_err)}")
+            elif settings.API_TYPE.lower() == "openai" and self._openai_client:
+                try:
+                    # Gửi prompt đến OpenAI API
+                    messages = [
+                        {"role": "system", "content": "Bạn là trợ lý AI có kiến thức chuyên sâu về kinh tế Việt Nam. Nhiệm vụ của bạn là trả lời câu hỏi dựa trên dữ liệu được cung cấp, không sử dụng thông tin bên ngoài."},
+                        {"role": "user", "content": prompt}
+                    ]
+                    
+                    response = self._openai_client.chat.completions.create(
+                        model=settings.OPENAI_MODEL,
+                        messages=messages,
+                        temperature=settings.TEMPERATURE,
+                        max_tokens=settings.MAX_TOKENS
+                    )
+                    
+                    answer = response.choices[0].message.content
+                    model_used = settings.OPENAI_MODEL
+                    logger.info("Using OpenAI API for response generation")
+                except Exception as api_err:
+                    logger.error(f"Error getting answer from OpenAI API: {str(api_err)}")
+                    logger.error(traceback.format_exc())
+                    raise RuntimeError(f"Failed to get response from OpenAI API: {str(api_err)}")
+            else:
+                logger.error("No valid API available for response generation")
+                raise RuntimeError("No valid API configuration found. Please check your API settings.")
+                
+            # Đảm bảo câu trả lời bắt đầu với "Theo dữ liệu tìm được: "
+            if answer and not answer.startswith("Theo dữ liệu tìm được:"):
+                answer = "Theo dữ liệu tìm được: " + answer
+            
+            elapsed_time = time.time() - start_time
+            logger.info(f"API response received in {elapsed_time:.2f} seconds")
+            
+            # Trả về kết quả
+            return {
+                "query": query,
+                "response": answer,
+                "model_info": {
+                    "model": model_used,
+                    "context_used": True if context else False,
+                    "documents_found": len(relevant_docs),
+                    "response_time": f"{elapsed_time:.2f} seconds"
+                }
+            }
                 
         except Exception as e:
             logger.error(f"Error in get_answer: {str(e)}")
             logger.error(traceback.format_exc())
-            raise 
+            return {
+                "query": query,
+                "response": "Xin lỗi, có lỗi xảy ra khi xử lý câu hỏi của bạn. Vui lòng thử lại sau.",
+                "model_info": {
+                    "error": str(e)
+                }
+            }
+    
+    def restart(self):
+        """Restart all components"""
+        logger.info("Restarting ChatbotService components...")
+        try:
+            # Giải phóng bộ nhớ
+            self._clean_gpu_memory()
+            
+            # Reset initialized flag
+            self._initialized = False
+            
+            # Khởi tạo lại components
+            self._initialize_components()
+            
+            return True
+        except Exception as e:
+            logger.error(f"Error restarting components: {str(e)}")
+            logger.error(traceback.format_exc())
+            return False 
