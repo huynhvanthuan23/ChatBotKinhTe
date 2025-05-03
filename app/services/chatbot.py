@@ -1,7 +1,7 @@
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 from app.core.config import settings
 from app.core.logger import get_logger
 import os
@@ -32,6 +32,64 @@ class ChatbotService:
     def __init__(self):
         # Các thuộc tính sẽ được khởi tạo trong _initialize_components
         pass
+    
+    def initialize_vector_db(self):
+        """
+        Khởi tạo và trả về vector database
+        
+        Returns:
+            Retriever đã được cấu hình hoặc None nếu có lỗi
+        """
+        try:
+            logger.info("Initializing vector database...")
+            # Kiểm tra đường dẫn và file tồn tại
+            db_path = settings.DB_FAISS_PATH
+            
+            if not os.path.exists(db_path):
+                logger.error(f"Vector database directory not found: {db_path}")
+                os.makedirs(db_path, exist_ok=True)
+                logger.info(f"Created vector database directory: {db_path}")
+                return None
+                
+            # Kiểm tra các file cần thiết
+            if not os.path.exists(os.path.join(db_path, "index.faiss")) or not os.path.exists(os.path.join(db_path, "index.pkl")):
+                logger.error(f"Missing vector index files in {db_path}")
+                return None
+                
+            # Tải embedding model
+            embedding = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+            
+            # Tải vector database
+            try:
+                logger.info(f"Loading vector database from {db_path}")
+                try:
+                    db = FAISS.load_local(db_path, embedding, allow_dangerous_deserialization=True)
+                except TypeError:
+                    db = FAISS.load_local(db_path, embedding)
+                    
+                # Tạo retriever với MMR (Maximum Marginal Relevance)
+                retriever = db.as_retriever(
+                    search_type="mmr",
+                    search_kwargs={
+                        "k": 2,
+                        "fetch_k": 5,
+                        "lambda_mult": 0.8,
+                        "score_threshold": 0.5
+                    }
+                )
+                
+                logger.info("Vector database loaded and retriever configured successfully")
+                return retriever
+                
+            except Exception as e:
+                logger.error(f"Error loading vector database: {str(e)}")
+                logger.error(traceback.format_exc())
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error initializing vector database: {str(e)}")
+            logger.error(traceback.format_exc())
+            return None
     
     def _initialize_components(self):
         """Initialize components at startup"""
@@ -335,5 +393,395 @@ YÊU CẦU ĐẶC BIỆT:
             return True
         except Exception as e:
             logger.error(f"Error restarting components: {str(e)}")
+            logger.error(traceback.format_exc())
+            return False
+
+    async def get_simple_retrieval(self, query: str, document_ids: List[int] = None) -> Dict[str, Any]:
+        """Tìm kiếm đơn giản dựa trên vector database mà không sử dụng LLM API"""
+        try:
+            # Đảm bảo components đã được khởi tạo
+            if not self._initialized:
+                self._initialize_components()
+            
+            docs = []
+            # Nếu có document IDs, ưu tiên tìm kiếm trong các tài liệu đã chọn
+            if document_ids:
+                for doc_id in document_ids:
+                    document_vectors_path = os.path.join(settings.DB_FAISS_PATH, f"doc_{doc_id}")
+                    
+                    if os.path.exists(document_vectors_path) and os.path.exists(os.path.join(document_vectors_path, "index.faiss")):
+                        try:
+                            logger.info(f"Tìm kiếm trong tài liệu ID {doc_id}")
+                            embedding = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+                            try:
+                                doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
+                            except TypeError:
+                                doc_db = FAISS.load_local(document_vectors_path, embedding)
+                                
+                            doc_retriever = doc_db.as_retriever(
+                                search_type="mmr",
+                                search_kwargs={
+                                    "k": 2,
+                                    "fetch_k": 15,
+                                    "lambda_mult": 0.8,
+                                    "score_threshold": 0.5
+                                }
+                            )
+                            doc_results = doc_retriever.get_relevant_documents(query)
+                            
+                            if doc_results:
+                                logger.info(f"Tìm thấy {len(doc_results)} kết quả trong tài liệu ID {doc_id}")
+                                for doc in doc_results:
+                                    if 'document_id' not in doc.metadata:
+                                        doc.metadata['document_id'] = doc_id
+                                docs.extend(doc_results)
+                        except Exception as e:
+                            logger.error(f"Lỗi khi tìm kiếm trong tài liệu ID {doc_id}: {e}")
+                            logger.error(traceback.format_exc())
+            
+            # Nếu không tìm thấy kết quả trong các tài liệu đã chọn, hoặc không có tài liệu được chọn
+            if not docs:
+                if not document_ids and self._retriever:
+                    logger.info("Không có tài liệu được chọn, tìm kiếm trong vector database chính")
+                    docs = self._retriever.get_relevant_documents(query)
+                    logger.info(f"Tìm thấy {len(docs)} tài liệu liên quan cho query: {query}")
+            
+            # Nếu tìm thấy tài liệu, sử dụng nội dung làm phản hồi
+            if docs:
+                content = "\n\n".join([doc.page_content for doc in docs])
+                
+                # Thêm thông tin nguồn tài liệu nếu có
+                if document_ids and any('document_id' in doc.metadata for doc in docs):
+                    doc_sources = set(doc.metadata.get('document_id') for doc in docs if 'document_id' in doc.metadata)
+                    source_info = f"\n\nThông tin từ tài liệu IDs: {', '.join(map(str, doc_sources))}"
+                    response = f"Tìm thấy thông tin liên quan trong tài liệu đã chọn:\n\n{content}{source_info}"
+                else:
+                    response = f"Tìm thấy thông tin liên quan:\n\n{content}"
+                    
+                return {
+                    "success": True,
+                    "response": response,
+                    "query": query,
+                    "doc_count": len(docs)
+                }
+            else:
+                # Không tìm thấy tài liệu
+                if document_ids:
+                    response = "Không tìm thấy thông tin liên quan đến câu hỏi của bạn trong các tài liệu đã chọn. Vui lòng thử lại với từ khóa khác hoặc chọn tài liệu khác."
+                else:
+                    response = "Không tìm thấy thông tin liên quan đến câu hỏi của bạn trong cơ sở dữ liệu."
+                    
+                return {
+                    "success": True,
+                    "response": response,
+                    "query": query,
+                    "doc_count": 0
+                }
+                
+        except Exception as e:
+            logger.error(f"Lỗi trong get_simple_retrieval: {str(e)}")
+            logger.error(traceback.format_exc())
+            return {
+                "success": False,
+                "response": "Xin lỗi, có lỗi xảy ra khi tìm kiếm thông tin. Vui lòng thử lại sau.",
+                "query": query,
+                "error": str(e)
+            }
+
+    async def process_document(self, request) -> Dict[str, Any]:
+        """Xử lý tài liệu và tạo vector embeddings"""
+        logger.info(f"Xử lý tài liệu ID: {request.document_id}, Đường dẫn: {request.file_path}")
+        
+        try:
+            # Ưu tiên dùng đường dẫn tuyệt đối nếu có
+            full_path = getattr(request, 'absolute_path', None)
+            
+            # Nếu không có đường dẫn tuyệt đối, thì dùng đường dẫn tương đối
+            if not full_path or not os.path.exists(full_path):
+                full_path = os.path.join(os.getenv("STORAGE_PATH", "storage"), request.file_path)
+                logger.info(f"Sử dụng đường dẫn tương đối: {full_path}")
+            else:
+                logger.info(f"Sử dụng đường dẫn tuyệt đối: {full_path}")
+            
+            # Kiểm tra file có tồn tại không
+            if not os.path.exists(full_path):
+                logger.error(f"Không tìm thấy file: {full_path}")
+                return {
+                    "success": False,
+                    "message": "File không tồn tại",
+                    "document_id": request.document_id,
+                    "error": f"File not found: {full_path}"
+                }
+            
+            # Khởi tạo document loader dựa trên loại file
+            logger.info(f"Đang đọc tài liệu: {full_path}")
+            loader = None
+            
+            if request.file_type:
+                mime_type = request.file_type
+            else:
+                # Đoán mime type từ đuôi file
+                file_ext = os.path.splitext(full_path)[1].lower()
+                if file_ext == '.pdf':
+                    mime_type = 'application/pdf'
+                elif file_ext in ['.docx', '.doc']:
+                    mime_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                elif file_ext == '.txt':
+                    mime_type = 'text/plain'
+                elif file_ext == '.md':
+                    mime_type = 'text/markdown'
+                else:
+                    mime_type = 'application/octet-stream'
+            
+            # Chọn loader phù hợp
+            from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
+            
+            if 'pdf' in mime_type:
+                logger.info("Sử dụng PyPDFLoader")
+                loader = PyPDFLoader(full_path)
+            elif 'word' in mime_type or 'docx' in mime_type or 'doc' in mime_type:
+                logger.info("Sử dụng Docx2txtLoader")
+                loader = Docx2txtLoader(full_path)
+            elif 'text' in mime_type or 'markdown' in mime_type or 'plain' in mime_type:
+                logger.info("Sử dụng TextLoader")
+                loader = TextLoader(full_path)
+            else:
+                logger.error(f"Loại file không được hỗ trợ: {mime_type}")
+                return {
+                    "success": False,
+                    "message": f"Loại file không được hỗ trợ: {mime_type}",
+                    "document_id": request.document_id,
+                    "error": f"Unsupported file type: {mime_type}"
+                }
+            
+            # Tải document
+            try:
+                docs = loader.load()
+                logger.info(f"Đọc tài liệu thành công, số trang/đoạn: {len(docs)}")
+            except Exception as e:
+                logger.error(f"Lỗi khi đọc tài liệu: {e}")
+                return {
+                    "success": False,
+                    "message": "Không thể đọc nội dung file",
+                    "document_id": request.document_id,
+                    "error": f"Error loading document: {e}"
+                }
+            
+            # Chia nhỏ văn bản
+            from langchain.text_splitter import RecursiveCharacterTextSplitter
+            
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=request.chunk_size,
+                chunk_overlap=request.chunk_overlap,
+                length_function=len,
+            )
+            
+            chunks = text_splitter.split_documents(docs)
+            logger.info(f"Chia tài liệu thành {len(chunks)} đoạn với chunk_size={request.chunk_size}, chunk_overlap={request.chunk_overlap}")
+            
+            # Tạo embedding
+            embedding = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+            
+            # Tạo thư mục lưu trữ vector riêng cho document
+            document_vectors_path = os.path.join(settings.DB_FAISS_PATH, f"doc_{request.document_id}")
+            os.makedirs(document_vectors_path, exist_ok=True)
+            
+            # Tạo FAISS database từ chunks
+            logger.info(f"Đang tạo vector store tại {document_vectors_path}")
+            db = FAISS.from_documents(chunks, embedding)
+            db.save_local(document_vectors_path)
+            
+            # Kiểm tra kết quả
+            if os.path.exists(os.path.join(document_vectors_path, "index.faiss")) and os.path.exists(os.path.join(document_vectors_path, "index.pkl")):
+                logger.info(f"Tạo vector store thành công cho tài liệu {request.document_id}")
+                
+                # Kiểm tra bằng tìm kiếm thử
+                try:
+                    loaded_db = FAISS.load_local(document_vectors_path, embedding)
+                    query = request.title or "Kinh tế"
+                    docs = loaded_db.similarity_search(query, k=1)
+                    logger.info(f"Truy vấn thử nghiệm thành công, tìm thấy {len(docs)} kết quả")
+                except Exception as e:
+                    logger.error(f"Truy vấn thử nghiệm thất bại: {e}")
+                
+                return {
+                    "success": True,
+                    "message": "Đã xử lý tài liệu và tạo vector thành công",
+                    "document_id": request.document_id
+                }
+            else:
+                logger.error(f"Tạo vector store thất bại cho tài liệu {request.document_id}")
+                return {
+                    "success": False,
+                    "message": "Không thể tạo vector cho tài liệu",
+                    "document_id": request.document_id,
+                    "error": "Vector store files not found after creation"
+                }
+                
+        except Exception as e:
+            logger.error(f"Lỗi xử lý tài liệu: {e}")
+            logger.error(traceback.format_exc())
+            return {
+                "success": False,
+                "message": "Lỗi xử lý tài liệu",
+                "document_id": request.document_id,
+                "error": str(e)
+            }
+
+    async def integrate_document(self, document_id: int) -> Dict[str, Any]:
+        """Tích hợp vector của tài liệu vào vector database chính"""
+        try:
+            logger.info(f"Đang tích hợp vector của tài liệu ID: {document_id}")
+            
+            # Đường dẫn tới vector database của tài liệu
+            document_vectors_path = os.path.join(settings.DB_FAISS_PATH, f"doc_{document_id}")
+            
+            # Kiểm tra có tồn tại không
+            if not os.path.exists(document_vectors_path) or not os.path.exists(os.path.join(document_vectors_path, "index.faiss")):
+                logger.error(f"Không tìm thấy đường dẫn vector của tài liệu: {document_vectors_path}")
+                return {
+                    "success": False,
+                    "message": f"Không thể tích hợp vector của tài liệu {document_id}",
+                    "document_id": document_id,
+                    "error": "Vector store not found"
+                }
+            
+            # Tải vector database chính
+            embedding = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+            
+            # Nếu vector database chính không tồn tại, tạo mới
+            main_vector_path = settings.DB_FAISS_PATH
+            
+            if not os.path.exists(os.path.join(main_vector_path, "index.faiss")):
+                logger.info("Không tìm thấy vector database chính, đang tạo mới")
+                empty_texts = ["Đây là vector database ban đầu."]
+                main_db = FAISS.from_texts(empty_texts, embedding)
+                main_db.save_local(main_vector_path)
+            
+            # Tải vector database chính và vector database của tài liệu
+            try:
+                main_db = FAISS.load_local(main_vector_path, embedding, allow_dangerous_deserialization=True)
+            except TypeError:
+                main_db = FAISS.load_local(main_vector_path, embedding)
+            
+            try:
+                doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
+            except TypeError:
+                doc_db = FAISS.load_local(document_vectors_path, embedding)
+            
+            # Kết hợp hai vector database
+            logger.info("Đang kết hợp vector của tài liệu vào vector database chính")
+            main_db.merge_from(doc_db)
+            
+            # Lưu lại vector database chính
+            logger.info("Lưu vector database đã kết hợp")
+            main_db.save_local(main_vector_path)
+            
+            # Khởi động lại retriever để áp dụng thay đổi
+            if hasattr(self, '_db') and self._db is not None:
+                del self._db
+            
+            self._db = main_db
+            self._retriever = self._db.as_retriever(
+                search_type="mmr",
+                search_kwargs={
+                    "k": 2,
+                    "fetch_k": 5,
+                    "lambda_mult": 0.8,
+                    "score_threshold": 0.5
+                }
+            )
+            
+            # Kiểm tra kết quả
+            if os.path.exists(os.path.join(main_vector_path, "index.faiss")):
+                logger.info(f"Tích hợp vector thành công cho tài liệu {document_id}")
+                return {
+                    "success": True,
+                    "message": f"Đã tích hợp vector của tài liệu {document_id} thành công",
+                    "document_id": document_id
+                }
+            else:
+                logger.error(f"Tích hợp vector thất bại cho tài liệu {document_id}")
+                return {
+                    "success": False,
+                    "message": f"Không thể tích hợp vector của tài liệu {document_id}",
+                    "document_id": document_id,
+                    "error": "Integration failed"
+                }
+                
+        except Exception as e:
+            logger.error(f"Lỗi khi tích hợp vector của tài liệu: {e}")
+            logger.error(traceback.format_exc())
+            return {
+                "success": False,
+                "message": "Lỗi khi tích hợp vector",
+                "document_id": document_id,
+                "error": str(e)
+            } 
+    
+    def integrate_document_vectors(self, document_id: int) -> bool:
+        """
+        Tích hợp vector của một tài liệu vào vector database chính
+        
+        Args:
+            document_id: ID của tài liệu cần tích hợp
+            
+        Returns:
+            Boolean: True nếu thành công, False nếu thất bại
+        """
+        try:
+            logger.info(f"Integrating vectors from document {document_id} into main vector database")
+            
+            # Đường dẫn tới vector database của tài liệu
+            document_vectors_path = os.path.join(settings.DB_FAISS_PATH, f"doc_{document_id}")
+            
+            # Kiểm tra xem vector database của tài liệu có tồn tại không
+            if not os.path.exists(document_vectors_path) or not os.path.exists(os.path.join(document_vectors_path, "index.faiss")):
+                logger.error(f"Vector database for document {document_id} not found at {document_vectors_path}")
+                return False
+            
+            # Đường dẫn tới vector database chính
+            main_vector_path = settings.DB_FAISS_PATH
+            
+            # Khởi tạo embedding model
+            embedding = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+            
+            # Nếu vector database chính không tồn tại, tạo mới
+            if not os.path.exists(os.path.join(main_vector_path, "index.faiss")):
+                logger.info("Main vector database not found, creating a new one")
+                empty_texts = ["This is the initial vector database."]
+                main_db = FAISS.from_texts(empty_texts, embedding)
+                main_db.save_local(main_vector_path)
+            
+            # Tải vector database chính
+            try:
+                main_db = FAISS.load_local(main_vector_path, embedding, allow_dangerous_deserialization=True)
+            except TypeError:
+                main_db = FAISS.load_local(main_vector_path, embedding)
+            
+            # Tải vector database của tài liệu
+            try:
+                doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
+            except TypeError:
+                doc_db = FAISS.load_local(document_vectors_path, embedding)
+            
+            # Kết hợp hai vector database
+            logger.info(f"Merging document {document_id} vectors into main vector database")
+            main_db.merge_from(doc_db)
+            
+            # Lưu vector database chính
+            logger.info("Saving merged vector database")
+            main_db.save_local(main_vector_path)
+            
+            # Kiểm tra kết quả
+            if os.path.exists(os.path.join(main_vector_path, "index.faiss")):
+                logger.info(f"Successfully integrated vectors from document {document_id}")
+                return True
+            else:
+                logger.error(f"Failed to integrate vectors from document {document_id}")
+                return False
+            
+        except Exception as e:
+            logger.error(f"Error integrating document vectors: {str(e)}")
             logger.error(traceback.format_exc())
             return False 

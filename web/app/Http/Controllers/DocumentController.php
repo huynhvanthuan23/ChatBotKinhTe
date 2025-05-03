@@ -26,7 +26,7 @@ class DocumentController extends Controller
         $documents = Document::byUser($user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+            
         // Lấy danh sách tài liệu đã chọn từ session
         $selectedDocumentIds = session('selected_document_ids', []);
             
@@ -263,7 +263,7 @@ class DocumentController extends Controller
                 ->where('user_id', Auth::id())
                 ->where('vector_status', 'completed')
                 ->firstOrFail();
-            
+                
             // Chuyển hướng đến trang chat với tham số doc_ids
             return redirect()->route('chat', ['doc_ids' => $id]);
                 

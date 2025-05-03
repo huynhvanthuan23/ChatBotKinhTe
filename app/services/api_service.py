@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional, List
 from app.core.config import settings
 from app.core.logger import get_logger
 import pickle
+import traceback
 
 # Configure logging
 logger = get_logger(__name__)
@@ -42,6 +43,72 @@ class APIService:
             raise ValueError(f"Unsupported API type: {self.api_type}")
         
         logger.info(f"Initialized {self.api_type.capitalize()} API service with model: {self.model}")
+    
+    def initialize_gemini(self):
+        """
+        Khởi tạo và cấu hình API Gemini
+        
+        Returns:
+            Đối tượng GenerativeModel của Gemini hoặc None nếu có lỗi
+        """
+        try:
+            import google.generativeai as genai
+            
+            logger.info(f"Initializing Gemini API with key: {self.api_key[:4]}...{self.api_key[-4:] if len(self.api_key) > 8 else ''}")
+            
+            # Cấu hình API
+            genai.configure(api_key=self.api_key)
+            
+            # Tạo model
+            model = genai.GenerativeModel(self.model)
+            
+            # Test kết nối
+            response = model.generate_content("Xin chào, đây là test kết nối.")
+            if response and hasattr(response, 'text'):
+                logger.info("Gemini API initialized successfully")
+                return model
+            else:
+                logger.error("Gemini API test failed - no valid response")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error initializing Gemini API: {str(e)}")
+            logger.error(traceback.format_exc())
+            return None
+    
+    def initialize_openai(self):
+        """
+        Khởi tạo và cấu hình API OpenAI
+        
+        Returns:
+            Client OpenAI hoặc None nếu có lỗi
+        """
+        try:
+            from openai import OpenAI
+            
+            logger.info(f"Initializing OpenAI API with key: {self.api_key[:4]}...{self.api_key[-4:] if len(self.api_key) > 8 else ''}")
+            
+            # Tạo client
+            client = OpenAI(api_key=self.api_key)
+            
+            # Test kết nối
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "system", "content": "Test connection"}],
+                max_tokens=5
+            )
+            
+            if response and hasattr(response, 'choices') and len(response.choices) > 0:
+                logger.info("OpenAI API initialized successfully")
+                return client
+            else:
+                logger.error("OpenAI API test failed - no valid response")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error initializing OpenAI API: {str(e)}")
+            logger.error(traceback.format_exc())
+            return None
     
     async def test_connection(self) -> bool:
         """Test the API connection"""
@@ -287,6 +354,129 @@ Please answer the question based solely on the provided context. If the context 
                 "api_type": self.api_type,
                 "model": self.model,
                 "status": "error"
+            }
+
+    async def process_chat(self, query: str, user_id: Optional[int] = None, vector_retriever = None) -> Dict[str, Any]:
+        """
+        Xử lý chat từ API
+        
+        Args:
+            query: Câu hỏi của người dùng
+            user_id: ID của người dùng (tùy chọn)
+            vector_retriever: Retriever để lấy ngữ cảnh (tùy chọn)
+            
+        Returns:
+            Dict với kết quả trả về
+        """
+        start_time = time.time()
+        
+        try:
+            # Tìm kiếm ngữ cảnh từ vector database
+            context = ""
+            docs = []
+            try:
+                if vector_retriever:
+                    docs = vector_retriever.get_relevant_documents(query)
+                    if docs:
+                        context = "\n\n".join([doc.page_content for doc in docs])
+                        logger.info(f"Found {len(docs)} relevant documents from vector database")
+                        
+                        # Log a preview of each document for debugging
+                        for i, doc in enumerate(docs):
+                            preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
+                            logger.info(f"Document {i+1} preview: {preview}")
+                    else:
+                        logger.info("No relevant documents found in vector database")
+            except Exception as ret_err:
+                logger.error(f"Error retrieving context: {str(ret_err)}")
+                context = ""
+            
+            # Tạo prompt với ngữ cảnh
+            prompt = f"""BẮT BUỘC trả lời dựa HOÀN TOÀN trên thông tin được cung cấp dưới đây.
+KHÔNG ĐƯỢC sử dụng kiến thức bên ngoài dưới bất kỳ hình thức nào.
+Nếu không có thông tin liên quan, hãy nói "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
+
+THÔNG TIN THAM KHẢO:
+{context}
+
+CÂU HỎI: {query}
+
+YÊU CẦU ĐẶC BIỆT:
+1. PHẢI bắt đầu câu trả lời của bạn với "Theo dữ liệu tìm được: " và kèm theo trích dẫn trực tiếp từ thông tin trên.
+2. Nếu có thông tin liên quan, PHẢI trích dẫn ít nhất một đoạn từ thông tin trên.
+3. Nếu không có thông tin liên quan, hãy nói rõ ràng "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu".
+4. KHÔNG ĐƯỢC thêm bất kỳ thông tin nào không có trong dữ liệu được cung cấp.
+"""
+
+            api_prompt = f"""Dựa trên thông tin được cung cấp, hãy trả lời câu hỏi sau.
+Thông tin có thể chứa nhiều đoạn văn bản từ các tài liệu khác nhau. Hãy tổng hợp tất cả thông tin liên quan để đưa ra câu trả lời đầy đủ nhất.
+
+THÔNG TIN THAM KHẢO:
+{context}
+
+CÂU HỎI: {query}
+
+Hướng dẫn:
+1. Bắt đầu câu trả lời với "Theo dữ liệu tìm được:"
+2. Tổng hợp thông tin từ tất cả các nguồn liên quan
+3. Nếu các nguồn có thông tin trái ngược, hãy trình bày các quan điểm khác nhau
+4. Trích dẫn cụ thể thông tin quan trọng từ dữ liệu
+5. Phân tích và kết nối các thông tin để tạo ra câu trả lời toàn diện
+6. Nếu không tìm thấy thông tin chính xác, hãy sử dụng thông tin gần đúng hoặc liên quan
+"""
+            
+            # Gửi prompt đến API dựa theo cấu hình
+            answer = ""
+            model_info = {}
+            
+            if self.api_type == "google":
+                # Gửi prompt đến Gemini API
+                answer = await self.query_google_api(query, context=api_prompt)
+                model_info = {"model": self.model}
+                logger.info(f"Nhận phản hồi từ Gemini API ({self.model})")
+            
+            elif self.api_type == "openai":
+                # Gửi prompt đến OpenAI API
+                answer = await self.query_openai_api(query, context=api_prompt)
+                model_info = {"model": self.model}
+                logger.info(f"Nhận phản hồi từ OpenAI API ({self.model})")
+            
+            else:
+                logger.warning(f"API_TYPE không được hỗ trợ: {self.api_type}")
+                answer = "API type không được hỗ trợ hoặc chưa được cấu hình."
+                model_info = {"model": "fallback", "error": f"Unsupported API type: {self.api_type}"}
+            
+            elapsed_time = time.time() - start_time
+            
+            # Đảm bảo câu trả lời bắt đầu với "Theo dữ liệu tìm được: " nếu cần
+            if answer and not answer.startswith("Theo dữ liệu tìm được:") and context:
+                answer = "Theo dữ liệu tìm được: " + answer
+            
+            # Chuẩn bị response
+            result = {
+                "success": True,
+                "answer": answer,
+                "query": query,
+                "processing_time": f"{elapsed_time:.2f} seconds",
+                "documents_found": len(docs)
+            }
+            
+            # Thêm model info
+            result.update(model_info)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Lỗi trong xử lý chat: {str(e)}")
+            logger.error(traceback.format_exc())
+            end_time = time.time()
+            
+            return {
+                "success": False,
+                "answer": f"Xin lỗi, có lỗi xảy ra trong quá trình xử lý: {str(e)}",
+                "query": query,
+                "error": str(e),
+                "processing_time": f"{end_time - start_time:.2f} seconds"
             }
 
 def load_data():

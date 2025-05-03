@@ -1,4 +1,7 @@
 import disable_pickle
+# Tự động cho phép pickle để tải vector database
+import os
+os.environ["ALLOW_PICKLE"] = "true"
 disable_pickle.disable()
 
 # Sửa lỗi OpenAI proxies
@@ -23,7 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 import openai
 from openai import OpenAI
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 import torch
 import gc
@@ -188,6 +191,7 @@ def _safe_load(*args, **kwargs):
 
 # Thay thế pickle.load bằng phiên bản có điều kiện
 pickle.load = _safe_load
+
 # Khởi tạo vector database - sử dụng dịch vụ
 def initialize_vector_db():
     """Initialize vector database from FAISS using ChatbotService."""
@@ -624,6 +628,7 @@ async def reload_config(config: Optional[ConfigRequest] = None):
             message="Lỗi khi tải lại cấu hình",
             error=str(e)
         )
+
 @app.post("/api/v1/documents/process")
 async def process_document(request: DocumentProcessRequest):
     """
