@@ -474,25 +474,76 @@
             left: -280px;
             top: 64px;
             bottom: 0;
+            width: 280px;
             transition: left 0.3s ease;
-            z-index: 10;
+            z-index: 1030;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
         
-        .chat-sidebar.collapsed {
+        .chat-sidebar.mobile-visible {
             left: 0;
+        }
+        
+        .chat-wrapper {
+            flex-direction: column;
         }
 
         .chat-main {
             width: 100%;
         }
         
-        .chat-wrapper.sidebar-collapsed .toggle-sidebar-btn {
+        .mobile-toggle-btn {
             position: fixed;
-            top: 75px;
+            top: 74px;
             left: 10px;
-            z-index: 11;
+            z-index: 1031;
             background-color: #fff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .mobile-toggle-btn:focus {
+            outline: none;
+        }
+        
+        .mobile-sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1025;
+        }
+        
+        .mobile-sidebar-overlay.visible {
+            display: block;
+        }
+        
+        /* Make sure conversation items in sidebar are more touch friendly */
+        .conversation-item {
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .conversation-title {
+            font-size: 15px;
+        }
+        
+        .delete-chat-btn {
+            opacity: 0.7;
+            padding: 8px;
+            font-size: 16px;
         }
     }
 
@@ -539,6 +590,23 @@
     .chat-message.bot .message-content a:hover {
         text-decoration: underline;
     }
+
+    /* Thêm CSS để đảm bảo trích dẫn hiển thị rõ ràng */
+    .chat-message.bot .message-content .citation-link {
+        color: #1890ff;
+        text-decoration: none;
+        cursor: pointer;
+        font-weight: 500;
+        border-bottom: 1px dashed #1890ff;
+        display: inline-block;
+        margin: 2px 0;
+    }
+
+    .chat-message.bot .message-content .citation-link:hover {
+        color: #40a9ff;
+        text-decoration: none;
+        background-color: rgba(24, 144, 255, 0.1);
+    }
 </style>
 @endpush
 
@@ -556,44 +624,125 @@ document.addEventListener('DOMContentLoaded', function() {
         const conversationsContainer = document.querySelector('.conversations');
         
         let isWaitingForResponse = false;
-        let currentChatId = Date.now();
-        let chatHistory = loadChatHistory();
-        let docIdsFromUrl = null;
-        
-        // Kiểm tra xem có tham số doc_ids trong URL không
-        function getDocIdsFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const docIdsParam = urlParams.get('doc_ids');
-            if (docIdsParam) {
-                return docIdsParam.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
-            }
-            return null;
+    let currentConversationId = null;
+    let conversationsLoaded = false;
+    let docIdsFromUrl = null;
+    let isMobile = window.innerWidth <= 768;
+    
+    // Create mobile sidebar toggle button and overlay
+    function setupMobileElements() {
+        if (isMobile && !document.querySelector('.mobile-toggle-btn')) {
+            // Create toggle button for mobile
+            const mobileToggleBtn = document.createElement('button');
+            mobileToggleBtn.className = 'mobile-toggle-btn';
+            mobileToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(mobileToggleBtn);
+            
+            // Create overlay for mobile
+            const overlay = document.createElement('div');
+            overlay.className = 'mobile-sidebar-overlay';
+            document.body.appendChild(overlay);
+            
+            // Add event listeners
+            mobileToggleBtn.addEventListener('click', toggleMobileSidebar);
+            overlay.addEventListener('click', toggleMobileSidebar);
         }
+    }
+    
+    // Toggle mobile sidebar
+    function toggleMobileSidebar() {
+        sidebar.classList.toggle('mobile-visible');
+        document.querySelector('.mobile-sidebar-overlay').classList.toggle('visible');
+    }
+    
+    // Handle resize events
+    function handleResize() {
+        const wasMobile = isMobile;
+        isMobile = window.innerWidth <= 768;
         
-        // Lưu doc_ids từ URL nếu có
-        docIdsFromUrl = getDocIdsFromUrl();
-        if (docIdsFromUrl && docIdsFromUrl.length > 0) {
-            console.log('Detected doc_ids in URL:', docIdsFromUrl);
-            // Hiển thị thông báo cho người dùng
-            const welcomeMessage = document.querySelector('.welcome-message');
-            if (welcomeMessage) {
-                const docIdsInfo = document.createElement('div');
-                docIdsInfo.className = 'alert alert-info mt-3';
-                docIdsInfo.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span><i class="fas fa-info-circle me-2"></i> Bạn đang chat với tài liệu ID: ${docIdsFromUrl.join(', ')}</span>
-                    </div>
-                    <p class="mt-2 mb-0">Hãy đặt câu hỏi liên quan đến nội dung của tài liệu.</p>
-                `;
-                welcomeMessage.appendChild(docIdsInfo);
+        // If switching between mobile/desktop views
+        if (wasMobile !== isMobile) {
+            if (isMobile) {
+                // Switched to mobile
+                setupMobileElements();
+                // Reset desktop sidebar state
+                document.querySelector('.chat-wrapper').classList.remove('sidebar-collapsed');
+            } else {
+                // Switched to desktop
+                sidebar.classList.remove('mobile-visible');
+                const overlay = document.querySelector('.mobile-sidebar-overlay');
+                if (overlay) overlay.classList.remove('visible');
             }
         }
-        
-        // Toggle sidebar functionality
+    }
+    
+    // Initial setup
+    setupMobileElements();
+    window.addEventListener('resize', handleResize);
+    
+    // Existing sidebar toggle for desktop
         toggleBtn.addEventListener('click', function() {
+        if (isMobile) {
+            toggleMobileSidebar();
+        } else {
             document.querySelector('.chat-wrapper').classList.toggle('sidebar-collapsed');
-            sidebar.classList.toggle('collapsed');
+        }
+    });
+    
+    // Close mobile sidebar when a conversation is selected
+    function closeMobileSidebar() {
+        if (isMobile) {
+            sidebar.classList.remove('mobile-visible');
+            const overlay = document.querySelector('.mobile-sidebar-overlay');
+            if (overlay) overlay.classList.remove('visible');
+        }
+    }
+    
+    // Kiểm tra xem có tham số doc_ids trong URL không
+    function getDocIdsFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const docIdsParam = urlParams.get('doc_ids');
+        if (docIdsParam) {
+            return docIdsParam.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+        }
+        return null;
+    }
+    
+    // Create a new chat session
+    function createNewChat() {
+        // Clear chat messages
+        clearChatMessages();
+        
+        // Reset current conversation ID
+        currentConversationId = null;
+        
+        // Remove active state from sidebar
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.remove('active');
         });
+            
+        // Focus on input
+        messageInput.focus();
+    }
+    
+    // Lưu doc_ids từ URL nếu có
+    docIdsFromUrl = getDocIdsFromUrl();
+    if (docIdsFromUrl && docIdsFromUrl.length > 0) {
+        console.log('Detected doc_ids in URL:', docIdsFromUrl);
+        // Hiển thị thông báo cho người dùng
+        const welcomeMessage = document.querySelector('.welcome-message');
+        if (welcomeMessage) {
+            const docIdsInfo = document.createElement('div');
+            docIdsInfo.className = 'alert alert-info mt-3';
+            docIdsInfo.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-info-circle me-2"></i> Bạn đang chat với tài liệu ID: ${docIdsFromUrl.join(', ')}</span>
+                </div>
+                <p class="mt-2 mb-0">Hãy đặt câu hỏi liên quan đến nội dung của tài liệu.</p>
+            `;
+            welcomeMessage.appendChild(docIdsInfo);
+        }
+    }
         
         // Auto-resize text area as user types
         messageInput.addEventListener('input', function() {
@@ -615,8 +764,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Shift+Enter will allow default behavior (new line)
         });
         
-        // Initialize existing chats from localStorage
-        initChats();
+    // Load conversations from server
+    loadConversations();
         
         // Handle form submission
         chatForm.addEventListener('submit', async function(e) {
@@ -632,9 +781,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Display user message
             appendMessage(message, 'user');
             
-            // Save message to current chat history
-            saveChatMessage(currentChatId, message, 'user');
-            
             // Clear input and reset height
             messageInput.value = '';
             messageInput.style.height = 'auto';
@@ -647,19 +793,19 @@ document.addEventListener('DOMContentLoaded', function() {
             appendTypingIndicator();
             
             try {
-                // Send message to server - use full URL
-                let chatEndpoint = '{{ route("chat.send") }}';
-                
-                // Thêm tham số doc_ids vào URL nếu có
-                if (docIdsFromUrl && docIdsFromUrl.length > 0) {
-                    // Kiểm tra xem URL đã có tham số chưa
-                    if (chatEndpoint.includes('?')) {
-                        chatEndpoint += '&doc_ids=' + docIdsFromUrl.join(',');
-                    } else {
-                        chatEndpoint += '?doc_ids=' + docIdsFromUrl.join(',');
-                    }
+            // Send message to server
+            let chatEndpoint = '{{ route("chat.send") }}';
+            
+            // Thêm tham số doc_ids vào URL nếu có
+            if (docIdsFromUrl && docIdsFromUrl.length > 0) {
+                // Kiểm tra xem URL đã có tham số chưa
+                if (chatEndpoint.includes('?')) {
+                    chatEndpoint += '&doc_ids=' + docIdsFromUrl.join(',');
+                } else {
+                    chatEndpoint += '?doc_ids=' + docIdsFromUrl.join(',');
                 }
-                
+            }
+            
                 console.log('Sending request to:', chatEndpoint);
                 
                 const response = await fetch(chatEndpoint, {
@@ -669,7 +815,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ message })
+                body: JSON.stringify({ 
+                    message,
+                    conversation_id: currentConversationId
+                })
                 });
                 
                 console.log('Response status:', response.status);
@@ -689,7 +838,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     const errorMessage = errorData.message || 'Có lỗi trong quá trình kết nối với máy chủ';
                     appendErrorMessage(errorMessage);
-                    saveChatMessage(currentChatId, errorMessage, 'error');
                     return;
                 }
                 
@@ -707,15 +855,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Handle application errors
                     const errorMessage = data.message || 'Có lỗi xảy ra khi xử lý tin nhắn của bạn';
                     appendErrorMessage(errorMessage);
-                    saveChatMessage(currentChatId, errorMessage, 'error');
                 } else {
                     // Display bot response
                     const botMessage = data.message;
                     appendMessage(botMessage, 'bot');
-                    saveChatMessage(currentChatId, botMessage, 'bot');
+                
+                // Update conversation ID if this was a new conversation
+                if (!currentConversationId && data.conversation_id) {
+                    currentConversationId = data.conversation_id;
                     
-                    // If this is the first message, update chat title in sidebar
-                    updateChatTitleIfNeeded(currentChatId, message);
+                    // Load conversations to update sidebar
+                    loadConversations();
+                }
                 }
                 
             } catch (error) {
@@ -723,7 +874,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 removeTypingIndicator();
                 const errorMessage = 'Không thể kết nối với máy chủ. Vui lòng kiểm tra kết nối internet của bạn.';
                 appendErrorMessage(errorMessage);
-                saveChatMessage(currentChatId, errorMessage, 'error');
             } finally {
                 // Reset state
                 isWaitingForResponse = false;
@@ -736,243 +886,210 @@ document.addEventListener('DOMContentLoaded', function() {
         newChatBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Save current chat if it has messages
-            if (chatMessages.children.length > 1) {
-                // The chat already has a valid ID and is saved
-                saveChatTitleIfNeeded(currentChatId);
-            }
-            
-            // Create new chat
+        // If current chat is empty/new (has only welcome message), just refresh
+        if (chatMessages.querySelectorAll('.chat-message').length === 0) {
+            // Just refresh the page
+            window.location.reload();
+            return;
+        }
+        
+        // Reset current state
+        currentConversationId = null;
+        clearChatMessages();
+        
+        // Create new chat interface (clear messages)
             createNewChat();
         });
         
-        // Create a new chat session
-        function createNewChat() {
-            // Generate new chat ID
-            currentChatId = Date.now();
-            
-            // Clear chat messages except welcome message
-            while (chatMessages.children.length > 1) {
-                chatMessages.removeChild(chatMessages.lastChild);
-            }
-            
-            // Add new chat to history
-            chatHistory[currentChatId] = {
-                id: currentChatId,
-                title: 'Cuộc trò chuyện mới',
-                timestamp: new Date().toISOString(),
-                messages: []
-            };
-            
-            // Save updated history
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-            
-            // Update sidebar
-            addChatToSidebar(chatHistory[currentChatId]);
-            
-            // Focus on input
-            messageInput.focus();
-        }
-        
-        // Initialize chats from localStorage
-        function initChats() {
-            // Clear existing chats in sidebar
-            conversationsContainer.innerHTML = '';
-            
-            // Add all chats to sidebar
-            const sortedChats = Object.values(chatHistory).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            sortedChats.forEach(chat => {
-                addChatToSidebar(chat);
+    // Load conversations from server
+    async function loadConversations() {
+        try {
+            const response = await fetch('{{ route("chat.conversations") }}', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
             });
             
-            // If no chats exist, create a new one
-            if (sortedChats.length === 0) {
-                createNewChat();
-            } else {
-                // Load the most recent chat
-                loadChat(sortedChats[0].id);
-            }
-        }
-        
-        // Add a chat to the sidebar
-        function addChatToSidebar(chat) {
-            const chatEl = document.createElement('div');
-            chatEl.className = 'conversation-item';
-            chatEl.dataset.chatId = chat.id;
-            chatEl.innerHTML = `
-                <div class="conversation-title">${chat.title}</div>
-                <div class="conversation-date">${formatDate(new Date(chat.timestamp))}</div>
-                <button class="delete-chat-btn" title="Xóa cuộc trò chuyện"><i class="fas fa-trash"></i></button>
-            `;
-            
-            // Add click handler to load the chat
-            chatEl.addEventListener('click', function(e) {
-                // Don't trigger if clicked on delete button
-                if (e.target.closest('.delete-chat-btn')) return;
-                
-                // Save current chat before switching
-                saveChatTitleIfNeeded(currentChatId);
-                
-                // Load selected chat
-                loadChat(chat.id);
-            });
-            
-            // Add delete handler
-            const deleteBtn = chatEl.querySelector('.delete-chat-btn');
-            deleteBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                deleteChat(chat.id);
-            });
-            
-            // Add to DOM - at the beginning
-            if (conversationsContainer.firstChild) {
-                conversationsContainer.insertBefore(chatEl, conversationsContainer.firstChild);
-            } else {
-                conversationsContainer.appendChild(chatEl);
-            }
-            
-            // Mark as active if this is the current chat
-            if (chat.id === currentChatId) {
-                chatEl.classList.add('active');
-            }
-        }
-        
-        // Load a chat from history
-        function loadChat(chatId) {
-            // Check if chat exists
-            if (!chatHistory[chatId]) {
-                console.error('Chat not found:', chatId);
+            if (!response.ok) {
+                console.error('Failed to load conversations:', response.status);
                 return;
             }
             
-            // Update current chat ID
-            currentChatId = chatId;
+            const data = await response.json();
             
-            // Clear chat messages
-            chatMessages.innerHTML = `
-                <div class="welcome-message">
-                    <h1>Tôi có thể giúp gì cho bạn?</h1>
-                </div>
-            `;
-            
-            // Add all messages
-            const chat = chatHistory[chatId];
-            chat.messages.forEach(msg => {
-                if (msg.type === 'error') {
-                    appendErrorMessage(msg.content);
-                } else {
-                    appendMessage(msg.content, msg.type);
+            if (data.success && data.conversations) {
+                // Clear existing conversations
+                conversationsContainer.innerHTML = '';
+                
+                // Add each conversation to sidebar
+                data.conversations.forEach(conversation => {
+                    addConversationToSidebar(conversation);
+                });
+                
+                // Mark as loaded
+                conversationsLoaded = true;
+                
+                // If no conversation is selected and we have conversations, select the first one
+                if (!currentConversationId && data.conversations.length > 0) {
+                    loadConversation(data.conversations[0].id);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading conversations:', error);
+        }
+    }
+    
+    // Load a specific conversation
+    async function loadConversation(conversationId) {
+        try {
+            const response = await fetch(`{{ url('chat/conversations') }}/${conversationId}/messages`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             });
+            
+            if (!response.ok) {
+                console.error('Failed to load conversation:', response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Set current conversation
+                currentConversationId = conversationId;
+            
+            // Clear chat messages
+                clearChatMessages();
+                
+                // Add messages to chat
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(message => {
+                        appendMessage(message.content, message.sender);
+                    });
+                }
             
             // Update active state in sidebar
             document.querySelectorAll('.conversation-item').forEach(item => {
                 item.classList.remove('active');
-                if (item.dataset.chatId == chatId) {
+                    if (item.dataset.conversationId == conversationId) {
                     item.classList.add('active');
                 }
             });
             
-            // Update timestamp
-            chat.timestamp = new Date().toISOString();
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+                // Close mobile sidebar after selecting a conversation
+                closeMobileSidebar();
+                
+                // Scroll to bottom
+                scrollToBottom();
+            }
+        } catch (error) {
+            console.error('Error loading conversation:', error);
+        }
+    }
+    
+    // Add a conversation to the sidebar
+    function addConversationToSidebar(conversation) {
+        const conversationElement = document.createElement('div');
+        conversationElement.className = 'conversation-item';
+        conversationElement.dataset.conversationId = conversation.id;
+        
+        if (currentConversationId && currentConversationId == conversation.id) {
+            conversationElement.classList.add('active');
         }
         
-        // Delete a chat
-        function deleteChat(chatId) {
-            // Confirm deletion
-            if (!confirm('Bạn có chắc chắn muốn xóa cuộc trò chuyện này?')) {
+        // Format date
+        const createdDate = new Date(conversation.created_at);
+        const formattedDate = formatDate(createdDate);
+        
+        conversationElement.innerHTML = `
+            <div class="conversation-title">${conversation.title}</div>
+            <div class="conversation-date">${formattedDate}</div>
+            <button class="delete-chat-btn" data-conversation-id="${conversation.id}">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        // Add click event for loading conversation
+        conversationElement.addEventListener('click', function(e) {
+            // Ignore clicks on delete button
+            if (e.target.closest('.delete-chat-btn')) {
                 return;
             }
             
-            // Delete from history
-            delete chatHistory[chatId];
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-            
-            // Remove from sidebar
-            const chatEl = document.querySelector(`.conversation-item[data-chat-id="${chatId}"]`);
-            if (chatEl) {
-                chatEl.remove();
-            }
-            
-            // If deleted the current chat, create a new one
-            if (chatId == currentChatId) {
-                createNewChat();
-            }
-            
-            // If no chats left, create a new one
-            if (Object.keys(chatHistory).length === 0) {
-                createNewChat();
-            }
+            loadConversation(conversation.id);
+        });
+        
+        // Add event for delete button
+        const deleteBtn = conversationElement.querySelector('.delete-chat-btn');
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deleteConversation(conversation.id);
+        });
+        
+        // Add to sidebar
+        conversationsContainer.appendChild(conversationElement);
+    }
+    
+    // Delete a conversation
+    async function deleteConversation(conversationId) {
+        // Confirm deletion
+        if (!confirm('Bạn có chắc chắn muốn xóa cuộc trò chuyện này?')) {
+            return;
         }
         
-        // Save a message to chat history
-        function saveChatMessage(chatId, content, type) {
-            if (!chatHistory[chatId]) {
-                chatHistory[chatId] = {
-                    id: chatId,
-                    title: 'Cuộc trò chuyện mới',
-                    timestamp: new Date().toISOString(),
-                    messages: []
-                };
-            }
-            
-            // Add message
-            chatHistory[chatId].messages.push({
-                id: Date.now(),
-                content: content,
-                type: type,
-                timestamp: new Date().toISOString()
+        try {
+            const response = await fetch(`{{ url('chat/conversations') }}/${conversationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
             });
             
-            // Update timestamp
-            chatHistory[chatId].timestamp = new Date().toISOString();
+            if (!response.ok) {
+                console.error('Failed to delete conversation:', response.status);
+                return;
+            }
             
-            // Save to localStorage
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-        }
-        
-        // Update chat title based on first user message
-        function updateChatTitleIfNeeded(chatId, message) {
-            const chat = chatHistory[chatId];
+            const data = await response.json();
             
-            // If this is the first message or title is default
-            if (chat && (chat.messages.length <= 2 || chat.title === 'Cuộc trò chuyện mới')) {
-                // Generate title from first message (max 30 chars)
-                const title = message.length > 30 ? message.substring(0, 27) + '...' : message;
-                chat.title = title;
+            if (data.success) {
+                // Remove from sidebar
+                const conversationEl = document.querySelector(`.conversation-item[data-conversation-id="${conversationId}"]`);
+                if (conversationEl) {
+                    conversationEl.remove();
+                }
                 
-                // Update in localStorage
-                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-                
-                // Update in sidebar
-                const chatEl = document.querySelector(`.conversation-item[data-chat-id="${chatId}"]`);
-                if (chatEl) {
-                    chatEl.querySelector('.conversation-title').textContent = title;
+                // If we deleted the current conversation, create a new one
+                if (conversationId == currentConversationId) {
+                    createNewChat();
                 }
             }
+        } catch (error) {
+            console.error('Error deleting conversation:', error);
         }
-        
-        // Make sure chat title is saved
-        function saveChatTitleIfNeeded(chatId) {
-            const chat = chatHistory[chatId];
-            if (!chat) return;
-            
-            // If chat has messages but no title
-            if (chat.messages.length > 0 && chat.title === 'Cuộc trò chuyện mới') {
-                // Find first user message
-                const firstUserMsg = chat.messages.find(msg => msg.type === 'user');
-                if (firstUserMsg) {
-                    updateChatTitleIfNeeded(chatId, firstUserMsg.content);
-                }
-            }
-        }
-        
-        // Load chat history from localStorage
-        function loadChatHistory() {
-            const saved = localStorage.getItem('chatHistory');
-            return saved ? JSON.parse(saved) : {};
+    }
+    
+    // Clear chat messages
+    function clearChatMessages() {
+        chatMessages.innerHTML = `
+            <div class="welcome-message">
+                <h1>Tôi có thể giúp gì cho bạn?</h1>
+                ${docIdsFromUrl && docIdsFromUrl.length > 0 ? `
+                <div class="alert alert-info mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-info-circle me-2"></i> Bạn đang chat với tài liệu ID: ${docIdsFromUrl.join(', ')}</span>
+                    </div>
+                    <p class="mt-2 mb-0">Hãy đặt câu hỏi liên quan đến nội dung của tài liệu.</p>
+                </div>
+                ` : ''}
+            </div>
+        `;
         }
         
         // Format date for display
@@ -994,10 +1111,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const contentElement = document.createElement('div');
             contentElement.className = 'message-content';
             
-        if (sender === 'bot') {
+            if (sender === 'bot') {
+                // Debug: Log raw message before parsing
+                console.log('Original bot message before parsing:', message);
+                
+                // Debug: Look for citation pattern
+                const hasCitations = message.includes('**Nguồn trích dẫn:**');
+                console.log('Message contains citation section:', hasCitations);
+                
                 // Process markdown for bot responses
                 contentElement.innerHTML = marked.parse(message);
-        } else {
+                
+                // Log để debug link trích dẫn
+                console.log('Bot message parsed as HTML:', contentElement.innerHTML);
+                
+                // Xử lý các liên kết trích dẫn để mở trong side panel
+                const citationLinks = contentElement.querySelectorAll('a');
+                console.log(`Found ${citationLinks.length} links in the message`);
+                
+                citationLinks.forEach(link => {
+                    console.log('Link found:', link.href, link.textContent);
+                    
+                    // Kiểm tra xem có phải là liên kết đến tài liệu không
+                    if (link.href.includes('/documents/')) {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            
+                            // Mở liên kết trong side panel thay vì chuyển hướng
+                            const documentUrl = this.getAttribute('href');
+                            console.log('Opening document citation:', documentUrl);
+                            
+                            // Tạo iframe để hiển thị tài liệu
+                            openDocumentInSidePanel(documentUrl);
+                        });
+                        
+                        // Thêm lớp CSS cho liên kết trích dẫn
+                        link.classList.add('citation-link');
+                        console.log('Citation link styled:', link.href);
+                    }
+                });
+            } else {
                 contentElement.textContent = message;
             }
             
@@ -1006,6 +1159,139 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Scroll to bottom
             scrollToBottom();
+        }
+        
+        // Mở tài liệu trong side panel
+        function openDocumentInSidePanel(url) {
+            console.log('Opening document in side panel with URL:', url);
+            
+            // Kiểm tra xem side panel đã tồn tại chưa
+            let sidePanel = document.getElementById('document-side-panel');
+            
+            if (!sidePanel) {
+                // Tạo side panel mới
+                sidePanel = document.createElement('div');
+                sidePanel.id = 'document-side-panel';
+                sidePanel.className = 'document-side-panel';
+                
+                // Thanh tiêu đề cho side panel
+                const panelHeader = document.createElement('div');
+                panelHeader.className = 'panel-header';
+                
+                const panelTitle = document.createElement('div');
+                panelTitle.className = 'panel-title';
+                panelTitle.textContent = 'Tài liệu trích dẫn';
+                
+                const closeButton = document.createElement('button');
+                closeButton.className = 'panel-close-btn';
+                closeButton.innerHTML = '<i class="fas fa-times"></i>';
+                closeButton.addEventListener('click', function() {
+                    sidePanel.classList.remove('open');
+                });
+                
+                panelHeader.appendChild(panelTitle);
+                panelHeader.appendChild(closeButton);
+                
+                // Khung nội dung
+                const panelContent = document.createElement('div');
+                panelContent.className = 'panel-content';
+                
+                const iframe = document.createElement('iframe');
+                iframe.id = 'document-iframe';
+                iframe.src = url;
+                iframe.frameBorder = '0';
+                
+                panelContent.appendChild(iframe);
+                
+                sidePanel.appendChild(panelHeader);
+                sidePanel.appendChild(panelContent);
+                
+                document.body.appendChild(sidePanel);
+                
+                // Thêm style cho side panel
+                const style = document.createElement('style');
+                style.textContent = `
+                    .document-side-panel {
+                        position: fixed;
+                        top: 64px;
+                        right: -50%;
+                        width: 50%;
+                        height: calc(100vh - 64px);
+                        background-color: white;
+                        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+                        z-index: 1050;
+                        transition: right 0.3s ease;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    .document-side-panel.open {
+                        right: 0;
+                    }
+                    
+                    .panel-header {
+                        height: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 0 16px;
+                        border-bottom: 1px solid #eee;
+                    }
+                    
+                    .panel-title {
+                        font-weight: 600;
+                    }
+                    
+                    .panel-close-btn {
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 16px;
+                        color: #666;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 4px;
+                    }
+                    
+                    .panel-close-btn:hover {
+                        background-color: #f5f5f5;
+                        color: #333;
+                    }
+                    
+                    .panel-content {
+                        flex: 1;
+                        overflow: hidden;
+                    }
+                    
+                    .panel-content iframe {
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .document-side-panel {
+                            width: 100%;
+                            right: -100%;
+                        }
+                    }
+                `;
+                
+                document.head.appendChild(style);
+            } else {
+                // Cập nhật URL của iframe
+                const iframe = document.getElementById('document-iframe');
+                iframe.src = url;
+            }
+            
+            // Mở side panel
+            setTimeout(() => {
+                sidePanel.classList.add('open');
+                console.log('Side panel opened with URL:', url);
+            }, 100);
         }
         
         // Add error message

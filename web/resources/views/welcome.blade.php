@@ -4,7 +4,12 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ \App\Models\Setting::getValue('site_name', 'Laravel') }}</title>
+
+        <!-- Favicon -->
+        @if(\App\Models\Setting::getValue('site_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . \App\Models\Setting::getValue('site_favicon')) }}">
+        @endif
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -188,7 +193,11 @@
 
             <div class="max-w-7xl mx-auto p-6 lg:p-8">
                 <div class="flex justify-center">
-                    <h1 class="text-4xl font-bold text-gray-900 dark:text-white">ChatBot Kinh Tế</h1>
+                    @if(\App\Models\Setting::getValue('site_logo'))
+                        <img src="{{ asset('storage/' . \App\Models\Setting::getValue('site_logo')) }}" alt="{{ \App\Models\Setting::getValue('site_name', 'ChatBot Kinh Tế') }}" class="h-16 mb-3">
+                    @else
+                        <h1 class="text-4xl font-bold text-gray-900 dark:text-white">{{ \App\Models\Setting::getValue('site_name', 'ChatBot Kinh Tế') }}</h1>
+                    @endif
                 </div>
                 
                 <!-- Thanh menu ngang -->
@@ -215,9 +224,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-6 lg:gap-8">
                         <div class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
                             <div>
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Chào mừng đến với ChatBot Kinh Tế</h2>
+                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Chào mừng đến với {{ \App\Models\Setting::getValue('site_name', 'ChatBot Kinh Tế') }}</h2>
                                 <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Hệ thống chatbot thông minh cung cấp thông tin và tư vấn về kinh tế, tài chính và đầu tư.
+                                    {{ \App\Models\Setting::getValue('site_description', 'Hệ thống chatbot thông minh cung cấp thông tin và tư vấn về kinh tế, tài chính và đầu tư.') }}
                                 </p>
                                 
                                 <div class="mt-8">
@@ -288,5 +297,8 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Footer -->
+        @include('components.footer')
     </body>
 </html>

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Validation\ValidationException;
+use App\Models\Conversation;
+use App\Models\Message;
 
 class ChatController extends Controller
 {
@@ -62,6 +64,7 @@ class ChatController extends Controller
         try {
             $validated = $request->validate([
                 'message' => 'required|string|max:1000',
+                'conversation_id' => 'nullable|integer|exists:conversations,id',
             ]);
 
             // Use the full URL directly
@@ -97,6 +100,51 @@ class ChatController extends Controller
                 'query_doc_ids' => $queryDocIds ?? null
             ]);
             
+            // Get or create conversation
+            $conversationId = $request->conversation_id;
+            
+            if (!$conversationId) {
+                // Create a new conversation if not provided
+                $conversation = Conversation::create([
+                    'user_id' => Auth::id(),
+                    'title' => 'Cuộc trò chuyện mới',
+                ]);
+                $conversationId = $conversation->id;
+            } else {
+                // Verify the conversation belongs to the user
+                $conversation = Conversation::where('id', $conversationId)
+                    ->where('user_id', Auth::id())
+                    ->first();
+                
+                if (!$conversation) {
+                    // If conversation doesn't exist or doesn't belong to user, create a new one
+                    $conversation = Conversation::create([
+                        'user_id' => Auth::id(),
+                        'title' => 'Cuộc trò chuyện mới',
+                    ]);
+                    $conversationId = $conversation->id;
+                }
+            }
+            
+            // Create user message
+            $userMessage = Message::create([
+                'conversation_id' => $conversationId,
+                'sender' => 'user',
+                'content' => $request->message,
+            ]);
+            
+            // If this is the first message, update the conversation title
+            if ($conversation->title === 'Cuộc trò chuyện mới') {
+                $title = strlen($request->message) > 30 
+                    ? substr($request->message, 0, 27) . '...' 
+                    : $request->message;
+                
+                $conversation->update(['title' => $title]);
+            }
+            
+            // Update conversation timestamp
+            $conversation->touch();
+            
             // Test if API is accessible before sending actual request
             try {
                 // Extract base URL without the endpoint part
@@ -110,9 +158,18 @@ class ChatController extends Controller
                 Log::info('Health check response: ' . $healthResponse->getStatusCode());
             } catch (\Exception $e) {
                 Log::error('Health check failed: ' . $e->getMessage());
+                
+                // Create error message in database
+                Message::create([
+                    'conversation_id' => $conversationId,
+                    'sender' => 'bot',
+                    'content' => 'Không thể kết nối với chatbot. Vui lòng kiểm tra xem máy chủ chatbot đã khởi động chưa.'
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không thể kết nối với chatbot. Vui lòng kiểm tra xem máy chủ chatbot đã khởi động chưa.'
+                    'message' => 'Không thể kết nối với chatbot. Vui lòng kiểm tra xem máy chủ chatbot đã khởi động chưa.',
+                    'conversation_id' => $conversationId
                 ], 503);
             }
             
@@ -166,9 +223,19 @@ class ChatController extends Controller
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('JSON decode error: ' . json_last_error_msg() . ', Raw response: ' . substr($responseBody, 0, 500));
+                
+                // Create error message in database
+                $errorMessage = 'Có lỗi khi phân tích dữ liệu từ server. Vui lòng thử lại sau.';
+                Message::create([
+                    'conversation_id' => $conversationId,
+                    'sender' => 'bot',
+                    'content' => $errorMessage
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Có lỗi khi phân tích dữ liệu từ server. Vui lòng thử lại sau.'
+                    'message' => $errorMessage,
+                    'conversation_id' => $conversationId
                 ], 500);
             }
             
@@ -190,18 +257,91 @@ class ChatController extends Controller
                 $answer = 'API error: ' . $result['error'];
             }
             
-            if (!empty($answer)) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $answer
-                ]);
+            // Kiểm tra và trích xuất thông tin trích dẫn (citation) nếu có
+            $citations = [];
+            if (isset($result['citations'])) {
+                $citations = $result['citations'];
+                Log::info('Citations found in API response: ' . json_encode($citations));
+            } elseif (isset($result['detailed_citations'])) {
+                $citations = $result['detailed_citations'];
+                Log::info('Detailed citations found in API response: ' . json_encode($citations));
             }
             
-            // Default response if no valid content found
-            Log::warning('Empty or unexpected API response structure', ['response' => $result]);
+            // Kiểm tra xem có cần thêm phần trích dẫn vào kết quả không
+            if (!empty($citations) && $answer) {
+                Log::info('Processing and adding citations to the response.');
+                
+                // Format trích dẫn để hiển thị ở frontend
+                $citationText = "\n\n**Nguồn trích dẫn:**\n";
+                
+                foreach ($citations as $index => $citation) {
+                    Log::info('Processing citation: ' . json_encode($citation));
+                    
+                    // Xử lý cho từng định dạng citation có thể có
+                    $title = isset($citation['title']) ? $citation['title'] : 
+                           (isset($citation['metadata']['title']) ? $citation['metadata']['title'] : 'Tài liệu');
+                    
+                    $page = isset($citation['page']) ? $citation['page'] : 
+                          (isset($citation['metadata']['page']) ? $citation['metadata']['page'] : '');
+                    
+                    $chunk = isset($citation['chunk_index']) ? $citation['chunk_index'] : 
+                           (isset($citation['metadata']['chunk_index']) ? $citation['metadata']['chunk_index'] : '');
+                    
+                    $url = isset($citation['url']) ? $citation['url'] : 
+                         (isset($citation['metadata']['url']) ? $citation['metadata']['url'] : '');
+                    
+                    // Đảm bảo URL có định dạng phù hợp
+                    if (!empty($url) && !preg_match('/^(http|https):\/\//', $url)) {
+                        // Nếu URL không bắt đầu bằng http:// hoặc https://, thêm domain của ứng dụng
+                        $url = url($url);
+                    }
+                    
+                    // Tạo link trích dẫn với Markdown
+                    $citationLink = "[${title} - Trang ${page}, đoạn ${chunk}](${url})";
+                    $citationText .= "- " . $citationLink . "\n";
+                    
+                    Log::info('Created citation link: ' . $citationLink);
+                }
+                
+                // Thêm thông tin trích dẫn vào cuối câu trả lời
+                $answer .= $citationText;
+                
+                Log::info('Answer with citations: ' . $answer);
+            } else {
+                if (empty($citations)) {
+                    Log::warning('No citations found in API response.');
+                }
+            }
+            
+            if (!$answer) {
+                Log::error('No answer found in API response');
+                
+                // Create error message in database
+                $errorMessage = 'Không thể nhận được câu trả lời từ chatbot. Vui lòng thử lại sau.';
+                Message::create([
+                    'conversation_id' => $conversationId,
+                    'sender' => 'bot',
+                    'content' => $errorMessage
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'conversation_id' => $conversationId
+                ], 500);
+            }
+            
+            // Create bot message in database
+            Message::create([
+                'conversation_id' => $conversationId,
+                'sender' => 'bot',
+                'content' => $answer
+            ]);
+            
             return response()->json([
-                'success' => false,
-                'message' => 'Tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại với câu hỏi khác.'
+                'success' => true,
+                'message' => $answer,
+                'conversation_id' => $conversationId
             ]);
         } catch (RequestException $e) {
             // Handle Guzzle request exceptions
@@ -227,16 +367,37 @@ class ChatController extends Controller
                 Log::error('Chatbot connection error: ' . $e->getMessage());
             }
             
+            // Create error message in database if conversation exists
+            if (isset($conversationId)) {
+                Message::create([
+                    'conversation_id' => $conversationId,
+                    'sender' => 'bot',
+                    'content' => $errorMessage
+                ]);
+            }
+            
             return response()->json([
                 'success' => false,
-                'message' => $errorMessage
+                'message' => $errorMessage,
+                'conversation_id' => $conversationId ?? null
             ], $statusCode);
         } catch (\Exception $e) {
             // Handle general exceptions
             Log::error('Chat Processing Error: ' . $e->getMessage());
+            
+            // Create error message in database if conversation exists
+            if (isset($conversationId)) {
+                Message::create([
+                    'conversation_id' => $conversationId,
+                    'sender' => 'bot',
+                    'content' => 'Xin lỗi, có lỗi xảy ra: ' . $e->getMessage()
+                ]);
+            }
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Xin lỗi, có lỗi xảy ra: ' . $e->getMessage()
+                'message' => 'Xin lỗi, có lỗi xảy ra: ' . $e->getMessage(),
+                'conversation_id' => $conversationId ?? null
             ], 500);
         }
     }
@@ -475,6 +636,201 @@ class ChatController extends Controller
         } catch (\Exception $e) {
             Log::error('Chat Processing Error: ' . $e->getMessage());
             return 'Xin lỗi, có lỗi xảy ra trong quá trình xử lý tin nhắn của bạn.';
+        }
+    }
+
+    /**
+     * Create a new conversation.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createConversation(Request $request)
+    {
+        try {
+            $conversation = Conversation::create([
+                'user_id' => Auth::id(),
+                'title' => 'Cuộc trò chuyện mới',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'conversation_id' => $conversation->id,
+                'title' => $conversation->title
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error creating conversation: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể tạo cuộc trò chuyện mới'
+            ], 500);
+        }
+    }
+
+    /**
+     * Save a chat message to the database.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function saveMessage(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'conversation_id' => 'required|exists:conversations,id',
+                'content' => 'required|string',
+                'sender' => 'required|in:user,bot',
+            ]);
+
+            // Verify the conversation belongs to the user
+            $conversation = Conversation::where('id', $request->conversation_id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if (!$conversation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cuộc trò chuyện không tồn tại'
+                ], 404);
+            }
+
+            // Save the message
+            $message = Message::create([
+                'conversation_id' => $request->conversation_id,
+                'content' => $request->content,
+                'sender' => $request->sender,
+            ]);
+
+            // If this is a user message, and conversation still has default title,
+            // update the title based on the message
+            if ($request->sender == 'user' && $conversation->title == 'Cuộc trò chuyện mới') {
+                $title = strlen($request->content) > 30 
+                    ? substr($request->content, 0, 27) . '...' 
+                    : $request->content;
+                
+                $conversation->update(['title' => $title]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message_id' => $message->id,
+                'conversation_title' => $conversation->title
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error saving message: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lưu tin nhắn'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all conversations for the current user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getConversations()
+    {
+        try {
+            $conversations = Conversation::where('user_id', Auth::id())
+                ->orderBy('updated_at', 'desc')
+                ->get(['id', 'title', 'created_at', 'updated_at']);
+
+            return response()->json([
+                'success' => true,
+                'conversations' => $conversations
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting conversations: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy danh sách cuộc trò chuyện'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get messages for a specific conversation.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMessages($id)
+    {
+        try {
+            // Verify the conversation belongs to the user
+            $conversation = Conversation::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if (!$conversation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cuộc trò chuyện không tồn tại'
+                ], 404);
+            }
+
+            $messages = $conversation->messages()
+                ->orderBy('created_at', 'asc')
+                ->get(['id', 'sender', 'content', 'created_at']);
+
+            return response()->json([
+                'success' => true,
+                'conversation' => [
+                    'id' => $conversation->id,
+                    'title' => $conversation->title,
+                    'created_at' => $conversation->created_at,
+                    'updated_at' => $conversation->updated_at
+                ],
+                'messages' => $messages
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting messages: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy tin nhắn'
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a conversation.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteConversation($id)
+    {
+        try {
+            // Verify the conversation belongs to the user
+            $conversation = Conversation::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if (!$conversation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cuộc trò chuyện không tồn tại'
+                ], 404);
+            }
+
+            // Delete all messages first
+            $conversation->messages()->delete();
+            
+            // Delete the conversation
+            $conversation->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã xóa cuộc trò chuyện'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting conversation: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa cuộc trò chuyện'
+            ], 500);
         }
     }
 }

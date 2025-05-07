@@ -21,14 +21,23 @@ COPY fix_openai_proxy.py .
 COPY app/ ./app/
 COPY routes/ ./routes/
 COPY resources/ ./resources/
-
 COPY .env ./.env
 
-# Tạo thư mục vector_db nếu chưa tồn tại
+# Tạo các thư mục cần thiết
 RUN mkdir -p vector_db
+RUN mkdir -p storage
+
+# Thiết lập biến môi trường
+ENV DB_FAISS_PATH=/app/vector_db \
+    EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2 \
+    ALLOW_PICKLE=true \
+    STORAGE_PATH=/app/storage
+
+# Tạo file app.log trống
+RUN touch app.log && chmod 666 app.log
 
 # Mở port 55050
 EXPOSE 55050
 
-# Lệnh để chạy ứng dụng
+# Lệnh để chạy ứng dụng và tạo file tar cho container
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "55050"]

@@ -10727,3 +10727,484 @@ U...
 TypeError: __init__() got an unexpected keyword argument 'proxies'
 
 2025-04-26 18:55:24,235 - main - WARNING - OpenAI model reinitialization returned None
+2025-05-06 20:33:37 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 20:33:37 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 20:33:38 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 20:33:38 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 20:33:38 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 20:33:38 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 20:34:00 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 20:34:03 [app.services.chatbot] INFO: Vector database loaded with 67524 vectors
+2025-05-06 20:34:03 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 20:34:03 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 20:34:04 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Xử lý tài liệu ID: 55, Đường dẫn: documents/3/1746563688_bai-giang-kinh-te-vi-mo-1.docx
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/55/1746563688_bai-giang-kinh-te-vi-mo-1.docx
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746563688_bai-giang-kinh-te-vi-mo-1.docx
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746563688_bai-giang-kinh-te-vi-mo-1.docx
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 55, người dùng: 0 với chunk_size=100, chunk_overlap=50
+2025-05-06 20:34:50 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746563688_bai-giang-kinh-te-vi-mo-1.docx, loại: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+2025-05-06 20:34:52 [app.services.chatbot] INFO: Đã trích xuất 134 trang từ tài liệu
+2025-05-06 20:35:12 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 55 với 4608 chunks
+2025-05-06 20:35:12 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 55
+2025-05-06 20:35:16 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-06 20:35:16 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-06 20:35:18 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 55
+2025-05-06 20:35:18 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 20:35:21 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 20:35:22 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 20:35:22 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 20:36:42 [app.services.api_service] INFO: Query gốc: 'kinh tế vĩ mô là gì'
+2025-05-06 20:36:45 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.017s
+2025-05-06 20:36:45 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.05940844118595123, 0.03986666351556778, 0.05720529705286026, 0.0012687597190961242, -0.07618250697851181]...
+2025-05-06 20:36:45 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 20:36:45 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 3, 'chunk_index': 11, 'content': 'Kinh tế học vi mô và kinh tế học vĩ mô', 'url': '/documents/55?page=3&highlight=11'}
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 1 - Preview: Kinh tế học vi mô và kinh tế học vĩ mô
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 61, 'chunk_index': 1, 'content': 'biên là gì? Mối quan hệ giữa tổng hữu dụng và hữu dụng biên?', 'url': '/documents/55?page=61&highlight=1'}
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 2 - Preview: biên là gì? Mối quan hệ giữa tổng hữu dụng và hữu dụng biên?
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 93, 'chunk_index': 4, 'content': 'Tính kinh tế và phi kinh tế theo quy mô là gì ? Tại sao nó lại xuất hiện ?', 'url': '/documents/55?page=93&highlight=4'}
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 3 - Preview: Tính kinh tế và phi kinh tế theo quy mô là gì ? Tại sao nó lại xuất hiện ?
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 4 - Preview: Trong lịch sử, sự tách biệt về mặt kinh tế giữa các chủ thể
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 20:36:45 [app.services.api_service] INFO: Tài liệu 5 - Preview: hệ kinh tế ở lĩnh vực nông nghiệp; kinh tế chính trị cổ
+2025-05-06 20:36:45 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 20:36:46 [app.services.api_service] INFO: Google API response received in 1.16 seconds
+2025-05-06 20:36:46 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 20:42:05 [app.services.api_service] INFO: Query gốc: 'kinh tế vi mô là gì'
+2025-05-06 20:42:08 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.010s
+2025-05-06 20:42:08 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.05940844118595123, 0.03986666351556778, 0.05720529705286026, 0.0012687597190961242, -0.07618250697851181]...
+2025-05-06 20:42:08 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 20:42:08 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 3, 'chunk_index': 11, 'content': 'Kinh tế học vi mô và kinh tế học vĩ mô', 'url': '/documents/55?page=3&highlight=11'}
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 1 - Preview: Kinh tế học vi mô và kinh tế học vĩ mô
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 61, 'chunk_index': 1, 'content': 'biên là gì? Mối quan hệ giữa tổng hữu dụng và hữu dụng biên?', 'url': '/documents/55?page=61&highlight=1'}
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 2 - Preview: biên là gì? Mối quan hệ giữa tổng hữu dụng và hữu dụng biên?
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 93, 'chunk_index': 4, 'content': 'Tính kinh tế và phi kinh tế theo quy mô là gì ? Tại sao nó lại xuất hiện ?', 'url': '/documents/55?page=93&highlight=4'}
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 3 - Preview: Tính kinh tế và phi kinh tế theo quy mô là gì ? Tại sao nó lại xuất hiện ?
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 4 - Preview: Trong lịch sử, sự tách biệt về mặt kinh tế giữa các chủ thể
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 20:42:08 [app.services.api_service] INFO: Tài liệu 5 - Preview: hệ kinh tế ở lĩnh vực nông nghiệp; kinh tế chính trị cổ
+2025-05-06 20:42:08 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 20:42:09 [app.services.api_service] INFO: Google API response received in 1.05 seconds
+2025-05-06 20:42:09 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 20:56:47 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 20:56:47 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 20:56:47 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 20:56:47 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 20:56:47 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 20:56:47 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 20:56:53 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 20:56:54 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 20:56:54 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 20:56:54 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 20:56:57 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 20:58:24 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 20:58:24 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 20:58:24 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 20:58:24 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 20:58:24 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 20:58:24 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 20:58:40 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 20:58:47 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 20:58:47 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 20:58:47 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 20:58:49 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 21:00:34 [app.services.api_service] INFO: Query gốc: 'kinh tế học là gì'
+2025-05-06 21:00:36 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.085s
+2025-05-06 21:00:36 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.044227056205272675, 0.05768842250108719, 0.0477779395878315, -0.016408640891313553, -0.03367413207888603]...
+2025-05-06 21:00:36 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 21:00:36 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 1 - Preview: Như vậy, có thề rút ra: Kinh tế chỉnh trị là môn khoa học
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 93, 'chunk_index': 4, 'content': 'Tính kinh tế và phi kinh tế theo quy mô là gì ? Tại sao nó lại xuất hiện ?', 'url': '/documents/55?page=93&highlight=4'}
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 2 - Preview: Tính kinh tế và phi kinh tế theo quy mô là gì ? Tại sao nó lại xuất hiện ?
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 11, 'chunk_index': 4, 'content': 'Chủ thể kinh tế của thị trường', 'url': '/documents/55?page=11&highlight=4'}
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 3 - Preview: Chủ thể kinh tế của thị trường
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 4 - Preview: Giữa quy luật kinh tế và chính sách kinh tế có sự phân
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 3, 'chunk_index': 12, 'content': 'Kinh tế học vi mô là một bộ phận của kinh tế học', 'url': '/documents/55?page=3&highlight=12'}
+2025-05-06 21:00:36 [app.services.api_service] INFO: Tài liệu 5 - Preview: Kinh tế học vi mô là một bộ phận của kinh tế học
+2025-05-06 21:00:36 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 21:00:38 [app.services.api_service] INFO: Google API response received in 1.58 seconds
+2025-05-06 21:00:38 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 21:47:45 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 21:47:45 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 21:47:45 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 21:47:45 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 21:47:45 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 21:47:45 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 21:48:03 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 21:48:06 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 21:48:06 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 21:48:06 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 21:48:08 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 21:49:40 [app.services.api_service] INFO: Query gốc: 'Thị trường cạnh tranh hoàn toàn'
+2025-05-06 21:49:43 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.164s
+2025-05-06 21:49:43 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.06926178932189941, 0.08047371357679367, -0.044885165989398956, -0.06434948742389679, -0.007962273433804512]...
+2025-05-06 21:49:43 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 21:49:43 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 133, 'chunk_index': 17, 'content': 'Thị trường cạnh tranh độc quyền\tC. Thị trường cạnh tranh hoàn toàn', 'url': '/documents/55?page=133&highlight=17'}
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 1 - Preview: Thị trường cạnh tranh độc quyền	C. Thị trường cạnh tranh hoàn toàn
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 1, 'chunk_index': 25, 'content': 'của doanh nghiệp Chương 6: Thị trường cạnh tranh hoàn hảo', 'url': '/documents/55?page=1&highlight=25'}
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 2 - Preview: của doanh nghiệp Chương 6: Thị trường cạnh tranh hoàn hảo
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 95, 'chunk_index': 26, 'content': 'PHÂN TÍCH TRONG NGẮN HẠN\n\nCân bằng thị trường cạnh tranh hoàn hảo', 'url': '/documents/55?page=95&highlight=26'}
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 3 - Preview: PHÂN TÍCH TRONG NGẮN HẠN
+
+Cân bằng thị trường cạnh tranh hoàn hảo
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 11, 'chunk_index': 0, 'content': 'Thị trường cạnh tranh hoàn toàn.\n\nThị trường cạnh tranh độc quyền.\n\nThị trường độc quyền hoàn toàn,…', 'url': '/documents/55?page=11&highlight=0'}
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 4 - Preview: Thị trường cạnh tranh hoàn toàn.
+
+Thị trường cạnh tranh độc quyền.
+
+Thị trường độc quyền hoàn toàn,…
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 132, 'chunk_index': 13, 'content': 'Thị trường độc quyền\tC. Thị trường cạnh tranh hoàn toàn', 'url': '/documents/55?page=132&highlight=13'}
+2025-05-06 21:49:43 [app.services.api_service] INFO: Tài liệu 5 - Preview: Thị trường độc quyền	C. Thị trường cạnh tranh hoàn toàn
+2025-05-06 21:49:43 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 21:49:45 [app.services.api_service] INFO: Google API response received in 2.56 seconds
+2025-05-06 21:49:45 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 22:01:57 [app.services.api_service] INFO: Query gốc: 'Thị trường cạnh tranh độc quyền'
+2025-05-06 22:02:00 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.016s
+2025-05-06 22:02:00 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.09841758012771606, 0.04744909703731537, -0.05743949115276337, -0.037550050765275955, -0.07931232452392578]...
+2025-05-06 22:02:00 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 22:02:00 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 113, 'chunk_index': 16, 'content': 'Đặc điểm thị trường cạnh tranh độc quyền', 'url': '/documents/55?page=113&highlight=16'}
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 1 - Preview: Đặc điểm thị trường cạnh tranh độc quyền
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 132, 'chunk_index': 16, 'content': 'Thị trường độc quyền .\tC. Thị trường cạnh tranh hoàn toàn', 'url': '/documents/55?page=132&highlight=16'}
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 2 - Preview: Thị trường độc quyền .	C. Thị trường cạnh tranh hoàn toàn
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 132, 'chunk_index': 24, 'content': 'Thị trường độc quyền nhóm\tD. Thị trường canh tranh độc quyền', 'url': '/documents/55?page=132&highlight=24'}
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 3 - Preview: Thị trường độc quyền nhóm	D. Thị trường canh tranh độc quyền
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 114, 'chunk_index': 7, 'content': 'Cân bằng thị trường cạnh tranh độc quyền', 'url': '/documents/55?page=114&highlight=7'}
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 4 - Preview: Cân bằng thị trường cạnh tranh độc quyền
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 133, 'chunk_index': 1, 'content': 'Thị trường độc quyền nhóm\tD. Thị trường canh tranh độc quyền', 'url': '/documents/55?page=133&highlight=1'}
+2025-05-06 22:02:00 [app.services.api_service] INFO: Tài liệu 5 - Preview: Thị trường độc quyền nhóm	D. Thị trường canh tranh độc quyền
+2025-05-06 22:02:00 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 22:02:01 [app.services.api_service] INFO: Google API response received in 1.32 seconds
+2025-05-06 22:02:01 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 22:18:49 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 22:18:49 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 22:18:50 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 22:18:50 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 22:18:50 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 22:18:50 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 22:19:04 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 22:19:07 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 22:19:07 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 22:19:07 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 22:19:09 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 22:20:11 [app.services.api_service] INFO: Query gốc: 'nghiên cứu nền kinh tế'
+2025-05-06 22:20:14 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.121s
+2025-05-06 22:20:14 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.11894774436950684, 0.10237880796194077, 0.033012550324201584, -0.0038833962753415108, -0.07869989424943924]...
+2025-05-06 22:20:14 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 22:20:14 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 1 - Preview: nghiên cứu của kinh tế chính trị.
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 6, 'chunk_index': 26, 'content': 'nghiệp (hay nền kinh tế) đã lựa chọn thực hiện khi doanh nghiệp (hay nền kinh tế) sử dụng hết một', 'url': '/documents/55?page=6&highlight=26'}
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 2 - Preview: nghiệp (hay nền kinh tế) đã lựa chọn thực hiện khi doanh nghiệp (hay nền kinh tế) sử dụng hết một
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 3, 'chunk_index': 26, 'content': 'nghiên cứu nền kinh tế như là một tổng thể thống nhất', 'url': '/documents/55?page=3&highlight=26'}
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 3 - Preview: nghiên cứu nền kinh tế như là một tổng thể thống nhất
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 4 - Preview: nghiên cứu trong các quan hệ kinh tế ở lĩnh vực nông
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': '/app/storage/documents/3/1746404879_giao-trinh.txt', 'document_id': 47, 'title': 'GIÁO TRÌNH'}
+2025-05-06 22:20:14 [app.services.api_service] INFO: Tài liệu 5 - Preview: họp khi nghiên cứu các khoa học kinh tế chuyên ngành
+2025-05-06 22:20:14 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 22:20:16 [app.services.api_service] INFO: Google API response received in 2.41 seconds
+2025-05-06 22:20:16 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 22:28:18 [app.services.api_service] INFO: Query gốc: 'Các yếu tố sản xuất là gì'
+2025-05-06 22:28:22 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.019s
+2025-05-06 22:28:22 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.029099108651280403, -0.03594297170639038, -0.019237011671066284, 0.008573701605200768, -0.0547434538602829]...
+2025-05-06 22:28:22 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 22:28:22 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 12, 'chunk_index': 16, 'content': 'họ sẽ cung ứng các yếu tố này cho thị trường yếu tố sản xuất', 'url': '/documents/55?page=12&highlight=16'}
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 1 - Preview: họ sẽ cung ứng các yếu tố này cho thị trường yếu tố sản xuất
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 2 - Preview: mặt kinh tế giữa các chủ thể sản xuất hiện khách quan dựa
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 99, 'chunk_index': 2, 'content': 'tăng cầu các yếu tố sản xuất và không làm tăng giá các yếu tố đầu vào sản xuất', 'url': '/documents/55?page=99&highlight=2'}
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 3 - Preview: tăng cầu các yếu tố sản xuất và không làm tăng giá các yếu tố đầu vào sản xuất
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 15, 'content': 'Các yếu tố sản xuất khan hiếm tuyệt đối vì số lượng của các yếu tố là có giới hạn', 'url': '/documents/55?page=5&highlight=15'}
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 4 - Preview: Các yếu tố sản xuất khan hiếm tuyệt đối vì số lượng của các yếu tố là có giới hạn
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 10, 'content': '. Nên các yếu tố sản xuất luôn luôn khan hiếm.', 'url': '/documents/55?page=5&highlight=10'}
+2025-05-06 22:28:22 [app.services.api_service] INFO: Tài liệu 5 - Preview: . Nên các yếu tố sản xuất luôn luôn khan hiếm.
+2025-05-06 22:28:22 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 22:28:24 [app.services.api_service] INFO: Google API response received in 1.27 seconds
+2025-05-06 22:28:24 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-07 05:36:08 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-07 05:36:08 [app.services.chatbot] INFO: System info: {'platform': 'Windows-10-10.0.26100-SP0', 'python_version': '3.10.6', 'cwd': 'D:\\ThucTap\\ChatBotKinhTe', 'log_file': 'D:\\ThucTap\\ChatBotKinhTe\\app.log', 'environment': 'Local', 'storage_dirs': ['D:\\ThucTap\\ChatBotKinhTe\\storage (exists, files: 1)', 'D:\\ThucTap\\ChatBotKinhTe\\web\\public\\storage (exists, files: 5)']}
+2025-05-07 05:36:08 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-07 05:36:08 [app.services.api_service] INFO: System info: {'platform': 'Windows-10-10.0.26100-SP0', 'python_version': '3.10.6', 'cwd': 'D:\\ThucTap\\ChatBotKinhTe', 'log_file': 'D:\\ThucTap\\ChatBotKinhTe\\app.log', 'environment': 'Local', 'storage_dirs': ['D:\\ThucTap\\ChatBotKinhTe\\storage (exists, files: 1)', 'D:\\ThucTap\\ChatBotKinhTe\\web\\public\\storage (exists, files: 5)']}
+2025-05-07 05:36:08 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-07 05:36:08 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-07 05:36:17 [app.services.chatbot] INFO: Loading vector database from ./vector_db
+2025-05-07 05:36:18 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-07 05:36:18 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-07 05:36:18 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-07 05:36:20 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 22:38:48 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 22:38:48 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 22:38:48 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 22:38:48 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 22:38:48 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 22:38:48 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 22:39:06 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 22:39:08 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 22:39:08 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 22:39:08 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 22:39:09 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 22:40:16 [app.services.chatbot] ERROR: Lỗi khi truy vấn tài liệu 55: The de-serialization relies loading a pickle file. Pickle files can be modified to deliver a malicious payload that results in execution of arbitrary code on your machine.You will need to set `allow_dangerous_deserialization` to `True` to enable deserialization. If you do this, make sure that you trust the source of the data. For example, if you are loading a file that you created, and no that no one else has modified the file, then this is safe to do. Do not set this to `True` if you are loading a file from an untrusted source (e.g., some random site on the internet.).
+2025-05-06 22:40:16 [app.services.chatbot] ERROR: Traceback (most recent call last):
+  File "/app/app/services/chatbot.py", line 1210, in query_document_with_citation
+    vector_store = FAISS.load_local(vector_dir, embeddings)
+  File "/usr/local/lib/python3.10/site-packages/langchain_community/vectorstores/faiss.py", line 1078, in load_local
+    raise ValueError(
+ValueError: The de-serialization relies loading a pickle file. Pickle files can be modified to deliver a malicious payload that results in execution of arbitrary code on your machine.You will need to set `allow_dangerous_deserialization` to `True` to enable deserialization. If you do this, make sure that you trust the source of the data. For example, if you are loading a file that you created, and no that no one else has modified the file, then this is safe to do. Do not set this to `True` if you are loading a file from an untrusted source (e.g., some random site on the internet.).
+
+2025-05-06 22:40:16 [app.services.api_service] INFO: Query gốc: 'Quy luật khan hiếm'
+2025-05-06 22:40:19 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.121s
+2025-05-06 22:40:19 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.0859825611114502, 0.10135676711797714, 0.004191407468169928, 0.053022805601358414, -0.10554362088441849]...
+2025-05-06 22:40:19 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 22:40:19 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 24, 'content': 'Quy luật khan hiếm và chi phí cơ hội', 'url': '/documents/55?page=5&highlight=24'}
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 1 - Preview: Quy luật khan hiếm và chi phí cơ hội
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 25, 'content': 'Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do đó nó khan hiếm', 'url': '/documents/55?page=5&highlight=25'}
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 2 - Preview: Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do đó nó khan hiếm
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 10, 'content': '. Nên các yếu tố sản xuất luôn luôn khan hiếm.', 'url': '/documents/55?page=5&highlight=10'}
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 3 - Preview: . Nên các yếu tố sản xuất luôn luôn khan hiếm.
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 67, 'chunk_index': 36, 'content': 'tế khái quát thành quy luật và được gọi là quy luật năng suất biên giảm dần', 'url': '/documents/55?page=67&highlight=36'}
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 4 - Preview: tế khái quát thành quy luật và được gọi là quy luật năng suất biên giảm dần
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': 'data\\Bao_moi\\1879_Phát triển khai thác thủy sản hiệu quả bền vững và.txt'}
+2025-05-06 22:40:19 [app.services.api_service] INFO: Tài liệu 5 - Preview: Khánh Phương
+2025-05-06 22:40:19 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 22:40:21 [app.services.api_service] INFO: Google API response received in 2.07 seconds
+2025-05-06 22:40:21 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 22:40:21 [app.services.api_service] INFO: Added 8 citations to the response
+2025-05-07 05:52:10 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-07 05:52:10 [app.services.chatbot] INFO: System info: {'platform': 'Windows-10-10.0.26100-SP0', 'python_version': '3.10.6', 'cwd': 'D:\\ThucTap\\ChatBotKinhTe', 'log_file': 'D:\\ThucTap\\ChatBotKinhTe\\app.log', 'environment': 'Local', 'storage_dirs': ['D:\\ThucTap\\ChatBotKinhTe\\storage (exists, files: 1)', 'D:\\ThucTap\\ChatBotKinhTe\\web\\public\\storage (exists, files: 5)']}
+2025-05-07 05:52:10 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-07 05:52:10 [app.services.api_service] INFO: System info: {'platform': 'Windows-10-10.0.26100-SP0', 'python_version': '3.10.6', 'cwd': 'D:\\ThucTap\\ChatBotKinhTe', 'log_file': 'D:\\ThucTap\\ChatBotKinhTe\\app.log', 'environment': 'Local', 'storage_dirs': ['D:\\ThucTap\\ChatBotKinhTe\\storage (exists, files: 1)', 'D:\\ThucTap\\ChatBotKinhTe\\web\\public\\storage (exists, files: 5)']}
+2025-05-07 05:52:10 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-07 05:52:10 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-07 05:52:19 [app.services.chatbot] INFO: Loading vector database from ./vector_db
+2025-05-07 05:52:20 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-07 05:52:20 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-07 05:52:20 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-07 05:52:22 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 22:54:44 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 22:54:44 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 22:54:44 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 22:54:44 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 22:54:44 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 22:54:44 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 22:55:00 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 22:55:03 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 22:55:03 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 22:55:03 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 22:55:04 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 23:28:51 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 23:28:51 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 23:28:51 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 23:28:51 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 23:28:51 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 23:28:51 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 23:29:09 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 23:29:16 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 23:29:16 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 23:29:16 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 23:29:17 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 23:34:34 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-06 23:34:34 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 23:34:34 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-06 23:34:34 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-06 23:34:34 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-06 23:34:34 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-06 23:34:49 [app.services.chatbot] INFO: Loading vector database from /app/vector_db
+2025-05-06 23:34:52 [app.services.chatbot] INFO: Vector database loaded with 72132 vectors
+2025-05-06 23:34:52 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-06 23:34:52 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-06 23:34:54 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-06 23:37:07 [app.services.api_service] INFO: Query gốc: 'dsadadadas'
+2025-05-06 23:37:10 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.088s
+2025-05-06 23:37:10 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.039135001599788666, 0.03642502799630165, -0.03504223749041557, -0.018884379416704178, -0.12126225978136063]...
+2025-05-06 23:37:10 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 23:37:10 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'source': 'data\\Bao_moi\\52_Triển khai đồng bộ giải pháp thu ngân sách nhà nướ.txt'}
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 1 - Preview: MAI HOÀNG
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'source': 'data\\Vnexpress\\1591_Vàng rời mốc 3.000 USD, giá dầu xuống thấp nhất gầ.txt'}
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 2 - Preview: Tiểu Gu(theoReuters,Fortune,Kitco)
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 18, 'chunk_index': 35, 'content': 'Cầu thị trường', 'url': '/documents/55?page=18&highlight=35'}
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 3 - Preview: Cầu thị trường
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 124, 'chunk_index': 29, 'content': 'doanh nghiệp (1) với sản lượng doanh nghiệp (2): Q=Q1+Q2', 'url': '/documents/55?page=124&highlight=29'}
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 4 - Preview: doanh nghiệp (1) với sản lượng doanh nghiệp (2): Q=Q1+Q2
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 18, 'chunk_index': 29, 'content': 'Lượng cầu', 'url': '/documents/55?page=18&highlight=29'}
+2025-05-06 23:37:10 [app.services.api_service] INFO: Tài liệu 5 - Preview: Lượng cầu
+2025-05-06 23:37:10 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 23:37:12 [app.services.api_service] INFO: Google API response received in 1.69 seconds
+2025-05-06 23:37:12 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 23:37:30 [app.services.api_service] INFO: Query gốc: 'Quy luật khan hiếm'
+2025-05-06 23:37:33 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.015s
+2025-05-06 23:37:33 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.0859825611114502, 0.10135676711797714, 0.004191407468169928, 0.053022805601358414, -0.10554362088441849]...
+2025-05-06 23:37:33 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 23:37:33 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 24, 'content': 'Quy luật khan hiếm và chi phí cơ hội', 'url': '/documents/55?page=5&highlight=24'}
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 1 - Preview: Quy luật khan hiếm và chi phí cơ hội
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 25, 'content': 'Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do đó nó khan hiếm', 'url': '/documents/55?page=5&highlight=25'}
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 2 - Preview: Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do đó nó khan hiếm
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 10, 'content': '. Nên các yếu tố sản xuất luôn luôn khan hiếm.', 'url': '/documents/55?page=5&highlight=10'}
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 3 - Preview: . Nên các yếu tố sản xuất luôn luôn khan hiếm.
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 67, 'chunk_index': 36, 'content': 'tế khái quát thành quy luật và được gọi là quy luật năng suất biên giảm dần', 'url': '/documents/55?page=67&highlight=36'}
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 4 - Preview: tế khái quát thành quy luật và được gọi là quy luật năng suất biên giảm dần
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': 'data\\Bao_moi\\1879_Phát triển khai thác thủy sản hiệu quả bền vững và.txt'}
+2025-05-06 23:37:33 [app.services.api_service] INFO: Tài liệu 5 - Preview: Khánh Phương
+2025-05-06 23:37:33 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 23:37:34 [app.services.api_service] INFO: Google API response received in 1.12 seconds
+2025-05-06 23:37:34 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 23:37:49 [app.services.api_service] INFO: Query gốc: 'Khi quyết định lựa chọn, con người phải trả chi phí cơ hội cho sự lựa chọn đó'
+2025-05-06 23:37:51 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.010s
+2025-05-06 23:37:51 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.07331067323684692, -0.009529869072139263, 0.006565579678863287, 0.014193627052009106, -0.1063440591096878]...
+2025-05-06 23:37:51 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 23:37:51 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 6, 'chunk_index': 3, 'content': 'Khi quyết định lựa chọn, con người phải trả chi phí cơ hội cho sự lựa chọn đó.', 'url': '/documents/55?page=6&highlight=3'}
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 1 - Preview: Khi quyết định lựa chọn, con người phải trả chi phí cơ hội cho sự lựa chọn đó.
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 126, 'chunk_index': 32, 'content': 'Chọn lựa giá để tối đa hóa lợi nhuận đối với sản phẩm có sự khác biệt', 'url': '/documents/55?page=126&highlight=32'}
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 2 - Preview: Chọn lựa giá để tối đa hóa lợi nhuận đối với sản phẩm có sự khác biệt
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 63, 'chunk_index': 13, 'content': 'để tối đa hóa sản lượng hoặc tối thiểu hóa chi phí cho doanh nghiệp', 'url': '/documents/55?page=63&highlight=13'}
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 3 - Preview: để tối đa hóa sản lượng hoặc tối thiểu hóa chi phí cho doanh nghiệp
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 70, 'chunk_index': 17, 'content': 'lượng sản phẩm đầu ra là lớn nhất với một chi phí cho trước', 'url': '/documents/55?page=70&highlight=17'}
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 4 - Preview: lượng sản phẩm đầu ra là lớn nhất với một chi phí cho trước
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 16, 'chunk_index': 22, 'content': '. Nếu chị Nga chọn phương án C thì chi phí cơ hội của phương án đó là:', 'url': '/documents/55?page=16&highlight=22'}
+2025-05-06 23:37:51 [app.services.api_service] INFO: Tài liệu 5 - Preview: . Nếu chị Nga chọn phương án C thì chi phí cơ hội của phương án đó là:
+2025-05-06 23:37:51 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 23:37:53 [app.services.api_service] INFO: Google API response received in 1.70 seconds
+2025-05-06 23:37:53 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-06 23:57:52 [app.services.api_service] INFO: Query gốc: 'Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do'
+2025-05-06 23:57:57 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.021s
+2025-05-06 23:57:57 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.1214473694562912, 0.13579419255256653, 0.05802714824676514, 0.0010674974182620645, -0.04543335735797882]...
+2025-05-06 23:57:57 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-06 23:57:57 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 5, 'chunk_index': 25, 'content': 'Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do đó nó khan hiếm', 'url': '/documents/55?page=5&highlight=25'}
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 1 - Preview: Quy luật khan hiếm: Kinh tế học nói rằng mọi nguồn lực đều hữu hạn do đó nó khan hiếm
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 2 - Preview: Quy luật kinh tế: Quy luật kinh té là những mối liên hệ
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 11, 'chunk_index': 11, 'content': 'Chủ thể kinh tế thứ nhất: Hộ gia đình', 'url': '/documents/55?page=11&highlight=11'}
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 3 - Preview: Chủ thể kinh tế thứ nhất: Hộ gia đình
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 19, 'chunk_index': 33, 'content': 'với ích lợi họ nhận được, hành vi này được lặp đi lặp lại ở mọi người mua', 'url': '/documents/55?page=19&highlight=33'}
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 4 - Preview: với ích lợi họ nhận được, hành vi này được lặp đi lặp lại ở mọi người mua
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-06 23:57:57 [app.services.api_service] INFO: Tài liệu 5 - Preview: khoa học mới - môn kinh tế chính trị. Tuy nhiên, tác phẩm
+2025-05-06 23:57:57 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-06 23:57:58 [app.services.api_service] INFO: Google API response received in 0.91 seconds
+2025-05-06 23:57:58 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-07 00:04:52 [app.services.api_service] INFO: Query gốc: 'giá gạo'
+2025-05-07 00:04:55 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.011s
+2025-05-07 00:04:55 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.12454856932163239, 0.054670680314302444, -0.059284742921590805, 0.03133486211299896, -0.028186583891510963]...
+2025-05-07 00:04:55 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-07 00:04:55 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 17, 'chunk_index': 25, 'content': 'gạo, do đó, họ mặc nhiên coi giá lúa gạo là cho trước và chấp nhận giá', 'url': '/documents/55?page=17&highlight=25'}
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 1 - Preview: gạo, do đó, họ mặc nhiên coi giá lúa gạo là cho trước và chấp nhận giá
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 56, 'chunk_index': 24, 'content': 'giá sách', 'url': '/documents/55?page=56&highlight=24'}
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 2 - Preview: giá sách
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'source': 'data\\Bao_moi\\1528_Giá vàng hôm nay 124 Tăng mạnh gần 2 triệu đồnglượ.txt'}
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 3 - Preview: Lệ Giang
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'source': 'data\\Bao_moi\\110_Triển khai hiệu quả các chương trình tín dụng chín.txt'}
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 4 - Preview: Nguyễn Yến
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-07 00:04:55 [app.services.api_service] INFO: Tài liệu 5 - Preview: giáo trình các môn Lý luận Chính trị.
+2025-05-07 00:04:55 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-07 00:04:56 [app.services.api_service] INFO: Google API response received in 1.10 seconds
+2025-05-07 00:04:56 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-07 00:07:57 [app.services.api_service] INFO: Query gốc: 'phân tích thị trường chứng khoán'
+2025-05-07 00:07:59 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.071s
+2025-05-07 00:07:59 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.12589846551418304, 0.11871722340583801, -0.004907261114567518, -0.01973288133740425, -0.04331936687231064]...
+2025-05-07 00:07:59 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-07 00:07:59 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 1 - Preview: triền và luận chứng vai trò lịch sừ của phương thức sàn
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'source': 'data\\thoi_bao_tai_chinh\\1246_Kinh tế vẫn chưa thoát khỏi khó khăn.txt'}
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 2 - Preview: Tính chung 4 tháng đầu năm 2023, có khoảng 76,8 nghìn doanh nghiệp rút lui khỏi thị trường.
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 126, 'chunk_index': 12, 'content': 'Thị trường chỉ có hai doanh nghiệp sản xuất những sản phẩm giống nhau, chúng có thể thay thế hoàn', 'url': '/documents/55?page=126&highlight=12'}
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 3 - Preview: Thị trường chỉ có hai doanh nghiệp sản xuất những sản phẩm giống nhau, chúng có thể thay thế hoàn
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 81, 'chunk_index': 13, 'content': 'cho chúng ta thấy điểm khác nhau quan trọng giữa phương pháp phân tích doanh nghiệp của nhà kinh tế', 'url': '/documents/55?page=81&highlight=13'}
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 4 - Preview: cho chúng ta thấy điểm khác nhau quan trọng giữa phương pháp phân tích doanh nghiệp của nhà kinh tế
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 132, 'chunk_index': 13, 'content': 'Thị trường độc quyền\tC. Thị trường cạnh tranh hoàn toàn', 'url': '/documents/55?page=132&highlight=13'}
+2025-05-07 00:07:59 [app.services.api_service] INFO: Tài liệu 5 - Preview: Thị trường độc quyền	C. Thị trường cạnh tranh hoàn toàn
+2025-05-07 00:07:59 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-07 00:08:01 [app.services.api_service] INFO: Google API response received in 1.74 seconds
+2025-05-07 00:08:01 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-07 00:08:14 [app.services.api_service] INFO: Query gốc: 'đậu nành'
+2025-05-07 00:08:17 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.009s
+2025-05-07 00:08:17 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.041339389979839325, 0.08289994299411774, 0.007889976724982262, -0.031763434410095215, -0.013127291575074196]...
+2025-05-07 00:08:17 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-07 00:08:17 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 20, 'chunk_index': 32, 'content': 'Đường cầu', 'url': '/documents/55?page=20&highlight=32'}
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 1 - Preview: Đường cầu
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 2 - Preview: những nhà hoạch định chính sách hình thành được năng lực,
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'source': 'data\\Bao_moi\\110_Triển khai hiệu quả các chương trình tín dụng chín.txt'}
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 3 - Preview: Nguyễn Yến
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 78, 'chunk_index': 8, 'content': '. Dẫn đến giá thành sản phẩm tăng.', 'url': '/documents/55?page=78&highlight=8'}
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 4 - Preview: . Dẫn đến giá thành sản phẩm tăng.
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'source': '/app/storage/documents/3/1745688872_giao-trinh.txt'}
+2025-05-07 00:08:17 [app.services.api_service] INFO: Tài liệu 5 - Preview: mình. Từ đó mà xây dựng tu- duy và tầm nhìn, kỹ năng thực
+2025-05-07 00:08:17 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-07 00:08:17 [app.services.api_service] INFO: Google API response received in 0.82 seconds
+2025-05-07 00:08:17 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)
+2025-05-07 00:08:28 [app.services.api_service] INFO: Query gốc: 'lúa gạo'
+2025-05-07 00:08:30 [app.services.api_service] INFO: API Service: Đã embedding câu hỏi thành vector kích thước 384, thời gian: 0.008s
+2025-05-07 00:08:30 [app.services.api_service] INFO: Mẫu vector câu hỏi: [-0.10612981021404266, -0.004326512571424246, -0.059069517999887466, 0.034186363220214844, -0.016089921817183495]...
+2025-05-07 00:08:30 [app.services.api_service] INFO: Sử dụng vector retriever để tìm kiếm: VectorStoreRetriever
+2025-05-07 00:08:30 [app.services.api_service] INFO: Sử dụng phương thức get_relevant_documents
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tìm thấy 8 tài liệu
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tìm thấy 8 tài liệu liên quan từ vector database
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 1 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 18, 'chunk_index': 29, 'content': 'Lượng cầu', 'url': '/documents/55?page=18&highlight=29'}
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 1 - Preview: Lượng cầu
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 2 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 60, 'chunk_index': 24, 'content': 'hơn hiệu ứng thay thế nên người tiêu dùng sẽ mua nhiều gạo hơn khi giá gạo tăng', 'url': '/documents/55?page=60&highlight=24'}
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 2 - Preview: hơn hiệu ứng thay thế nên người tiêu dùng sẽ mua nhiều gạo hơn khi giá gạo tăng
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 3 - Metadata: {'source': 'data\\Vnexpress\\44_Giá lúa, gạo giảm.txt'}
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 3 - Preview: TITLE: Giá lúa, gạo giảm
+
+URL: https://vnexpress.net/gia-lua-gao-giam-4802434.html
+
+PUBLICATION DATE: 2024-10-11 10:03:00
+
+CONTENT:
+
+Ấn Độ bỏ lệnh cấm...
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 4 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 99, 'chunk_index': 6, 'content': '. Doanh nghiệp tăng sản lượng sản xuất, sản lượng của ngành tăng', 'url': '/documents/55?page=99&highlight=6'}
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 4 - Preview: . Doanh nghiệp tăng sản lượng sản xuất, sản lượng của ngành tăng
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 5 - Metadata: {'doc_id': 55, 'source': '1746563688_bai-giang-kinh-te-vi-mo-1.docx', 'page_num': 17, 'chunk_index': 25, 'content': 'gạo, do đó, họ mặc nhiên coi giá lúa gạo là cho trước và chấp nhận giá', 'url': '/documents/55?page=17&highlight=25'}
+2025-05-07 00:08:30 [app.services.api_service] INFO: Tài liệu 5 - Preview: gạo, do đó, họ mặc nhiên coi giá lúa gạo là cho trước và chấp nhận giá
+2025-05-07 00:08:30 [app.services.api_service] INFO: Sending request to Google API: gemini-2.0-flash
+2025-05-07 00:08:33 [app.services.api_service] INFO: Google API response received in 3.11 seconds
+2025-05-07 00:08:33 [app.services.api_service] INFO: Nhận phản hồi từ Gemini API (gemini-2.0-flash)

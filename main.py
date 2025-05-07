@@ -13,7 +13,7 @@ except Exception as e:
 
 import uvicorn
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
@@ -83,9 +83,23 @@ except Exception as e:
 # Middleware để xử lý encoding
 class EncodingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # Set character encoding for the request
+        if "content-type" in request.headers and "charset" not in request.headers.get("content-type", ""):
+            # Default to UTF-8 for JSON requests without explicit charset
+            if "application/json" in request.headers.get("content-type", ""):
+                # We can't modify the request headers directly, but we can log this
+                logger.info("JSON request without charset detected, will process as UTF-8")
+        
+        # Process the request and get response
         response = await call_next(request)
+        
+        # Set consistent encoding for JSON responses
         if response.headers.get("content-type", "").startswith("application/json"):
             response.headers["content-type"] = "application/json; charset=utf-8"
+            
+            # Add additional headers to prevent encoding issues
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["Accept-Charset"] = "utf-8"
         return response
 
 # Tạo ứng dụng FastAPI với middleware
@@ -161,6 +175,7 @@ class DocumentProcessRequest(BaseModel):
     absolute_path: Optional[str] = None
     chunk_size: Optional[int] = 1000
     chunk_overlap: Optional[int] = 200
+    user_id: Optional[int] = None
 
 class DocumentProcessResponse(BaseModel):
     success: bool
@@ -210,17 +225,17 @@ def initialize_vector_db():
             
             return DummyRetriever()
     except Exception as e:
-        logging.error(f"Error initializing vector database: {str(e)}")
-        logging.error(traceback.format_exc())
+                logging.error(f"Error initializing vector database: {str(e)}")
+                logging.error(traceback.format_exc())
         
-        # Tạo dummy retriever
-        class DummyRetriever:
-            def get_relevant_documents(self, query):
-                logging.warning(f"Using dummy retriever for query: {query}")
-                from langchain.schema import Document
-                return [Document(page_content="Không có thông tin.", metadata={})]
-        
-        return DummyRetriever()
+                # Tạo dummy retriever
+                class DummyRetriever:
+                    def get_relevant_documents(self, query):
+                        logging.warning(f"Using dummy retriever for query: {query}")
+                        from langchain.schema import Document
+                        return [Document(page_content="Không có thông tin.", metadata={})]
+                
+                return DummyRetriever()
 
 # Khởi tạo Gemini API - sử dụng dịch vụ
 def initialize_gemini():
@@ -330,9 +345,34 @@ async def chat_direct(request: Request):
     Chat trực tiếp với API, có sử dụng vector database
     """
     try:
-        # Read raw body
-        body = await request.json()
+        # Try to safely parse JSON with proper encoding
+        try:
+            # First try to parse directly using FastAPI
+            body = await request.json()
+            logger.info("Successfully parsed JSON from request in chat_direct")
+        except Exception as e:
+            # If that fails, try manual parsing with explicit encoding
+            logger.warning(f"Direct JSON parsing failed: {str(e)}")
+            raw_body = await request.body()
+            try:
+                body_str = raw_body.decode('utf-8')
+                body = json.loads(body_str)
+                logger.info("Parsed JSON with explicit UTF-8 decoding")
+            except Exception as decode_err:
+                logger.error(f"Error decoding request body: {str(decode_err)}")
+                return {
+                    "success": False,
+                    "response": "Không thể phân tích yêu cầu. Lỗi mã hóa.",
+                    "error": f"Request decoding error: {str(decode_err)}"
+                }
+        
+        # Extract query with proper handling
         query = body.get("message", "")
+        if query and isinstance(query, str):
+            # Normalize the string
+            query = query.strip()
+            logger.info(f"Processing query: {query}")
+            
         user_id = body.get("user_id")
         
         if not query:
@@ -347,21 +387,28 @@ async def chat_direct(request: Request):
         # Xử lý chat
         result = await process_chat(query, user_id)
         
-        return {
+        # Ensure the response is properly encoded
+        response_data = {
             "success": result.get("success", False),
             "response": result.get("answer", "Không có phản hồi"),
             "query": query,
             "model_info": result.get("model_info", {})
         }
         
+        # Log successful response
+        logger.info(f"Successfully generated response for query: {query}")
+        
+        return UTF8JSONResponse(content=response_data)
+        
     except Exception as e:
         logger.error(f"Error in chat_direct endpoint: {str(e)}")
         logger.error(traceback.format_exc())
-        return {
+        error_response = {
             "success": False,
             "response": f"Xin lỗi, có lỗi xảy ra: {str(e)}",
             "error": str(e)
         }
+        return UTF8JSONResponse(content=error_response)
 
 @app.get("/api/v1/chat/service-info")
 async def service_info():
@@ -427,39 +474,81 @@ async def simple_chat(request: Request):
         raw_body = await request.body()
         logger.info(f"Raw request body length: {len(raw_body)}")
         
-        # Try to decode with different encodings
+        # Try to parse directly first
         try:
-            body_str = raw_body.decode('utf-8')
-            logger.info("Used utf-8 encoding for request body")
-        except UnicodeDecodeError:
+            # Assume request comes with correct Content-Type header
+            body = await request.json()
+            logger.info(f"Successfully parsed JSON directly from request")
+        except Exception as json_err:
+            logger.warning(f"Could not parse JSON directly: {str(json_err)}, trying manual decoding")
+            
+            # Try to decode with different encodings
             try:
-                body_str = raw_body.decode('latin-1')
-                logger.info("Used latin-1 encoding for request body")
+                body_str = raw_body.decode('utf-8')
+                logger.info("Used utf-8 encoding for request body")
             except UnicodeDecodeError:
-                body_str = raw_body.decode('cp1252', errors='ignore')
-                logger.info("Used cp1252 encoding with error ignore for request body")
+                try:
+                    body_str = raw_body.decode('latin-1')
+                    logger.info("Used latin-1 encoding for request body")
+                except UnicodeDecodeError:
+                    body_str = raw_body.decode('cp1252', errors='ignore')
+                    logger.info("Used cp1252 encoding with error ignore for request body")
+            
+            # Parse JSON from string
+            try:
+                body = json.loads(body_str)
+                logger.info(f"Parsed JSON after manual decoding")
+            except json.JSONDecodeError as e:
+                # Log a part of body for debugging
+                preview = body_str[:100] if len(body_str) > 100 else body_str
+                logger.error(f"JSON parsing error: {str(e)}, preview: {preview}")
+                return {
+                    "success": False,
+                    "response": "Invalid JSON format",
+                    "error": f"JSON decode error: {str(e)}"
+                }
         
-        # Parse JSON from string
-        try:
-            body = json.loads(body_str)
-            logger.info(f"Parsed JSON: {body}")
-        except json.JSONDecodeError as e:
-            # Log a part of body for debugging
-            preview = body_str[:100] if len(body_str) > 100 else body_str
-            logger.error(f"JSON parsing error: {str(e)}, preview: {preview}")
-            return {
-                "success": False,
-                "response": "Invalid JSON format",
-                "error": f"JSON decode error: {str(e)}"
-            }
-        
+        # Extract message and handle UTF-8 characters properly
         query = body.get("message", "")
+        if query:
+            # Ensure query is properly encoded
+            if isinstance(query, str):
+                # Normalize the string to ensure consistent encoding
+                query = query.strip()
+                logger.info(f"Normalized query: {query}")
         
         # Chấp nhận nhiều tham số document ID khác nhau từ client
         support_doc_ids = body.get("support_doc_ids", [])
         doc_ids = body.get("doc_ids", [])
         document_ids = body.get("document_ids", [])
         context_document_ids = body.get("context_document_ids", [])
+        
+        # Kiểm tra xem doc_ids có phải là chuỗi string không và chuyển đổi nếu cần
+        if isinstance(doc_ids, str) and doc_ids:
+            try:
+                doc_ids = [int(id.strip()) for id in doc_ids.split(',')]
+                logger.info(f"Đã chuyển đổi doc_ids từ string '{body.get('doc_ids')}' thành list: {doc_ids}")
+            except Exception as e:
+                logger.error(f"Lỗi khi chuyển đổi doc_ids từ string: {str(e)}")
+        
+        # Kiểm tra các trường ID khác
+        for field_name, field_value in [
+            ("support_doc_ids", support_doc_ids),
+            ("document_ids", document_ids),
+            ("context_document_ids", context_document_ids)
+        ]:
+            if isinstance(field_value, str) and field_value:
+                try:
+                    converted_ids = [int(id.strip()) for id in field_value.split(',')]
+                    if field_name == "support_doc_ids":
+                        support_doc_ids = converted_ids
+                    elif field_name == "document_ids":
+                        document_ids = converted_ids
+                    elif field_name == "context_document_ids":
+                        context_document_ids = converted_ids
+                    logger.info(f"Đã chuyển đổi {field_name} từ string '{field_value}' thành list")
+                except Exception as e:
+                    logger.error(f"Lỗi khi chuyển đổi {field_name} từ string: {str(e)}")
         
         # Kết hợp tất cả document IDs từ các tham số khác nhau
         all_doc_ids = []
@@ -489,16 +578,46 @@ async def simple_chat(request: Request):
         # Sử dụng ChatbotService để xử lý simple chat
         result = await chatbot_service.get_simple_retrieval(query, all_doc_ids)
         
-        return result
+        # Đảm bảo thông tin trích dẫn được bao gồm trong phản hồi
+        if "citations" not in result and "response" in result:
+            logger.info("No citations included in the get_simple_retrieval result, querying documents for citations")
+            
+            # Thử lấy thêm thông tin trích dẫn nếu có document IDs
+            if all_doc_ids:
+                try:
+                    # Truy vấn riêng để lấy thông tin trích dẫn
+                    citation_results = await chatbot_service.query_document_with_citation(query, all_doc_ids)
+                    
+                    # Kiểm tra xem có kết quả trích dẫn không
+                    if citation_results and "citations" in citation_results and citation_results["citations"]:
+                        logger.info(f"Found {len(citation_results['citations'])} citations, adding to result")
+                        result["citations"] = citation_results["citations"]
+                        
+                        # Thêm cả detailed_citations nếu có
+                        if "detailed_citations" in citation_results:
+                            result["detailed_citations"] = citation_results["detailed_citations"]
+                            
+                        # Log thông tin để debug
+                        logger.info(f"Added citations to response: {json.dumps(result['citations'], ensure_ascii=False)}")
+                except Exception as citation_err:
+                    logger.error(f"Error getting citations: {str(citation_err)}")
+        
+        # Log thông tin đầy đủ về kết quả trả về
+        logger.info(f"Simple chat response structure: {list(result.keys())}")
+        if "citations" in result:
+            logger.info(f"Citations included in response: {len(result['citations'])}")
+            
+        return UTF8JSONResponse(content=result)
             
     except Exception as e:
         logger.error(f"Error in simple chat request parsing: {str(e)}")
         logger.error(traceback.format_exc())
-        return {
+        error_response = {
             "success": False,
             "response": "Xin lỗi, có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.",
             "error": str(e)
         }
+        return UTF8JSONResponse(content=error_response)
 
 @app.post("/api/v1/admin/reload-config")
 async def reload_config(config: Optional[ConfigRequest] = None):
@@ -624,14 +743,118 @@ async def reload_config(config: Optional[ConfigRequest] = None):
             message="Lỗi khi tải lại cấu hình",
             error=str(e)
         )
+
+@app.post("/api/v1/chat/document-chat")
+async def document_chat(request: Request):
+    """
+    Chat với tài liệu cụ thể, hỗ trợ trích dẫn
+    """
+    try:
+        # Đọc dữ liệu từ request
+        body = await request.json()
+        query = body.get("message", "")
+        user_id = body.get("user_id")
+        
+        # Đọc document_ids từ các trường khác nhau
+        doc_ids = body.get("document_ids", [])
+        if not doc_ids:
+            doc_ids = body.get("doc_ids", [])
+        if not doc_ids:
+            doc_ids = body.get("context_document_ids", [])
+        
+        # Chuyển đổi nếu là chuỗi
+        if isinstance(doc_ids, str):
+            doc_ids = [int(id.strip()) for id in doc_ids.split(',') if id.strip().isdigit()]
+            
+        if not query:
+            return {
+                "success": False,
+                "response": "Không có tin nhắn được cung cấp",
+                "error": "No message provided"
+            }
+            
+        if not doc_ids:
+            return {
+                "success": False,
+                "response": "Không có tài liệu nào được chọn",
+                "error": "No documents selected"
+            }
+            
+        logger.info(f"Truy vấn tài liệu với câu hỏi: {query}, document_ids: {doc_ids}")
+            
+        # Truy vấn tài liệu với hỗ trợ trích dẫn
+        search_results = await chatbot_service.query_document_with_citation(query, doc_ids)
+        
+        if not search_results["results"]:
+            return {
+                "success": True,
+                "response": "Tôi không tìm thấy thông tin liên quan đến câu hỏi của bạn trong các tài liệu được chọn.",
+                "query": query,
+                "citations": []
+            }
+        
+        # Tổng hợp kết quả tìm kiếm để gửi đến LLM
+        context_text = "\n---\n".join(search_results["results"])
+        
+        # Tạo prompt với ngữ cảnh
+        prompt = f"""Dưới đây là một số đoạn văn bản liên quan đến câu hỏi của người dùng. 
+Hãy sử dụng thông tin này để trả lời câu hỏi.
+Nếu thông tin không đủ, hãy nói rằng bạn không tìm thấy đủ thông tin trong tài liệu.
+Không được tạo ra thông tin không có trong ngữ cảnh.
+
+NGỮ CẢNH:
+{context_text}
+
+CÂU HỎI: {query}
+
+TRẢ LỜI:"""
+
+        # Gọi API LLM
+        if api_service:
+            if settings.API_TYPE.lower() == "google":
+                llm_response = await api_service.generate_with_gemini(prompt)
+            else:
+                llm_response = await api_service.generate_with_openai(prompt)
+        else:
+                llm_response = "Không thể kết nối với API LLM."
+        
+        # Trả về kết quả kèm theo thông tin trích dẫn
+        return {
+            "success": True,
+            "response": llm_response,
+            "query": query,
+            "citations": search_results["citations"]
+        }
+            
+    except Exception as e:
+        logger.error(f"Lỗi trong document_chat: {str(e)}")
+        logger.error(traceback.format_exc())
+        return {
+            "success": False,
+            "response": f"Xin lỗi, có lỗi xảy ra: {str(e)}",
+            "error": str(e)
+        }
+
 @app.post("/api/v1/documents/process")
 async def process_document(request: DocumentProcessRequest):
-    """
-    Xử lý tài liệu được upload và tạo vector embeddings
-    """
-    logger.info(f"Processing document ID: {request.document_id}, File path: {request.file_path}")
+    """Xử lý tài liệu được upload và tạo vector embeddings"""
+    logger.info(f"Đang xử lý tài liệu ID: {request.document_id}, Đường dẫn: {request.file_path}")
     
-    # Sử dụng ChatbotService để xử lý tài liệu
+    # Kiểm tra tham số
+    if not request.file_path:
+        return DocumentProcessResponse(
+            success=False,
+            message="Thiếu đường dẫn tập tin",
+            document_id=request.document_id,
+            error="Missing file path"
+        )
+    
+    # Đảm bảo user_id tồn tại, nếu không thì thiết lập giá trị mặc định
+    if request.user_id is None:
+        logger.info(f"Không có user_id được cung cấp cho tài liệu {request.document_id}, sử dụng mặc định 0")
+        request.user_id = 0  # Mặc định là 0 nếu không có
+    
+    # Gọi hàm tạo vector
     result = await chatbot_service.process_document(request)
     
     # Trả về kết quả
@@ -720,6 +943,19 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
         logger.error(traceback.format_exc())
+
+# Custom JSONResponse class to ensure proper UTF-8 encoding
+class UTF8JSONResponse(JSONResponse):
+    media_type = "application/json; charset=utf-8"
+    
+    def render(self, content):
+        return json.dumps(
+            content,
+            ensure_ascii=False,  # Important for proper UTF-8 handling
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":")
+        ).encode("utf-8")
 
 # Chạy ứng dụng
 if __name__ == "__main__":

@@ -371,24 +371,102 @@ Please answer the question based solely on the provided context. If the context 
         start_time = time.time()
         
         try:
+            # Log thông tin query ban đầu
+            logger.info(f"Query gốc: '{query}'")
+            
+            # Kiểm tra xem câu hỏi có được embedding không
+            try:
+                from langchain_community.embeddings import HuggingFaceEmbeddings
+                
+                embedding_model = HuggingFaceEmbeddings(model_name=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"))
+                emb_start_time = time.time()
+                question_embedding = embedding_model.embed_query(query)
+                emb_time = time.time() - emb_start_time
+                
+                if question_embedding and len(question_embedding) > 0:
+                    logger.info(f"API Service: Đã embedding câu hỏi thành vector kích thước {len(question_embedding)}, thời gian: {emb_time:.3f}s")
+                    vector_sample = str(question_embedding[:5])
+                    logger.info(f"Mẫu vector câu hỏi: {vector_sample}...")
+                else:
+                    logger.error("API Service: Không thể embedding câu hỏi!")
+            except Exception as emb_err:
+                logger.error(f"Lỗi khi kiểm tra embedding cho câu hỏi: {str(emb_err)}")
+            
             # Tìm kiếm ngữ cảnh từ vector database
             context = ""
             docs = []
             try:
                 if vector_retriever:
-                    docs = vector_retriever.get_relevant_documents(query)
+                    logger.info(f"Sử dụng vector retriever để tìm kiếm: {type(vector_retriever).__name__}")
+                    # Thử các phương pháp khác nhau để lấy tài liệu liên quan, tùy vào loại retriever
+                    try:
+                        # Thử phương thức similarity_search_with_score trước nếu có
+                        if hasattr(vector_retriever, 'similarity_search_with_score'):
+                            logger.info("Sử dụng phương thức similarity_search_with_score")
+                            search_results = vector_retriever.similarity_search_with_score(query, k=8)
+                            docs = [doc for doc, score in search_results]
+                            scores = [score for doc, score in search_results]
+                            logger.info(f"Tìm thấy {len(docs)} tài liệu với điểm số: {scores}")
+                        else:
+                            # Nếu không, sử dụng get_relevant_documents
+                            logger.info("Sử dụng phương thức get_relevant_documents")
+                            docs = vector_retriever.get_relevant_documents(query, k=8)
+                            logger.info(f"Tìm thấy {len(docs)} tài liệu")
+                    except AttributeError:
+                        # Fallback: thử cách khác nếu không tìm thấy phương thức
+                        logger.info("Không tìm thấy phương thức tìm kiếm, thử sử dụng as_retriever")
+                        try:
+                            if hasattr(vector_retriever, 'as_retriever'):
+                                temp_retriever = vector_retriever.as_retriever(
+                                    search_type="mmr",
+                                    search_kwargs={
+                                        "k": 10,
+                                        "fetch_k": 40,
+                                        "lambda_mult": 0.7,
+                                        "score_threshold": 0.15  # Giảm ngưỡng điểm để lấy nhiều kết quả hơn
+                                    }
+                                )
+                                docs = temp_retriever.get_relevant_documents(query)
+                                logger.info(f"Tìm thấy {len(docs)} tài liệu qua phương thức as_retriever")
+                            else:
+                                logger.info("Thử phương pháp cuối cùng với get_relevant_documents")
+                                docs = vector_retriever.get_relevant_documents(query)
+                        except Exception as inner_err:
+                            logger.error(f"Lỗi trong khi thử các phương thức tìm kiếm thay thế: {str(inner_err)}")
+                    
+                    # Nếu không tìm thấy tài liệu, thử lại với ngưỡng thấp hơn
+                    if not docs and hasattr(vector_retriever, 'as_retriever'):
+                        logger.info("Không tìm thấy tài liệu, thử lại với ngưỡng rất thấp")
+                        try:
+                            alt_retriever = vector_retriever.as_retriever(
+                                search_type="similarity",  # Dùng similarity thay vì MMR
+                                search_kwargs={
+                                    "k": 15,              # Tăng số lượng kết quả
+                                    "score_threshold": 0.05  # Ngưỡng rất thấp
+                                }
+                            )
+                            docs = alt_retriever.get_relevant_documents(query)
+                            logger.info(f"Tìm thấy {len(docs)} tài liệu sau khi giảm ngưỡng")
+                        except Exception as alt_err:
+                            logger.error(f"Lỗi khi tìm kiếm với ngưỡng thấp: {str(alt_err)}")
+                    
                     if docs:
                         context = "\n\n".join([doc.page_content for doc in docs])
-                        logger.info(f"Found {len(docs)} relevant documents from vector database")
+                        logger.info(f"Tìm thấy {len(docs)} tài liệu liên quan từ vector database")
                         
-                        # Log a preview of each document for debugging
-                        for i, doc in enumerate(docs):
-                            preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
-                            logger.info(f"Document {i+1} preview: {preview}")
+                        # Log chi tiết về từng tài liệu tìm thấy
+                        for i, doc in enumerate(docs[:5]):  # Log 5 kết quả đầu tiên
+                            preview = doc.page_content[:150] + "..." if len(doc.page_content) > 150 else doc.page_content
+                            metadata_preview = str(doc.metadata) if hasattr(doc, 'metadata') else "No metadata"
+                            logger.info(f"Tài liệu {i+1} - Metadata: {metadata_preview}")
+                            logger.info(f"Tài liệu {i+1} - Preview: {preview}")
                     else:
-                        logger.info("No relevant documents found in vector database")
+                        logger.warning("Không tìm thấy tài liệu liên quan trong vector database sau nhiều lần thử")
+                else:
+                    logger.info("Không có vector retriever được cung cấp")
             except Exception as ret_err:
-                logger.error(f"Error retrieving context: {str(ret_err)}")
+                logger.error(f"Lỗi khi tìm kiếm từ vector database: {str(ret_err)}")
+                logger.error(traceback.format_exc())
                 context = ""
             
             # Tạo prompt với ngữ cảnh
@@ -478,6 +556,83 @@ Hướng dẫn:
                 "error": str(e),
                 "processing_time": f"{end_time - start_time:.2f} seconds"
             }
+
+    async def generate_with_gemini(self, prompt: str) -> str:
+        """Tạo phản hồi trực tiếp từ Gemini với prompt đã định dạng sẵn"""
+        try:
+            import google.generativeai as genai
+            
+            logger.info(f"Generating response from Gemini with prompt length: {len(prompt)}")
+            
+            # Cấu hình API
+            genai.configure(api_key=self.api_key)
+            
+            # Tạo model
+            model = genai.GenerativeModel(self.model)
+            
+            # Gọi API
+            start_time = time.time()
+            response = model.generate_content(prompt)
+            elapsed_time = time.time() - start_time
+            
+            if response and hasattr(response, 'text'):
+                response_text = response.text
+                logger.info(f"Generated response from Gemini in {elapsed_time:.2f}s")
+                return response_text
+            else:
+                logger.error("Gemini API returned invalid response")
+                return "Xin lỗi, có lỗi xảy ra khi tạo phản hồi. Vui lòng thử lại sau."
+                
+        except Exception as e:
+            logger.error(f"Error generating from Gemini: {str(e)}")
+            logger.error(traceback.format_exc())
+            return f"Xin lỗi, có lỗi xảy ra: {str(e)}"
+    
+    async def generate_with_openai(self, prompt: str) -> str:
+        """Tạo phản hồi trực tiếp từ OpenAI với prompt đã định dạng sẵn"""
+        try:
+            from openai import OpenAI
+            
+            logger.info(f"Generating response from OpenAI with prompt length: {len(prompt)}")
+            
+            # Tạo client
+            client = OpenAI(api_key=self.api_key)
+            
+            # Gọi API
+            start_time = time.time()
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=settings.TEMPERATURE,
+                max_tokens=settings.MAX_TOKENS,
+                top_p=0.95,
+                frequency_penalty=0,
+                presence_penalty=0
+            )
+            elapsed_time = time.time() - start_time
+            
+            if response and hasattr(response, 'choices') and len(response.choices) > 0:
+                response_text = response.choices[0].message.content
+                logger.info(f"Generated response from OpenAI in {elapsed_time:.2f}s")
+                return response_text
+            else:
+                logger.error("OpenAI API returned invalid response")
+                return "Xin lỗi, có lỗi xảy ra khi tạo phản hồi. Vui lòng thử lại sau."
+                
+        except Exception as e:
+            logger.error(f"Error generating from OpenAI: {str(e)}")
+            logger.error(traceback.format_exc())
+            return f"Xin lỗi, có lỗi xảy ra: {str(e)}"
+
+    async def call_llm_api(self, prompt: str) -> str:
+        """Gọi API của LLM phù hợp dựa vào cấu hình"""
+        if self.api_type == "google":
+            return await self.generate_with_gemini(prompt)
+        elif self.api_type == "openai":
+            return await self.generate_with_openai(prompt)
+        else:
+            logger.error(f"Unsupported API type: {self.api_type}")
+            return "Xin lỗi, loại API không được hỗ trợ."
 
 def load_data():
     """Return empty dict instead of loading from pickle"""

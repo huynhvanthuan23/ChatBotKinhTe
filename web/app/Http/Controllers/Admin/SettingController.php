@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -33,25 +34,46 @@ class SettingController extends Controller
      */
     public function updateGeneral(Request $request)
     {
-        $data = $request->validate([
-            'site_name' => 'required|string|max:255',
-            'site_description' => 'nullable|string',
-            'admin_email' => 'required|email',
-            'items_per_page' => 'required|integer|min:5|max:100',
-            'maintenance_mode' => 'boolean',
-        ]);
-
-        foreach ($data as $key => $value) {
-            // Xác định kiểu dữ liệu
-            $type = 'string';
-            if (is_bool($value)) $type = 'boolean';
-            if (is_int($value)) $type = 'integer';
+        try {
+            // Lấy giá trị các trường
+            $siteName = $request->input('site_name');
+            $siteDescription = $request->input('site_description');
             
-            Setting::setValue($key, $value, 'general', $type);
-        }
+            // Xác thực dữ liệu
+            if (empty($siteName)) {
+                return redirect()->back()
+                    ->withErrors(['site_name' => 'Tên website là bắt buộc'])
+                    ->withInput();
+            }
+            
+            // Lưu vào database
+            $setting1 = Setting::updateOrCreate(
+                ['key' => 'site_name'],
+                [
+                    'value' => $siteName,
+                    'group' => 'general',
+                    'type' => 'string',
+                    'description' => 'Tên website'
+                ]
+            );
+            
+            $setting2 = Setting::updateOrCreate(
+                ['key' => 'site_description'],
+                [
+                    'value' => $siteDescription,
+                    'group' => 'general',
+                    'type' => 'string',
+                    'description' => 'Mô tả website'
+                ]
+            );
 
         return redirect()->route('admin.settings.index')
             ->with('success', 'Cấu hình chung đã được cập nhật thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -83,6 +105,7 @@ class SettingController extends Controller
             'contact_address' => 'nullable|string',
             'contact_phone' => 'nullable|string',
             'contact_email' => 'nullable|email',
+            'business_hours' => 'nullable|string',
             'google_map_embed' => 'nullable|string',
         ]);
 
@@ -107,7 +130,17 @@ class SettingController extends Controller
             'linkedin_url' => 'nullable|url',
         ]);
 
-        foreach ($data as $key => $value) {
+        // Xử lý từng URL một, cho phép giá trị null hoặc trống
+        foreach (['facebook_url', 'twitter_url', 'instagram_url', 'youtube_url', 'linkedin_url'] as $key) {
+            // Lấy giá trị từ request, nếu không có thì đặt là null
+            $value = $request->has($key) ? $request->input($key) : null;
+            
+            // Nếu input rỗng, đặt giá trị là null
+            if (empty($value)) {
+                $value = null;
+            }
+            
+            // Cập nhật cài đặt với giá trị mới (có thể là null)
             Setting::setValue($key, $value, 'social');
         }
 
@@ -126,11 +159,23 @@ class SettingController extends Controller
         ]);
 
         if ($request->hasFile('site_logo')) {
+            // Xóa logo cũ nếu tồn tại
+            $oldLogo = Setting::getValue('site_logo');
+            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                Storage::disk('public')->delete($oldLogo);
+            }
+            
             $logoPath = $request->file('site_logo')->store('logos', 'public');
             Setting::setValue('site_logo', $logoPath, 'general');
         }
 
         if ($request->hasFile('site_favicon')) {
+            // Xóa favicon cũ nếu tồn tại
+            $oldFavicon = Setting::getValue('site_favicon');
+            if ($oldFavicon && Storage::disk('public')->exists($oldFavicon)) {
+                Storage::disk('public')->delete($oldFavicon);
+            }
+            
             $faviconPath = $request->file('site_favicon')->store('logos', 'public');
             Setting::setValue('site_favicon', $faviconPath, 'general');
         }
@@ -147,22 +192,23 @@ class SettingController extends Controller
         // General settings
         Setting::setValue('site_name', 'ChatBot Kinh Tế', 'general', 'string', 'Tên website');
         Setting::setValue('site_description', 'Cổng thông tin kinh tế với trợ lý AI', 'general', 'string', 'Mô tả website');
-        Setting::setValue('admin_email', 'admin@example.com', 'general', 'string', 'Email quản trị viên');
-        Setting::setValue('items_per_page', 10, 'general', 'integer', 'Số mục trên mỗi trang');
-        Setting::setValue('maintenance_mode', false, 'general', 'boolean', 'Chế độ bảo trì');
 
         // SEO settings
         Setting::setValue('meta_keywords', 'kinh tế, việt nam, AI, chatbot', 'seo', 'string', 'Từ khóa Meta');
         Setting::setValue('meta_description', 'ChatBot Kinh Tế - Nguồn thông tin kinh tế Việt Nam', 'seo', 'string', 'Mô tả Meta');
         
         // Contact settings
-        Setting::setValue('contact_address', 'Hà Nội, Việt Nam', 'contact', 'string', 'Địa chỉ liên hệ');
+        Setting::setValue('contact_address', 'Cần Thơ, Việt Nam', 'contact', 'string', 'Địa chỉ liên hệ');
         Setting::setValue('contact_phone', '(+84) 123 456 789', 'contact', 'string', 'Số điện thoại liên hệ');
         Setting::setValue('contact_email', 'contact@example.com', 'contact', 'string', 'Email liên hệ');
+        Setting::setValue('business_hours', 'Thứ 2 - Thứ 6: 8h00 - 17h30', 'contact', 'string', 'Giờ làm việc');
         
         // Social settings
         Setting::setValue('facebook_url', 'https://facebook.com/', 'social', 'string', 'URL Facebook');
         Setting::setValue('twitter_url', 'https://twitter.com/', 'social', 'string', 'URL Twitter');
+        Setting::setValue('instagram_url', 'https://instagram.com/', 'social', 'string', 'URL Instagram');
+        Setting::setValue('youtube_url', 'https://youtube.com/', 'social', 'string', 'URL Youtube');
+        Setting::setValue('linkedin_url', 'https://linkedin.com/', 'social', 'string', 'URL LinkedIn');
 
         return redirect()->route('admin.settings.index')
             ->with('success', 'Cấu hình mặc định đã được khởi tạo thành công.');

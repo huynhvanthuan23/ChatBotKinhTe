@@ -82,6 +82,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/test-connection', [ChatController::class, 'testConnection'])->name('chat.test-connection');
     
+    // Thêm các route mới cho quản lý cuộc trò chuyện
+    Route::post('/chat/create-conversation', [ChatController::class, 'createConversation'])->name('chat.create-conversation');
+    Route::post('/chat/save-message', [ChatController::class, 'saveMessage'])->name('chat.save-message');
+    Route::get('/chat/conversations', [ChatController::class, 'getConversations'])->name('chat.conversations');
+    Route::get('/chat/conversations/{id}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::delete('/chat/conversations/{id}', [ChatController::class, 'deleteConversation'])->name('chat.delete-conversation');
+    
     // Thêm routes cho quản lý tài liệu
     Route::prefix('documents')->group(function () {
         Route::get('/', [App\Http\Controllers\DocumentController::class, 'index'])->name('documents.index');

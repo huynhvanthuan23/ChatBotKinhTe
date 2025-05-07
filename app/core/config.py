@@ -70,40 +70,49 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = get_env_str("PROJECT_NAME", "ChatBotKinhTe")
     DEBUG_MODE: bool = get_env_bool("DEBUG_MODE", True)
     
-    # Chatbot settings
-    DB_FAISS_PATH: str = get_env_str("DB_FAISS_PATH", "vector_db")
-    EMBEDDING_MODEL: str = get_env_str("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-    TEMPERATURE: float = get_env_float("TEMPERATURE", 0.2)
-    MAX_TOKENS: int = get_env_int("MAX_TOKENS", 512)
+    # API configuration
+    API_TYPE: str = get_env_str("API_TYPE", "google")
+    USE_API: bool = get_env_bool("USE_API", True)
     
-    # API Configuration
-    USE_API: bool = get_env_bool("USE_API", True)  # Mặc định là True
-    API_TYPE: str = get_env_str("API_TYPE", "google")  # google hoặc openai
-    
-    # Google API settings
+    # Google Generative AI
     GOOGLE_API_KEY: str = get_env_str("GOOGLE_API_KEY", "")
     GOOGLE_MODEL: str = get_env_str("GOOGLE_MODEL", "gemini-1.5-pro")
     
-    # OpenAI API settings
+    # OpenAI
     OPENAI_API_KEY: str = get_env_str("OPENAI_API_KEY", "")
     OPENAI_MODEL: str = get_env_str("OPENAI_MODEL", "gpt-4o-mini")
     
+    # API Timeout
     API_TIMEOUT: int = get_env_int("API_TIMEOUT", 30)
     
-    # API URLs
-    CHATBOT_API_URL: Optional[str] = get_env_str("CHATBOT_API_URL", None)
+    # Model
+    EMBEDDING_MODEL: str = get_env_str("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+    TEMPERATURE: float = get_env_float("TEMPERATURE", 0.2)
     
-    # Security
-    SECRET_KEY: str = get_env_str("SECRET_KEY", "your-super-secret-key-change-this-in-production")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = get_env_int("ACCESS_TOKEN_EXPIRE_MINUTES", 60)
+    # Database
+    DB_FAISS_PATH: str = get_env_str("DB_FAISS_PATH", "vector_db")
     
-    # CORS
-    CORS_ORIGINS: List[str] = []
-    CORS_METHODS: List[str] = []
-    CORS_HEADERS: List[str] = []
+    # Storage
+    STORAGE_PATH: str = get_env_str("STORAGE_PATH", "D:/ThucTap/ChatBotKinhTe/storage")
+    
+    # API Rate limiting
+    RATE_LIMIT: int = get_env_int("RATE_LIMIT", 60)
+    RATE_LIMIT_PERIOD: int = get_env_int("RATE_LIMIT_PERIOD", 60)
     
     # Logging
     LOG_LEVEL: str = get_env_str("LOG_LEVEL", "INFO")
+    
+    # CORS settings
+    CORS_ORIGINS: List[str] = ["*"]
+    CORS_METHODS: List[str] = ["*"]
+    CORS_HEADERS: List[str] = ["*"]
+    ALLOW_CREDENTIALS: bool = True
+    
+    # Cấu hình cho tạo vector tài liệu
+    UPLOAD_VECTOR_DIR: str = get_env_str("UPLOAD_VECTOR_DIR", "vector_db/uploads")
+    DEFAULT_CHUNK_SIZE: int = get_env_int("DEFAULT_CHUNK_SIZE", 500)
+    DEFAULT_CHUNK_OVERLAP: int = get_env_int("DEFAULT_CHUNK_OVERLAP", 100)
+    DEFAULT_TOP_K: int = get_env_int("DEFAULT_TOP_K", 3)
     
     @validator("CORS_ORIGINS", "CORS_METHODS", "CORS_HEADERS", pre=True)
     def parse_cors(cls, v):

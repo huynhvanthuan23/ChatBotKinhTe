@@ -4,22 +4,6 @@
 
 @section('content')
 <div class="container-fluid">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true"></button>
-            <h5><i class="icon fas fa-check"></i> Thành công!</h5>
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true"></button>
-            <h5><i class="icon fas fa-ban"></i> Lỗi!</h5>
-            {{ session('error') }}
-        </div>
-    @endif
-
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
@@ -68,29 +52,14 @@
                         <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
                             <form action="{{ route('admin.settings.update-general') }}" method="POST">
                                 @csrf
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="site_name">Tên website <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control @error('site_name') is-invalid @enderror" 
-                                                id="site_name" name="site_name" 
-                                                value="{{ old('site_name', \App\Models\Setting::getValue('site_name', 'ChatBot Kinh Tế')) }}">
-                                            @error('site_name')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="admin_email">Email quản trị <span class="text-danger">*</span></label>
-                                            <input type="email" class="form-control @error('admin_email') is-invalid @enderror" 
-                                                id="admin_email" name="admin_email" 
-                                                value="{{ old('admin_email', \App\Models\Setting::getValue('admin_email', 'admin@example.com')) }}">
-                                            @error('admin_email')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
+                                <div class="form-group mb-3">
+                                    <label for="site_name">Tên website <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('site_name') is-invalid @enderror" 
+                                        id="site_name" name="site_name" 
+                                        value="{{ old('site_name', \App\Models\Setting::getValue('site_name', 'ChatBot Kinh Tế')) }}">
+                                    @error('site_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 
                                 <div class="form-group mb-3">
@@ -100,31 +69,6 @@
                                     @error('site_description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="items_per_page">Số mục trên trang</label>
-                                            <input type="number" class="form-control @error('items_per_page') is-invalid @enderror" 
-                                                id="items_per_page" name="items_per_page" min="5" max="100"
-                                                value="{{ old('items_per_page', \App\Models\Setting::getValue('items_per_page', 10)) }}">
-                                            @error('items_per_page')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label>Chế độ bảo trì</label>
-                                            <div class="custom-control custom-switch mt-2">
-                                                <input type="checkbox" class="custom-control-input" 
-                                                    id="maintenance_mode" name="maintenance_mode" value="1"
-                                                    {{ \App\Models\Setting::getValue('maintenance_mode') ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="maintenance_mode">Bật chế độ bảo trì</label>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                                 
                                 <button type="submit" class="btn btn-primary">
@@ -137,6 +81,8 @@
                         <div class="tab-pane fade" id="seo" role="tabpanel" aria-labelledby="seo-tab">
                             <form action="{{ route('admin.settings.update-seo') }}" method="POST">
                                 @csrf
+                                
+                               
                                 <div class="form-group mb-3">
                                     <label for="meta_keywords">Meta Keywords</label>
                                     <textarea class="form-control @error('meta_keywords') is-invalid @enderror" 
@@ -181,6 +127,16 @@
                                     </div>
                                 </div>
                                 
+                                <div class="mb-4">
+                                    <h5>Xem trước SEO component</h5>
+                                    <div class="card">
+                                        <div class="card-body bg-light">
+                                            <h6 class="text-muted">Component seo.blade.php hiện tại:</h6>
+                                            <pre class="border p-3 bg-white" style="max-height: 200px; overflow-y: auto;"><code>{{ file_get_contents(resource_path('views/components/seo.blade.php')) }}</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save"></i> Lưu cấu hình SEO
                                 </button>
@@ -216,21 +172,37 @@
                                     </div>
                                 </div>
                                 
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="contact_email">Email liên hệ</label>
+                                            <input type="email" class="form-control @error('contact_email') is-invalid @enderror" 
+                                                id="contact_email" name="contact_email" 
+                                                value="{{ old('contact_email', \App\Models\Setting::getValue('contact_email')) }}">
+                                            @error('contact_email')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            
+                                            @error('contact_hotline')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="form-group mb-3">
-                                    <label for="contact_email">Email liên hệ</label>
-                                    <input type="email" class="form-control @error('contact_email') is-invalid @enderror" 
-                                        id="contact_email" name="contact_email" 
-                                        value="{{ old('contact_email', \App\Models\Setting::getValue('contact_email')) }}">
-                                    @error('contact_email')
+                                    
+                                    @error('business_hours')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 
                                 <div class="form-group mb-3">
-                                    <label for="google_map_embed">Google Map Embed</label>
-                                    <textarea class="form-control @error('google_map_embed') is-invalid @enderror" 
-                                        id="google_map_embed" name="google_map_embed" rows="3">{{ old('google_map_embed', \App\Models\Setting::getValue('google_map_embed')) }}</textarea>
-                                    <small class="form-text text-muted">Mã nhúng từ Google Maps.</small>
+                                    
                                     @error('google_map_embed')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -246,6 +218,8 @@
                         <div class="tab-pane fade" id="social" role="tabpanel" aria-labelledby="social-tab">
                             <form action="{{ route('admin.settings.update-social') }}" method="POST">
                                 @csrf
+                                
+                                
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
@@ -255,6 +229,9 @@
                                                 <input type="url" class="form-control @error('facebook_url') is-invalid @enderror" 
                                                     id="facebook_url" name="facebook_url" 
                                                     value="{{ old('facebook_url', \App\Models\Setting::getValue('facebook_url')) }}">
+                                                <button type="button" class="btn btn-outline-secondary clear-url" data-target="facebook_url">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             </div>
                                             @error('facebook_url')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -269,6 +246,9 @@
                                                 <input type="url" class="form-control @error('twitter_url') is-invalid @enderror" 
                                                     id="twitter_url" name="twitter_url" 
                                                     value="{{ old('twitter_url', \App\Models\Setting::getValue('twitter_url')) }}">
+                                                <button type="button" class="btn btn-outline-secondary clear-url" data-target="twitter_url">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             </div>
                                             @error('twitter_url')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -286,6 +266,9 @@
                                                 <input type="url" class="form-control @error('instagram_url') is-invalid @enderror" 
                                                     id="instagram_url" name="instagram_url" 
                                                     value="{{ old('instagram_url', \App\Models\Setting::getValue('instagram_url')) }}">
+                                                <button type="button" class="btn btn-outline-secondary clear-url" data-target="instagram_url">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             </div>
                                             @error('instagram_url')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -300,6 +283,9 @@
                                                 <input type="url" class="form-control @error('youtube_url') is-invalid @enderror" 
                                                     id="youtube_url" name="youtube_url" 
                                                     value="{{ old('youtube_url', \App\Models\Setting::getValue('youtube_url')) }}">
+                                                <button type="button" class="btn btn-outline-secondary clear-url" data-target="youtube_url">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             </div>
                                             @error('youtube_url')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -308,17 +294,24 @@
                                     </div>
                                 </div>
                                 
-                                <div class="form-group mb-3">
-                                    <label for="linkedin_url">URL LinkedIn</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
-                                        <input type="url" class="form-control @error('linkedin_url') is-invalid @enderror" 
-                                            id="linkedin_url" name="linkedin_url" 
-                                            value="{{ old('linkedin_url', \App\Models\Setting::getValue('linkedin_url')) }}">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="linkedin_url">URL LinkedIn</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
+                                                <input type="url" class="form-control @error('linkedin_url') is-invalid @enderror" 
+                                                    id="linkedin_url" name="linkedin_url" 
+                                                    value="{{ old('linkedin_url', \App\Models\Setting::getValue('linkedin_url')) }}">
+                                                <button type="button" class="btn btn-outline-secondary clear-url" data-target="linkedin_url">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            @error('linkedin_url')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                    @error('linkedin_url')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                                 
                                 <button type="submit" class="btn btn-primary">
@@ -387,4 +380,18 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý nút xóa URL
+    document.querySelectorAll('.clear-url').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).value = '';
+        });
+    });
+});
+</script>
+@endpush 
