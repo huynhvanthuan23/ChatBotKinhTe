@@ -25,10 +25,12 @@ docker run -d --name chatbot-kinhte -p 55050:55050 ^
   -v "%cd%\storage:/app/storage" ^
   -v "%cd%\web\public\storage:/app/web/public/storage" ^
   -v "%cd%\app.log:/app/app.log" ^
+  -v "%cd%\.env:/app/.env" ^
   chatbot-kinhte:55050
 
-echo === Luu image ra file tar ===
-docker save -o sys_55050.tar chatbot-kinhte:55050
+
+@REM echo === Luu image ra file tar ===
+@REM docker save -o sys_55050.tar chatbot-kinhte:55050
 
 echo === Trang thai container ===
 wmic process where "name='dockerd.exe'" list brief

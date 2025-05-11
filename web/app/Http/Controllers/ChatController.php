@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\RequestException;
 use Illuminate\Validation\ValidationException;
 use App\Models\Conversation;
 use App\Models\Message;
+use Illuminate\Support\Str;
 
 class ChatController extends Controller
 {
@@ -67,8 +68,10 @@ class ChatController extends Controller
                 'conversation_id' => 'nullable|integer|exists:conversations,id',
             ]);
 
-            // Use the full URL directly
-            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/simple-chat');
+            // Use the full URL directly but strip any endpoints
+            $rawApiUrl = env('CHATBOT_API_URL', 'http://localhost:55050');
+            // Loại bỏ bất kỳ endpoint nào có thể có trong URL cấu hình
+            $baseApiUrl = preg_replace('#/api/v1/chat/.*$#', '', $rawApiUrl);
             
             // Lấy selected_document_ids từ session nếu có
             $selectedDocumentIds = $request->session()->get('selected_document_ids', []);
@@ -89,6 +92,16 @@ class ChatController extends Controller
                 Log::info('Using document IDs from query string', [
                     'doc_ids' => $queryDocIds
                 ]);
+            }
+            
+            // Sử dụng endpoint document-chat khi có document_ids, nếu không thì dùng chat-direct
+            $apiUrl = $baseApiUrl;
+            if (!empty($selectedDocumentIds)) {
+                $apiUrl .= '/api/v1/chat/document-chat';
+                Log::info('Using document-chat endpoint for documents');
+            } else {
+                $apiUrl .= '/api/v1/chat/simple-chat';
+                Log::info('Using simple-chat endpoint (only main database, no uploaded documents)');
             }
             
             // Log request information for debugging
@@ -147,9 +160,8 @@ class ChatController extends Controller
             
             // Test if API is accessible before sending actual request
             try {
-                // Extract base URL without the endpoint part
-                $baseUrl = preg_replace('#/api/v1/chat/.*$#', '', $apiUrl);
-                $healthUrl = $baseUrl . '/api/v1/chat/health';
+                // Sử dụng baseApiUrl đã được xử lý ở trên
+                $healthUrl = $baseApiUrl . '/api/v1/chat/health';
                 
                 Log::info('Checking health at: ' . $healthUrl);
                 
@@ -221,6 +233,16 @@ class ChatController extends Controller
             $result = json_decode($responseBody, true);
             Log::info('Decoded JSON: ' . json_encode($result));
             
+            // Kiểm tra và log thông tin trích dẫn nếu có
+            if (isset($result['citations']) && is_array($result['citations']) && !empty($result['citations'])) {
+                Log::info('[CITATION-LARAVEL] Nhận được ' . count($result['citations']) . ' trích dẫn từ API Python');
+                foreach ($result['citations'] as $index => $citation) {
+                    Log::info("[CITATION-LARAVEL] Trích dẫn #" . ($index + 1) . ": doc_id={$citation['doc_id']}, page={$citation['page']}, title={$citation['title']}");
+                }
+            } else {
+                Log::info('[CITATION-LARAVEL] Không có trích dẫn trong phản hồi từ API Python');
+            }
+            
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('JSON decode error: ' . json_last_error_msg() . ', Raw response: ' . substr($responseBody, 0, 500));
                 
@@ -239,109 +261,77 @@ class ChatController extends Controller
                 ], 500);
             }
             
-            // Find the answer field in the response, whatever it's called
-            $answer = null;
-            if (isset($result['response'])) {
-                $answer = $result['response'];
-            } elseif (isset($result['answer'])) {
-                $answer = $result['answer'];
-            } elseif (isset($result['result'])) {
-                $answer = $result['result'];
-            } elseif (isset($result['message'])) {
-                $answer = $result['message'];
-            } elseif (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                // Google API response format
-                $answer = $result['candidates'][0]['content']['parts'][0]['text'];
-            } elseif (isset($result['error'])) {
-                // Return error as answer for debugging
-                $answer = 'API error: ' . $result['error'];
+            // Save the conversation if needed
+            if (!$conversationId && $result['success'] !== false) {
+                $conversation = new Conversation();
+                $conversation->user_id = Auth::id();
+                $conversation->title = Str::limit($request->message, 50);
+                $conversation->save();
+                
+                $conversationId = $conversation->id;
+                
+                // Create the first message (user's message)
+                $userMessage = new Message();
+                $userMessage->conversation_id = $conversationId;
+                $userMessage->user_id = Auth::id();
+                $userMessage->content = $request->message;
+                $userMessage->sender = 'user';
+                $userMessage->save();
+                
+                Log::info('Created new conversation', ['id' => $conversationId]);
             }
             
-            // Kiểm tra và trích xuất thông tin trích dẫn (citation) nếu có
-            $citations = [];
-            if (isset($result['citations'])) {
-                $citations = $result['citations'];
-                Log::info('Citations found in API response: ' . json_encode($citations));
-            } elseif (isset($result['detailed_citations'])) {
-                $citations = $result['detailed_citations'];
-                Log::info('Detailed citations found in API response: ' . json_encode($citations));
-            }
+            // Determine message content from response
+            $messageContent = '';
             
-            // Kiểm tra xem có cần thêm phần trích dẫn vào kết quả không
-            if (!empty($citations) && $answer) {
-                Log::info('Processing and adding citations to the response.');
-                
-                // Format trích dẫn để hiển thị ở frontend
-                $citationText = "\n\n**Nguồn trích dẫn:**\n";
-                
-                foreach ($citations as $index => $citation) {
-                    Log::info('Processing citation: ' . json_encode($citation));
-                    
-                    // Xử lý cho từng định dạng citation có thể có
-                    $title = isset($citation['title']) ? $citation['title'] : 
-                           (isset($citation['metadata']['title']) ? $citation['metadata']['title'] : 'Tài liệu');
-                    
-                    $page = isset($citation['page']) ? $citation['page'] : 
-                          (isset($citation['metadata']['page']) ? $citation['metadata']['page'] : '');
-                    
-                    $chunk = isset($citation['chunk_index']) ? $citation['chunk_index'] : 
-                           (isset($citation['metadata']['chunk_index']) ? $citation['metadata']['chunk_index'] : '');
-                    
-                    $url = isset($citation['url']) ? $citation['url'] : 
-                         (isset($citation['metadata']['url']) ? $citation['metadata']['url'] : '');
-                    
-                    // Đảm bảo URL có định dạng phù hợp
-                    if (!empty($url) && !preg_match('/^(http|https):\/\//', $url)) {
-                        // Nếu URL không bắt đầu bằng http:// hoặc https://, thêm domain của ứng dụng
-                        $url = url($url);
-                    }
-                    
-                    // Tạo link trích dẫn với Markdown
-                    $citationLink = "[${title} - Trang ${page}, đoạn ${chunk}](${url})";
-                    $citationText .= "- " . $citationLink . "\n";
-                    
-                    Log::info('Created citation link: ' . $citationLink);
-                }
-                
-                // Thêm thông tin trích dẫn vào cuối câu trả lời
-                $answer .= $citationText;
-                
-                Log::info('Answer with citations: ' . $answer);
+            if (isset($result['success']) && $result['success'] === false) {
+                $messageContent = $result['message'] ?? $result['error'] ?? 'Có lỗi xảy ra';
+                Log::error('API error response', ['error' => $messageContent]);
             } else {
-                if (empty($citations)) {
-                    Log::warning('No citations found in API response.');
+                // Check different response formats
+                if (isset($result['response'])) {
+                    $messageContent = $result['response'];
+                } elseif (isset($result['answer'])) {
+                    $messageContent = $result['answer'];
+                } elseif (isset($result['message'])) {
+                    $messageContent = $result['message'];
+                } else {
+                    $messageContent = 'Không có phản hồi từ API';
+                    Log::warning('No message/response/answer in API response', ['result' => $result]);
                 }
             }
             
-            if (!$answer) {
-                Log::error('No answer found in API response');
+            // Save bot response if we have a conversation
+            if ($conversationId) {
+                // Check if we have citations in the response
+                $citations = $result['citations'] ?? [];
                 
-                // Create error message in database
-                $errorMessage = 'Không thể nhận được câu trả lời từ chatbot. Vui lòng thử lại sau.';
-                Message::create([
-                    'conversation_id' => $conversationId,
-                    'sender' => 'bot',
-                    'content' => $errorMessage
-                ]);
+                $botMessage = new Message();
+                $botMessage->conversation_id = $conversationId;
+                $botMessage->user_id = Auth::id();
+                $botMessage->content = $messageContent;
+                $botMessage->sender = 'bot';
                 
-                return response()->json([
-                    'success' => false,
-                    'message' => $errorMessage,
-                    'conversation_id' => $conversationId
-                ], 500);
+                // Lưu trích dẫn nếu có
+                if (!empty($citations)) {
+                    $botMessage->citations = $citations;
+                    Log::info('Saving message with citations', [
+                        'conversation_id' => $conversationId,
+                        'citations_count' => count($citations)
+                    ]);
+                }
+                
+                $botMessage->save();
+                
+                Log::info('Saved bot response to conversation', ['id' => $conversationId]);
             }
             
-            // Create bot message in database
-            Message::create([
-                'conversation_id' => $conversationId,
-                'sender' => 'bot',
-                'content' => $answer
-            ]);
-            
+            // Return JSON response with message and citations
             return response()->json([
                 'success' => true,
-                'message' => $answer,
-                'conversation_id' => $conversationId
+                'message' => $messageContent,
+                'conversation_id' => $conversationId,
+                'citations' => $result['citations'] ?? []
             ]);
         } catch (RequestException $e) {
             // Handle Guzzle request exceptions
@@ -771,9 +761,10 @@ class ChatController extends Controller
                 ], 404);
             }
 
+            // Lấy tất cả tin nhắn bao gồm trường citations
             $messages = $conversation->messages()
                 ->orderBy('created_at', 'asc')
-                ->get(['id', 'sender', 'content', 'created_at']);
+                ->get(['id', 'sender', 'content', 'citations', 'created_at']);
 
             return response()->json([
                 'success' => true,

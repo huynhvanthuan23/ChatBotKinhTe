@@ -1,6 +1,10 @@
 import disable_pickle
 disable_pickle.disable()
 
+# Set ALLOW_PICKLE for vector database loading
+import os
+os.environ["ALLOW_PICKLE"] = "true"
+
 # Sửa lỗi OpenAI proxies
 try:
     import fix_openai_proxy
@@ -13,7 +17,7 @@ except Exception as e:
 
 import uvicorn
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
@@ -48,7 +52,7 @@ from app.services.chatbot import ChatbotService
 from app.services.api_service import APIService
 
 # Constants and Environment Variables
-VECTOR_DB_PATH = os.getenv("DB_FAISS_PATH", "vector_db")
+VECTOR_DB_PATH = os.getenv("CORE_VECTOR_DIR", "vector_db/core_data")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 GEMINI_MODEL = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
@@ -83,23 +87,9 @@ except Exception as e:
 # Middleware để xử lý encoding
 class EncodingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Set character encoding for the request
-        if "content-type" in request.headers and "charset" not in request.headers.get("content-type", ""):
-            # Default to UTF-8 for JSON requests without explicit charset
-            if "application/json" in request.headers.get("content-type", ""):
-                # We can't modify the request headers directly, but we can log this
-                logger.info("JSON request without charset detected, will process as UTF-8")
-        
-        # Process the request and get response
         response = await call_next(request)
-        
-        # Set consistent encoding for JSON responses
         if response.headers.get("content-type", "").startswith("application/json"):
             response.headers["content-type"] = "application/json; charset=utf-8"
-            
-            # Add additional headers to prevent encoding issues
-            response.headers["X-Content-Type-Options"] = "nosniff"
-            response.headers["Accept-Charset"] = "utf-8"
         return response
 
 # Tạo ứng dụng FastAPI với middleware
@@ -203,6 +193,7 @@ def _safe_load(*args, **kwargs):
 
 # Thay thế pickle.load bằng phiên bản có điều kiện
 pickle.load = _safe_load
+
 # Khởi tạo vector database - sử dụng dịch vụ
 def initialize_vector_db():
     """Initialize vector database from FAISS using ChatbotService."""
@@ -225,17 +216,17 @@ def initialize_vector_db():
             
             return DummyRetriever()
     except Exception as e:
-                logging.error(f"Error initializing vector database: {str(e)}")
-                logging.error(traceback.format_exc())
+        logging.error(f"Error initializing vector database: {str(e)}")
+        logging.error(traceback.format_exc())
         
-                # Tạo dummy retriever
-                class DummyRetriever:
-                    def get_relevant_documents(self, query):
-                        logging.warning(f"Using dummy retriever for query: {query}")
-                        from langchain.schema import Document
-                        return [Document(page_content="Không có thông tin.", metadata={})]
-                
-                return DummyRetriever()
+        # Tạo dummy retriever
+        class DummyRetriever:
+            def get_relevant_documents(self, query):
+                logging.warning(f"Using dummy retriever for query: {query}")
+                from langchain.schema import Document
+                return [Document(page_content="Không có thông tin.", metadata={})]
+        
+        return DummyRetriever()
 
 # Khởi tạo Gemini API - sử dụng dịch vụ
 def initialize_gemini():
@@ -345,34 +336,9 @@ async def chat_direct(request: Request):
     Chat trực tiếp với API, có sử dụng vector database
     """
     try:
-        # Try to safely parse JSON with proper encoding
-        try:
-            # First try to parse directly using FastAPI
-            body = await request.json()
-            logger.info("Successfully parsed JSON from request in chat_direct")
-        except Exception as e:
-            # If that fails, try manual parsing with explicit encoding
-            logger.warning(f"Direct JSON parsing failed: {str(e)}")
-            raw_body = await request.body()
-            try:
-                body_str = raw_body.decode('utf-8')
-                body = json.loads(body_str)
-                logger.info("Parsed JSON with explicit UTF-8 decoding")
-            except Exception as decode_err:
-                logger.error(f"Error decoding request body: {str(decode_err)}")
-                return {
-                    "success": False,
-                    "response": "Không thể phân tích yêu cầu. Lỗi mã hóa.",
-                    "error": f"Request decoding error: {str(decode_err)}"
-                }
-        
-        # Extract query with proper handling
+        # Read raw body
+        body = await request.json()
         query = body.get("message", "")
-        if query and isinstance(query, str):
-            # Normalize the string
-            query = query.strip()
-            logger.info(f"Processing query: {query}")
-            
         user_id = body.get("user_id")
         
         if not query:
@@ -387,28 +353,21 @@ async def chat_direct(request: Request):
         # Xử lý chat
         result = await process_chat(query, user_id)
         
-        # Ensure the response is properly encoded
-        response_data = {
+        return {
             "success": result.get("success", False),
             "response": result.get("answer", "Không có phản hồi"),
             "query": query,
             "model_info": result.get("model_info", {})
         }
         
-        # Log successful response
-        logger.info(f"Successfully generated response for query: {query}")
-        
-        return UTF8JSONResponse(content=response_data)
-        
     except Exception as e:
         logger.error(f"Error in chat_direct endpoint: {str(e)}")
         logger.error(traceback.format_exc())
-        error_response = {
+        return {
             "success": False,
             "response": f"Xin lỗi, có lỗi xảy ra: {str(e)}",
             "error": str(e)
         }
-        return UTF8JSONResponse(content=error_response)
 
 @app.get("/api/v1/chat/service-info")
 async def service_info():
@@ -474,48 +433,33 @@ async def simple_chat(request: Request):
         raw_body = await request.body()
         logger.info(f"Raw request body length: {len(raw_body)}")
         
-        # Try to parse directly first
+        # Try to decode with different encodings
         try:
-            # Assume request comes with correct Content-Type header
-            body = await request.json()
-            logger.info(f"Successfully parsed JSON directly from request")
-        except Exception as json_err:
-            logger.warning(f"Could not parse JSON directly: {str(json_err)}, trying manual decoding")
-            
-            # Try to decode with different encodings
+            body_str = raw_body.decode('utf-8')
+            logger.info("Used utf-8 encoding for request body")
+        except UnicodeDecodeError:
             try:
-                body_str = raw_body.decode('utf-8')
-                logger.info("Used utf-8 encoding for request body")
+                body_str = raw_body.decode('latin-1')
+                logger.info("Used latin-1 encoding for request body")
             except UnicodeDecodeError:
-                try:
-                    body_str = raw_body.decode('latin-1')
-                    logger.info("Used latin-1 encoding for request body")
-                except UnicodeDecodeError:
-                    body_str = raw_body.decode('cp1252', errors='ignore')
-                    logger.info("Used cp1252 encoding with error ignore for request body")
-            
-            # Parse JSON from string
-            try:
-                body = json.loads(body_str)
-                logger.info(f"Parsed JSON after manual decoding")
-            except json.JSONDecodeError as e:
-                # Log a part of body for debugging
-                preview = body_str[:100] if len(body_str) > 100 else body_str
-                logger.error(f"JSON parsing error: {str(e)}, preview: {preview}")
-                return {
-                    "success": False,
-                    "response": "Invalid JSON format",
-                    "error": f"JSON decode error: {str(e)}"
-                }
+                body_str = raw_body.decode('cp1252', errors='ignore')
+                logger.info("Used cp1252 encoding with error ignore for request body")
         
-        # Extract message and handle UTF-8 characters properly
+        # Parse JSON from string
+        try:
+            body = json.loads(body_str)
+            logger.info(f"Parsed JSON: {body}")
+        except json.JSONDecodeError as e:
+            # Log a part of body for debugging
+            preview = body_str[:100] if len(body_str) > 100 else body_str
+            logger.error(f"JSON parsing error: {str(e)}, preview: {preview}")
+            return {
+                "success": False,
+                "response": "Invalid JSON format",
+                "error": f"JSON decode error: {str(e)}"
+            }
+        
         query = body.get("message", "")
-        if query:
-            # Ensure query is properly encoded
-            if isinstance(query, str):
-                # Normalize the string to ensure consistent encoding
-                query = query.strip()
-                logger.info(f"Normalized query: {query}")
         
         # Chấp nhận nhiều tham số document ID khác nhau từ client
         support_doc_ids = body.get("support_doc_ids", [])
@@ -578,46 +522,16 @@ async def simple_chat(request: Request):
         # Sử dụng ChatbotService để xử lý simple chat
         result = await chatbot_service.get_simple_retrieval(query, all_doc_ids)
         
-        # Đảm bảo thông tin trích dẫn được bao gồm trong phản hồi
-        if "citations" not in result and "response" in result:
-            logger.info("No citations included in the get_simple_retrieval result, querying documents for citations")
-            
-            # Thử lấy thêm thông tin trích dẫn nếu có document IDs
-            if all_doc_ids:
-                try:
-                    # Truy vấn riêng để lấy thông tin trích dẫn
-                    citation_results = await chatbot_service.query_document_with_citation(query, all_doc_ids)
-                    
-                    # Kiểm tra xem có kết quả trích dẫn không
-                    if citation_results and "citations" in citation_results and citation_results["citations"]:
-                        logger.info(f"Found {len(citation_results['citations'])} citations, adding to result")
-                        result["citations"] = citation_results["citations"]
-                        
-                        # Thêm cả detailed_citations nếu có
-                        if "detailed_citations" in citation_results:
-                            result["detailed_citations"] = citation_results["detailed_citations"]
-                            
-                        # Log thông tin để debug
-                        logger.info(f"Added citations to response: {json.dumps(result['citations'], ensure_ascii=False)}")
-                except Exception as citation_err:
-                    logger.error(f"Error getting citations: {str(citation_err)}")
-        
-        # Log thông tin đầy đủ về kết quả trả về
-        logger.info(f"Simple chat response structure: {list(result.keys())}")
-        if "citations" in result:
-            logger.info(f"Citations included in response: {len(result['citations'])}")
-            
-        return UTF8JSONResponse(content=result)
+        return result
             
     except Exception as e:
         logger.error(f"Error in simple chat request parsing: {str(e)}")
         logger.error(traceback.format_exc())
-        error_response = {
+        return {
             "success": False,
             "response": "Xin lỗi, có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.",
             "error": str(e)
         }
-        return UTF8JSONResponse(content=error_response)
 
 @app.post("/api/v1/admin/reload-config")
 async def reload_config(config: Optional[ConfigRequest] = None):
@@ -630,7 +544,11 @@ async def reload_config(config: Optional[ConfigRequest] = None):
         importlib.reload(settings)
         
         # Update global variables
-        global API_TYPE, GEMINI_MODEL, OPENAI_MODEL
+        global API_TYPE, GEMINI_MODEL, OPENAI_MODEL, api_service
+        
+        # Lưu trữ API keys từ cấu hình cũ hoặc từ request
+        google_api_key = None
+        openai_api_key = None
         
         # If config is provided, use it directly instead of environment variables
         if config:
@@ -642,11 +560,13 @@ async def reload_config(config: Optional[ConfigRequest] = None):
                 GEMINI_MODEL = config.google_model
                 # Set API key if provided
                 if config.google_api_key:
+                    google_api_key = config.google_api_key
                     os.environ["GOOGLE_API_KEY"] = config.google_api_key
             elif API_TYPE == "openai" and config.openai_model:
                 OPENAI_MODEL = config.openai_model
                 # Set API key if provided
                 if config.openai_api_key:
+                    openai_api_key = config.openai_api_key
                     os.environ["OPENAI_API_KEY"] = config.openai_api_key
         else:
             # Use environment variables
@@ -654,9 +574,38 @@ async def reload_config(config: Optional[ConfigRequest] = None):
             API_TYPE = os.getenv("API_TYPE", "google").lower()
             GEMINI_MODEL = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
             OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+            
+            # Lấy API keys từ biến môi trường
+            google_api_key = os.getenv("GOOGLE_API_KEY", "")
+            openai_api_key = os.getenv("OPENAI_API_KEY", "")
         
         # Set global API_TYPE environment variable
         os.environ["API_TYPE"] = API_TYPE
+        
+        # Tạo lại đối tượng api_service với cấu hình mới và API key phù hợp
+        try:
+            from app.services.api_service import APIService
+            
+            # Chọn API key và model phù hợp với loại API
+            current_api_key = google_api_key if API_TYPE == "google" else openai_api_key
+            current_model = GEMINI_MODEL if API_TYPE == "google" else OPENAI_MODEL
+            
+            # Tạo đối tượng API Service mới với tham số trực tiếp
+            api_service = APIService(
+                api_type=API_TYPE,
+                api_key=current_api_key,
+                model=current_model
+            )
+            
+            logger.info(f"Recreated API Service with new {API_TYPE} configuration")
+        except Exception as e:
+            logger.error(f"Failed to recreate API Service: {str(e)}")
+            logger.error(traceback.format_exc())
+            return ReloadResponse(
+                success=False,
+                message=f"Không thể tạo lại API Service với cấu hình {API_TYPE}",
+                error=str(e)
+            )
         
         # Reinitialize API clients
         global gemini_model, openai_client
@@ -750,10 +699,14 @@ async def document_chat(request: Request):
     Chat với tài liệu cụ thể, hỗ trợ trích dẫn
     """
     try:
+        start_time = time.time()
         # Đọc dữ liệu từ request
         body = await request.json()
         query = body.get("message", "")
         user_id = body.get("user_id")
+        
+        # Log chi tiết request đầu vào
+        logger.info(f"[CITATION-API] Nhận request document-chat từ user_id: {user_id}, query: '{query}'")
         
         # Đọc document_ids từ các trường khác nhau
         doc_ids = body.get("document_ids", [])
@@ -766,7 +719,10 @@ async def document_chat(request: Request):
         if isinstance(doc_ids, str):
             doc_ids = [int(id.strip()) for id in doc_ids.split(',') if id.strip().isdigit()]
             
+        logger.info(f"[CITATION-API] Danh sách tài liệu cần truy vấn: {doc_ids}")
+            
         if not query:
+            logger.warning("[CITATION-API] Không có tin nhắn được cung cấp")
             return {
                 "success": False,
                 "response": "Không có tin nhắn được cung cấp",
@@ -774,18 +730,33 @@ async def document_chat(request: Request):
             }
             
         if not doc_ids:
+            logger.warning("[CITATION-API] Không có tài liệu nào được chọn")
             return {
                 "success": False,
                 "response": "Không có tài liệu nào được chọn",
                 "error": "No documents selected"
             }
             
-        logger.info(f"Truy vấn tài liệu với câu hỏi: {query}, document_ids: {doc_ids}")
+        logger.info(f"[CITATION-API] Bắt đầu truy vấn tài liệu với câu hỏi: {query}, document_ids: {doc_ids}")
             
         # Truy vấn tài liệu với hỗ trợ trích dẫn
         search_results = await chatbot_service.query_document_with_citation(query, doc_ids)
         
-        if not search_results["results"]:
+        # Kiểm tra kết quả trả về
+        if not search_results:
+            logger.error("[CITATION-API] Hàm query_document_with_citation trả về giá trị None")
+            return {
+                "success": False,
+                "response": "Có lỗi khi xử lý tài liệu. Vui lòng thử lại sau.",
+                "query": query,
+                "citations": []
+            }
+        
+        # Log kết quả tìm kiếm
+        logger.info(f"[CITATION-API] Nhận được {len(search_results.get('results', []))} kết quả và {len(search_results.get('citations', []))} trích dẫn")
+        
+        if not search_results.get("results", []):
+            logger.warning("[CITATION-API] Không tìm thấy kết quả nào phù hợp")
             return {
                 "success": True,
                 "response": "Tôi không tìm thấy thông tin liên quan đến câu hỏi của bạn trong các tài liệu được chọn.",
@@ -794,7 +765,7 @@ async def document_chat(request: Request):
             }
         
         # Tổng hợp kết quả tìm kiếm để gửi đến LLM
-        context_text = "\n---\n".join(search_results["results"])
+        context_text = "\n---\n".join(search_results.get("results", []))
         
         # Tạo prompt với ngữ cảnh
         prompt = f"""Dưới đây là một số đoạn văn bản liên quan đến câu hỏi của người dùng. 
@@ -809,25 +780,40 @@ CÂU HỎI: {query}
 
 TRẢ LỜI:"""
 
+        logger.info(f"[CITATION-API] Gửi prompt đến LLM API, độ dài prompt: {len(prompt)} ký tự")
+
         # Gọi API LLM
         if api_service:
             if settings.API_TYPE.lower() == "google":
+                logger.info("[CITATION-API] Sử dụng Google Gemini API")
                 llm_response = await api_service.generate_with_gemini(prompt)
             else:
+                logger.info("[CITATION-API] Sử dụng OpenAI API")
                 llm_response = await api_service.generate_with_openai(prompt)
         else:
                 llm_response = "Không thể kết nối với API LLM."
+                logger.error("[CITATION-API] Không có API service được khởi tạo")
+        
+        # Log thời gian xử lý
+        processing_time = time.time() - start_time
+        logger.info(f"[CITATION-API] Hoàn tất xử lý trong {processing_time:.2f} giây")
+        
+        # Log kết quả trả về
+        citations = search_results.get("citations", [])
+        logger.info(f"[CITATION-API] Trả về câu trả lời với {len(citations)} trích dẫn")
+        if citations:
+            logger.info(f"[CITATION-API] Chi tiết trích dẫn đầu tiên: doc_id={citations[0].get('doc_id')}, page={citations[0].get('page')}, url={citations[0].get('url')}")
         
         # Trả về kết quả kèm theo thông tin trích dẫn
         return {
             "success": True,
             "response": llm_response,
             "query": query,
-            "citations": search_results["citations"]
+            "citations": citations
         }
             
     except Exception as e:
-        logger.error(f"Lỗi trong document_chat: {str(e)}")
+        logger.error(f"[CITATION-API] Lỗi trong document_chat: {str(e)}")
         logger.error(traceback.format_exc())
         return {
             "success": False,
@@ -943,19 +929,6 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
         logger.error(traceback.format_exc())
-
-# Custom JSONResponse class to ensure proper UTF-8 encoding
-class UTF8JSONResponse(JSONResponse):
-    media_type = "application/json; charset=utf-8"
-    
-    def render(self, content):
-        return json.dumps(
-            content,
-            ensure_ascii=False,  # Important for proper UTF-8 handling
-            allow_nan=False,
-            indent=None,
-            separators=(",", ":")
-        ).encode("utf-8")
 
 # Chạy ứng dụng
 if __name__ == "__main__":

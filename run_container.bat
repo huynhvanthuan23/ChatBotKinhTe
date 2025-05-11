@@ -10,4 +10,5 @@ docker run -d --name chatbot-kinhte -p 55050:55050 ^
   -v "%cd%\storage:/app/storage" ^
   -v "%cd%\web\public\storage:/app/web/public/storage" ^
   -v "%cd%\app.log:/app/app.log" ^
+  -v "%cd%\.env:/app/.env" ^
   chatbot-kinhte:55050

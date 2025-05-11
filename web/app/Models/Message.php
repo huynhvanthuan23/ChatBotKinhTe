@@ -11,8 +11,19 @@ class Message extends Model
 
     protected $fillable = [
         'conversation_id',
+        'user_id',
         'sender',
         'content',
+        'citations',
+    ];
+    
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'citations' => 'array',
     ];
 
     /**
@@ -21,5 +32,13 @@ class Message extends Model
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
+    }
+
+    /**
+     * Get the user that owns the message.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

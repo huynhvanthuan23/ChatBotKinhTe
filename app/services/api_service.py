@@ -15,15 +15,22 @@ logger = get_logger(__name__)
 class APIService:
     """Service to handle LLM API calls (Google, OpenAI, etc.)"""
     
-    def __init__(self):
-        """Initialize the API service with configuration from settings"""
-        self.api_type = settings.API_TYPE.lower()
+    def __init__(self, api_type: Optional[str] = None, api_key: Optional[str] = None, model: Optional[str] = None):
+        """
+        Initialize the API service with configuration
+        
+        Args:
+            api_type: Optional - The API type to use ('google' or 'openai')
+            api_key: Optional - The API key to use
+            model: Optional - The model to use
+        """
+        self.api_type = api_type.lower() if api_type else settings.API_TYPE.lower()
         self.timeout = settings.API_TIMEOUT
         
         # Set up API-specific configurations
         if self.api_type == "google":
-            self.api_key = settings.GOOGLE_API_KEY
-            self.model = settings.GOOGLE_MODEL
+            self.api_key = api_key if api_key else settings.GOOGLE_API_KEY
+            self.model = model if model else settings.GOOGLE_MODEL
             self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
             
             if not self.api_key or self.api_key == "your-google-api-key-here":
@@ -31,8 +38,8 @@ class APIService:
                 raise ValueError("Google API key not configured")
         
         elif self.api_type == "openai":
-            self.api_key = settings.OPENAI_API_KEY
-            self.model = settings.OPENAI_MODEL
+            self.api_key = api_key if api_key else settings.OPENAI_API_KEY
+            self.model = model if model else settings.OPENAI_MODEL
             self.base_url = "https://api.openai.com/v1"
             
             if not self.api_key:

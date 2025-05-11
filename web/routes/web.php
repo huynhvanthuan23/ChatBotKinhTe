@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CitationController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -81,13 +82,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('/chat/test-connection', [ChatController::class, 'testConnection'])->name('chat.test-connection');
-    
+
     // Thêm các route mới cho quản lý cuộc trò chuyện
     Route::post('/chat/create-conversation', [ChatController::class, 'createConversation'])->name('chat.create-conversation');
     Route::post('/chat/save-message', [ChatController::class, 'saveMessage'])->name('chat.save-message');
     Route::get('/chat/conversations', [ChatController::class, 'getConversations'])->name('chat.conversations');
     Route::get('/chat/conversations/{id}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
     Route::delete('/chat/conversations/{id}', [ChatController::class, 'deleteConversation'])->name('chat.delete-conversation');
+    
+    // Route cho API trích dẫn
+    Route::get('/api/citation/{docId}/{page}', [CitationController::class, 'getCitationContent'])->name('api.citation.content');
+    Route::get('/api/citation-document-type/{docId}', [CitationController::class, 'getDocumentType'])->name('api.citation.document-type');
+    Route::get('/api/citation-document/{docId}', [CitationController::class, 'getCitationDocument'])->name('api.citation.document');
     
     // Thêm routes cho quản lý tài liệu
     Route::prefix('documents')->group(function () {
@@ -96,6 +102,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
         Route::get('/{id}', [App\Http\Controllers\DocumentController::class, 'show'])->name('documents.show');
         Route::delete('/{id}', [App\Http\Controllers\DocumentController::class, 'destroy'])->name('documents.destroy');
+        
+        // Xem tài liệu Word dưới dạng HTML
+        Route::get('/{id}/view', [App\Http\Controllers\DocumentController::class, 'viewDocument'])->name('documents.view');
+        
+        // Reload cache của tài liệu
+        Route::get('/{id}/reload-cache', [App\Http\Controllers\DocumentController::class, 'reloadDocCache'])->name('documents.reload-cache');
         
         // Chat với document
         Route::get('/{id}/chat', [App\Http\Controllers\DocumentController::class, 'showChat'])->name('documents.chat');

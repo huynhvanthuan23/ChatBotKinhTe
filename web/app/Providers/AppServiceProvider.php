@@ -41,5 +41,10 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment() !== 'production' && !file_exists(public_path('storage'))) {
             \Artisan::call('storage:link');
         }
+
+        // Force HTTPS in production
+        if(config('app.force_https') || env('FORCE_HTTPS', false)) {
+            \URL::forceScheme('https');
+        }
     }
 }

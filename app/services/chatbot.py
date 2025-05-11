@@ -18,6 +18,7 @@ from langchain.schema import Document
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import shutil
+import pdfplumber
 
 # Cấu hình logging
 logger = get_logger(__name__)
@@ -49,7 +50,7 @@ class ChatbotService:
         try:
             logger.info("Initializing vector database...")
             # Kiểm tra đường dẫn và file tồn tại
-            db_path = settings.DB_FAISS_PATH
+            db_path = settings.CORE_VECTOR_DIR
             
             if not os.path.exists(db_path):
                 logger.error(f"Vector database directory not found: {db_path}")
@@ -70,8 +71,12 @@ class ChatbotService:
                 logger.info(f"Loading vector database from {db_path}")
                 try:
                     db = FAISS.load_local(db_path, embedding, allow_dangerous_deserialization=True)
-                except TypeError:
-                    db = FAISS.load_local(db_path, embedding)
+                except Exception as e:
+                    logger.error(f"Failed to load from {db_path} with allow_dangerous_deserialization=True: {e}")
+                    logger.info("Retrying with environment variables")
+                    # Set environment variable directly
+                    os.environ["ALLOW_PICKLE"] = "true"
+                    db = FAISS.load_local(db_path, embedding, allow_dangerous_deserialization=True)
                     
                 # Kiểm tra kích thước của vector database
                 if hasattr(db, 'index') and hasattr(db.index, 'ntotal'):
@@ -164,7 +169,7 @@ class ChatbotService:
             # Khởi tạo embedding model và vector store
             try:
                 # Kiểm tra đường dẫn vector database
-                db_path = settings.DB_FAISS_PATH
+                db_path = settings.CORE_VECTOR_DIR
                 logger.info(f"Vector store path: {db_path}")
                 
                 # Kiểm tra xem thư mục và file có tồn tại không
@@ -192,7 +197,8 @@ class ChatbotService:
                     # Sửa lại cách load FAISS index
                     self._db = FAISS.load_local(
                         db_path, 
-                        self._embeddings
+                        self._embeddings,
+                        allow_dangerous_deserialization=True
                     )
                     
                     # Kiểm tra xem vector store có dữ liệu không
@@ -423,7 +429,9 @@ YÊU CẦU ĐẶC BIỆT:
             
             # Tạo các biến thể của truy vấn để tìm kiếm tốt hơn (đặc biệt cho truy vấn định nghĩa)
             expanded_queries = [processed_query]
+            is_definition_query = False
             if "là gì" in processed_query:
+                is_definition_query = True
                 # Trích xuất khái niệm từ câu hỏi "X là gì"
                 concept = processed_query.replace("là gì", "").strip()
                 # Thêm các biến thể
@@ -433,7 +441,15 @@ YÊU CẦU ĐẶC BIỆT:
                     f"{concept} có nghĩa",
                     f"khái niệm {concept}"
                 ])
-                logger.info(f"Mở rộng truy vấn định nghĩa: {expanded_queries}")
+                logger.info(f"[CITATION] Mở rộng truy vấn định nghĩa: {expanded_queries}")
+            # Thêm biến thể cho các câu hỏi thông thường
+            else:
+                # Thêm các từ khóa của truy vấn làm biến thể
+                keywords = [w for w in processed_query.split() if len(w) >= 4]
+                for keyword in keywords[:3]:
+                    if keyword not in expanded_queries:
+                        expanded_queries.append(keyword)
+                logger.info(f"[CITATION] Mở rộng truy vấn với các từ khóa: {expanded_queries}")
             
             # Tạo embedding cho câu hỏi để kiểm tra
             try:
@@ -455,9 +471,6 @@ YÊU CẦU ĐẶC BIỆT:
                 logger.error(traceback.format_exc())
             
             docs = []
-            citations = [] # Khởi tạo danh sách citations
-            detailed_citations = [] # Khởi tạo danh sách detailed_citations
-            
             # Log thông tin chi tiết về document IDs
             if document_ids:
                 logger.info(f"Đang tìm kiếm trong các tài liệu: {document_ids}")
@@ -482,7 +495,7 @@ YÊU CẦU ĐẶC BIỆT:
                         document_vectors_path = f"{settings.UPLOAD_VECTOR_DIR}/{user_id}/{doc_id}"
                     else:
                         # Định dạng cũ
-                        document_vectors_path = os.path.join(settings.DB_FAISS_PATH, f"doc_{doc_id}")
+                        document_vectors_path = os.path.join(settings.CORE_VECTOR_DIR, f"doc_{doc_id}")
                     
                     logger.info(f"Kiểm tra đường dẫn tài liệu: {document_vectors_path}")
                     
@@ -499,9 +512,9 @@ YÊU CẦU ĐẶC BIỆT:
                                 try:
                                     doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
                                     logger.info(f"Đã load vector database cho tài liệu {doc_id} với allow_dangerous_deserialization=True")
-                                except TypeError:
-                                    doc_db = FAISS.load_local(document_vectors_path, embedding)
-                                    logger.info(f"Đã load vector database cho tài liệu {doc_id} với cách thông thường")
+                                except Exception as e:
+                                    logger.error(f"Failed to load from {document_vectors_path} with allow_dangerous_deserialization=True: {e}")
+                                    doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
                                 
                                 # Kiểm tra kích thước vector database
                                 if hasattr(doc_db, 'index') and hasattr(doc_db.index, 'ntotal'):
@@ -549,50 +562,6 @@ YÊU CẦU ĐẶC BIỆT:
                                         preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
                                         logger.info(f"  Kết quả {i+1} từ tài liệu {doc_id}: {preview}")
                                     docs.extend(unique_results)
-                                    
-                                    # Đọc metadata của tài liệu để sử dụng trong citations
-                                    doc_title = f"Tài liệu {doc_id}"
-                                    metadata_path = os.path.join(document_vectors_path, "document_metadata.json")
-                                    if os.path.exists(metadata_path):
-                                        try:
-                                            with open(metadata_path, 'r', encoding='utf-8') as f:
-                                                doc_metadata = json.load(f)
-                                                if 'title' in doc_metadata:
-                                                    doc_title = doc_metadata['title']
-                                        except Exception as e:
-                                            logger.error(f"Lỗi đọc metadata tài liệu: {e}")
-                                    
-                                    # Tạo trích dẫn cho mỗi kết quả
-                                    for doc_result in unique_results[:5]:  # Giới hạn số lượng trích dẫn
-                                        # Xây dựng URL trích dẫn
-                                        page_num = doc_result.metadata.get('page_num', 1)
-                                        chunk_idx = doc_result.metadata.get('chunk_index', 0)
-                                        doc_url = f"/documents/{doc_id}?page={page_num}&highlight={chunk_idx}"
-                                        
-                                        # Tạo citation đơn giản
-                                        citation = {
-                                            "doc_id": doc_id,
-                                            "title": doc_title,
-                                            "page": page_num,
-                                            "chunk_index": chunk_idx,
-                                            "url": doc_url,
-                                            "citation_text": f"{doc_title} - Trang {page_num}, đoạn {chunk_idx}"
-                                        }
-                                        citations.append(citation)
-                                        
-                                        # Tạo citation chi tiết
-                                        detailed_citation = {
-                                            "text": doc_result.page_content,
-                                            "metadata": {
-                                                "doc_id": doc_id,
-                                                "title": doc_title,
-                                                "page": page_num,
-                                                "chunk_index": chunk_idx,
-                                                "url": doc_url,
-                                                "citation_text": f"{doc_title} - Trang {page_num}, đoạn {chunk_idx}"
-                                            }
-                                        }
-                                        detailed_citations.append(detailed_citation)
                                 else:
                                     logger.info(f"Không tìm thấy kết quả nào trong tài liệu ID {doc_id}")
                                     # Thử với ngưỡng thấp hơn nếu không tìm thấy kết quả
@@ -611,22 +580,6 @@ YÊU CẦU ĐẶC BIỆT:
                                             if 'document_id' not in doc.metadata:
                                                 doc.metadata['document_id'] = doc_id
                                         docs.extend(retry_results)
-                                        
-                                        # Thêm trích dẫn cho kết quả tìm được với ngưỡng thấp
-                                        for doc_result in retry_results[:5]:
-                                            page_num = doc_result.metadata.get('page_num', 1)
-                                            chunk_idx = doc_result.metadata.get('chunk_index', 0)
-                                            doc_url = f"/documents/{doc_id}?page={page_num}&highlight={chunk_idx}"
-                                            
-                                            citation = {
-                                                "doc_id": doc_id,
-                                                "title": doc_title,
-                                                "page": page_num,
-                                                "chunk_index": chunk_idx,
-                                                "url": doc_url,
-                                                "citation_text": f"{doc_title} - Trang {page_num}, đoạn {chunk_idx}"
-                                            }
-                                            citations.append(citation)
                             except Exception as e:
                                 logger.error(f"Lỗi khi tìm kiếm trong tài liệu ID {doc_id}: {e}")
                                 logger.error(traceback.format_exc())
@@ -662,16 +615,17 @@ YÊU CẦU ĐẶC BIỆT:
                     
                     # Lọc kết quả trùng lặp
                     unique_results = {}  # Sử dụng dict để lọc trùng lặp
+                    seen_content = set()
                     
-                    for doc, score in all_results:
+                    for doc in all_results:
                         content_hash = hash(doc.page_content)
-                        # Lưu kết quả có điểm tốt nhất
-                        if content_hash not in unique_results or score < unique_results[content_hash][1]:
-                            unique_results[content_hash] = (doc, score)
+                        if content_hash not in seen_content:
+                            seen_content.add(content_hash)
+                            # Chỉ lưu document, không có score
+                            unique_results[content_hash] = doc
                     
-                    # Chuyển đổi dict trở lại thành list và sắp xếp theo điểm
+                    # Chuyển đổi dict trở lại thành list
                     filtered_results = list(unique_results.values())
-                    filtered_results.sort(key=lambda x: x[1])  # Sắp xếp tăng dần theo điểm (điểm thấp = liên quan hơn)
                     
                     docs = filtered_results
                     logger.info(f"Tìm thấy {len(docs)} tài liệu liên quan độc nhất trong vector database chính")
@@ -680,39 +634,6 @@ YÊU CẦU ĐẶC BIỆT:
                         for i, doc in enumerate(docs[:3]):  # Log 3 kết quả đầu tiên
                             preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
                             logger.info(f"  Kết quả {i+1} từ vector database chính: {preview}")
-                        
-                        # Tạo trích dẫn cho kết quả từ vector database chính
-                        for doc_tuple in docs[:5]:
-                            doc = doc_tuple[0]  # Lấy document từ tuple (doc, score)
-                            doc_id = doc.metadata.get('document_id', 0)
-                            page_num = doc.metadata.get('page_num', 1)
-                            chunk_idx = doc.metadata.get('chunk_index', 0)
-                            doc_title = doc.metadata.get('title', f"Tài liệu {doc_id}")
-                            doc_url = f"/documents/{doc_id}?page={page_num}&highlight={chunk_idx}"
-                            
-                            citation = {
-                                "doc_id": doc_id,
-                                "title": doc_title,
-                                "page": page_num,
-                                "chunk_index": chunk_idx,
-                                "url": doc_url,
-                                "citation_text": f"{doc_title} - Trang {page_num}, đoạn {chunk_idx}"
-                            }
-                            citations.append(citation)
-                            
-                            # Thêm detailed citation
-                            detailed_citation = {
-                                "text": doc.page_content,
-                                "metadata": {
-                                    "doc_id": doc_id,
-                                    "title": doc_title,
-                                    "page": page_num,
-                                    "chunk_index": chunk_idx,
-                                    "url": doc_url,
-                                    "citation_text": f"{doc_title} - Trang {page_num}, đoạn {chunk_idx}"
-                                }
-                            }
-                            detailed_citations.append(detailed_citation)
                     elif self._db:  # Nếu vẫn không tìm thấy, thử lại với ngưỡng thấp hơn nữa
                         logger.info("Thử lại với ngưỡng thấp hơn trong vector database chính")
                         alt_retriever = self._db.as_retriever(
@@ -736,23 +657,6 @@ YÊU CẦU ĐẶC BIỆT:
                                         if content_hash not in seen_content:
                                             seen_content.add(content_hash)
                                             docs.append(doc)
-                                            
-                                            # Thêm trích dẫn cho kết quả từ từ khóa
-                                            doc_id = doc.metadata.get('document_id', 0)
-                                            page_num = doc.metadata.get('page_num', 1)
-                                            chunk_idx = doc.metadata.get('chunk_index', 0)
-                                            doc_title = doc.metadata.get('title', f"Tài liệu {doc_id}")
-                                            doc_url = f"/documents/{doc_id}?page={page_num}&highlight={chunk_idx}"
-                                            
-                                            citation = {
-                                                "doc_id": doc_id,
-                                                "title": doc_title,
-                                                "page": page_num,
-                                                "chunk_index": chunk_idx,
-                                                "url": doc_url,
-                                                "citation_text": f"{doc_title} - Trang {page_num}, đoạn {chunk_idx}"
-                                            }
-                                            citations.append(citation)
                                     logger.info(f"Tìm thấy {len(keyword_docs)} kết quả cho từ khóa '{keyword}'")
                             
                             logger.info(f"Tổng cộng tìm thấy {len(docs)} tài liệu sau khi tìm kiếm từ khóa")
@@ -788,29 +692,48 @@ YÊU CẦU ĐẶC BIỆT:
             if docs:
                 # Tạo prompt cho LLM tổng hợp phản hồi nếu có nhiều kết quả
                 if len(docs) > 3:
-                    content_parts = []
-                    for i, doc in enumerate(docs[:10]):  # Giới hạn 10 kết quả
-                        content_parts.append(f"[Đoạn {i+1}]: {doc.page_content}")
-                    
-                    content = "\n\n".join(content_parts)
+                    # Xử lý riêng cho trường hợp có hoặc không có document_ids
+                    if document_ids:
+                        # Giữ lại định dạng trích dẫn cho chat RAG
+                        content_parts = []
+                        for i, doc in enumerate(docs[:10]):  # Giới hạn 10 kết quả
+                            content_parts.append(f"[Đoạn {i+1}]: {doc.page_content}")
+                        
+                        content = "\n\n".join(content_parts)
+                    else:
+                        # Không đánh số đoạn và trích dẫn cho chatbot kinh tế
+                        content = "\n\n".join([doc.page_content for doc in docs[:10]])
                     
                     # Sử dụng LLM để tổng hợp phản hồi (nếu có thể)
                     try:
                         if self._gemini_model or self._openai_client:
-                            prompt = f"""Dựa trên các đoạn văn dưới đây, hãy tạo một câu trả lời NGẮN GỌN và SÚC TÍCH, trích dẫn thẳng thắn từ các đoạn, không thêm thông tin:
+                            # Tùy chỉnh prompt dựa trên loại chat
+                            if document_ids:
+                                # Prompt cho chat RAG - yêu cầu trích dẫn
+                                prompt = f"""Dựa trên các đoạn văn dưới đây, hãy tạo một câu trả lời NGẮN GỌN và SÚC TÍCH, trích dẫn thẳng thắn từ các đoạn, không thêm thông tin:
 
 {content}
 
 Câu hỏi: {query}
 
 Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung cấp, TRÍCH DẪN TRỰC TIẾP những phần liên quan. Nếu là định nghĩa, hãy trích dẫn chính xác và nguyên văn. Chỉ trả lời dựa trên thông tin thực sự có trong các đoạn văn."""
-                        
+                            else:
+                                # Prompt cho chatbot kinh tế - tổng hợp mạch lạc
+                                prompt = f"""Dựa trên các đoạn văn dưới đây, hãy tạo một câu trả lời MẠCH LẠC và DỄ HIỂU, tổng hợp và tổ chức thông tin một cách hợp lý, không đánh số các đoạn:
+
+{content}
+
+Câu hỏi: {query}
+
+Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung cấp. Nếu là định nghĩa, hãy trích dẫn chính xác. Viết thành một bài trả lời liền mạch, tự nhiên, không đánh số đoạn."""
+                            
+                            # Xử lý phản hồi từ LLM
                             if self._gemini_model:
                                 response = self._gemini_model.generate_content(prompt)
                                 enhanced_content = response.text
                             elif self._openai_client:
                                 messages = [
-                                    {"role": "system", "content": "Bạn là trợ lý AI tổng hợp thông tin từ tài liệu. Nhiệm vụ của bạn là trích dẫn chính xác và nguyên văn từ các đoạn văn được cung cấp."},
+                                    {"role": "system", "content": "Bạn là trợ lý AI tổng hợp thông tin từ tài liệu. Nhiệm vụ của bạn là tổng hợp thông tin một cách mạch lạc và rõ ràng."},
                                     {"role": "user", "content": prompt}
                                 ]
                                 response = self._openai_client.chat.completions.create(
@@ -829,26 +752,37 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                     except Exception as e:
                         logger.error(f"Lỗi khi tổng hợp phản hồi: {e}")
                         # Quay lại cách xử lý mặc định
-                        content = "\n\n".join([doc.page_content for doc in docs[:5]])  # Giới hạn 5 kết quả để không quá dài
+                        if document_ids:
+                            content = "\n\n".join([f"[Đoạn {i+1}]: {doc.page_content}" for i, doc in enumerate(docs[:5])])
+                        else:
+                            content = "\n\n".join([doc.page_content for doc in docs[:5]])
                 else:
                     # Nếu chỉ có ít kết quả, sử dụng trực tiếp
-                    content = "\n\n".join([doc.page_content for doc in docs])
+                    if document_ids:
+                        # Vẫn giữ định dạng trích dẫn cho chat RAG
+                        content_parts = []
+                        for i, doc in enumerate(docs):
+                            content_parts.append(f"[Đoạn {i+1}]: {doc.page_content}")
+                        content = "\n\n".join(content_parts)
+                    else:
+                        # Kết hợp trực tiếp nội dung cho chatbot kinh tế
+                        content = "\n\n".join([doc.page_content for doc in docs])
                 
-                # Log thông tin trích dẫn
-                logger.info(f"Tổng số trích dẫn: {len(citations)}")
+                # Thêm thông tin nguồn tài liệu nếu có
+                if document_ids and any('document_id' in doc.metadata for doc in docs):
+                    doc_sources = set(doc.metadata.get('document_id') for doc in docs if 'document_id' in doc.metadata)
+                    source_info = f"\n\nThông tin từ tài liệu IDs: {', '.join(map(str, doc_sources))}"
+                    response = f"Tìm thấy thông tin liên quan trong tài liệu đã chọn:\n\n{content}{source_info}"
+                else:
+                    # Không thêm "Tìm thấy thông tin liên quan:" cho chatbot kinh tế
+                    response = content
                 
-                # Đảm bảo có citations trong kết quả
-                response = {
+                return {
                     "success": True,
-                    "response": f"Theo dữ liệu tìm được:\n\n{content}",
+                    "response": response,
                     "query": query,
-                    "doc_count": len(docs),
-                    "citations": citations,
-                    "detailed_citations": detailed_citations
+                    "doc_count": len(docs)
                 }
-                
-                logger.info("Trả về kết quả với citations")
-                return response
             else:
                 # Không tìm thấy tài liệu
                 if document_ids:
@@ -860,8 +794,7 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                     "success": True,
                     "response": response,
                     "query": query,
-                    "doc_count": 0,
-                    "citations": []  # Trả về mảng trống vì không có trích dẫn
+                    "doc_count": 0
                 }
                 
         except Exception as e:
@@ -871,8 +804,7 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 "success": False,
                 "response": "Xin lỗi, có lỗi xảy ra khi tìm kiếm thông tin. Vui lòng thử lại sau.",
                 "query": query,
-                "error": str(e),
-                "citations": []  # Trả về mảng trống khi có lỗi
+                "error": str(e)
             }
 
     def extract_text_from_document(self, file_path, file_type):
@@ -887,72 +819,139 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
             
             # Xử lý theo loại file
             if "pdf" in file_type.lower():
-                # Sử dụng PyPDFLoader
-                loader = PyPDFLoader(file_path)
-                pages = loader.load()
-                
-                # Lưu metadata
-                doc_metadata["total_pages"] = len(pages)
-                
-                # Xử lý từng trang
-                for i, page in enumerate(pages):
-                    # Chuẩn hóa văn bản
-                    text = page.page_content
-                    text = re.sub(r'\s+', ' ', text)  # Loại bỏ khoảng trắng dư thừa
-                    text = text.strip()
+                try:
+                    # Sử dụng pdfplumber thay vì PyPDFLoader
+                    import pdfplumber
                     
-                    if text:  # Chỉ thêm trang không trống
-                        pages_text.append({
-                            "page_num": i + 1,
-                            "text": text
-                        })
+                    logger.info(f"Đọc PDF với pdfplumber: {file_path}")
+                    with pdfplumber.open(file_path) as pdf:
+                        # Lưu metadata
+                        doc_metadata["total_pages"] = len(pdf.pages)
+                        
+                        # Xử lý từng trang
+                        for i, page in enumerate(pdf.pages):
+                            text = page.extract_text() or ""
+                            
+                            # Chuẩn hóa văn bản
+                            text = re.sub(r'\s+', ' ', text)  # Loại bỏ khoảng trắng dư thừa
+                            text = text.strip()
+                            
+                            if text:  # Chỉ thêm trang không trống
+                                pages_text.append({
+                                    "page_num": i + 1,
+                                    "text": text
+                                })
+                                logger.info(f"Đã trích xuất trang {i+1} với {len(text)} ký tự")
+                            else:
+                                logger.warning(f"Trang {i+1} trống hoặc không có nội dung")
+                                
+                    logger.info(f"Đã trích xuất tổng cộng {len(pages_text)}/{doc_metadata['total_pages']} trang từ PDF")
+                    
+                except ImportError:
+                    logger.error("Thư viện pdfplumber không được tìm thấy. Đang thử dùng PyPDFLoader.")
+                    try:
+                        # Sử dụng PyPDFLoader như phương án dự phòng
+                        loader = PyPDFLoader(file_path)
+                        pages = loader.load()
+                        
+                        # Lưu metadata
+                        doc_metadata["total_pages"] = len(pages)
+                        
+                        # Xử lý từng trang
+                        for i, page in enumerate(pages):
+                            # Chuẩn hóa văn bản
+                            text = page.page_content
+                            text = re.sub(r'\s+', ' ', text)  # Loại bỏ khoảng trắng dư thừa
+                            text = text.strip()
+                            
+                            if text:  # Chỉ thêm trang không trống
+                                pages_text.append({
+                                    "page_num": i + 1,
+                                    "text": text
+                                })
+                    except Exception as pdf_err:
+                        logger.error(f"Lỗi khi dùng PyPDFLoader: {str(pdf_err)}")
+                        raise pdf_err
                         
             elif "word" in file_type.lower() or file_path.lower().endswith(('.docx', '.doc')):
                 # Sử dụng Docx2txtLoader
                 loader = Docx2txtLoader(file_path)
                 docs = loader.load()
                 
-                # Word thường trả về một document duy nhất
-                doc_metadata["total_pages"] = 1
+                # Kiểm tra xem có nội dung không
+                if not docs:
+                    logger.warning(f"Docx2txtLoader không trích xuất được nội dung từ {file_path}")
+                    pages_text.append({
+                        "page_num": 1,
+                        "text": "Không thể trích xuất nội dung từ file Word này."
+                    })
+                    doc_metadata["total_pages"] = 1
+                    return pages_text, doc_metadata
                 
-                # Phân tách theo đoạn
-                if docs:
-                    text = docs[0].page_content
+                # Word thường trả về một document duy nhất
+                text = docs[0].page_content
+                logger.info(f"Đã trích xuất {len(text)} ký tự từ file docx")
+                
+                # Kiểm tra xem có thực sự trích xuất được nội dung không
+                if not text or len(text.strip()) < 10:
+                    logger.warning(f"Nội dung trích xuất từ {file_path} quá ngắn hoặc rỗng")
+                    pages_text.append({
+                        "page_num": 1,
+                        "text": "File Word này có vẻ rỗng hoặc không có nội dung văn bản."
+                    })
+                    doc_metadata["total_pages"] = 1
+                    return pages_text, doc_metadata
+                
+                # Phân tách theo đoạn - Thử nhiều separators khác nhau
+                text = text.replace('\r\n', '\n')  # Chuẩn hóa line endings
+                
+                # Thử các phương pháp phân tách khác nhau
+                if '\n\n' in text:
                     paragraphs = text.split('\n\n')
-                    
-                    # Gom các đoạn thành các trang ảo, mỗi trang ~2000 ký tự
-                    current_page_text = ""
-                    current_page_num = 1
-                    
-                    for para in paragraphs:
-                        para = para.strip()
-                        if not para:
-                            continue
-                            
-                        if len(current_page_text) + len(para) > 2000:
-                            # Lưu trang hiện tại
-                            if current_page_text:
-                                pages_text.append({
-                                    "page_num": current_page_num,
-                                    "text": current_page_text
-                                })
-                                current_page_num += 1
-                                current_page_text = para
-                        else:
-                            if current_page_text:
-                                current_page_text += "\n\n" + para
-                            else:
-                                current_page_text = para
-                    
-                    # Lưu trang cuối cùng
-                    if current_page_text:
+                    logger.info(f"Phân tách theo \\n\\n: {len(paragraphs)} đoạn")
+                elif '\n' in text:
+                    paragraphs = text.split('\n')
+                    logger.info(f"Phân tách theo \\n: {len(paragraphs)} đoạn")
+                else:
+                    # Nếu không có dấu xuống dòng, cố gắng phân tách theo câu
+                    paragraphs = re.split(r'(?<=[.!?])\s+', text)
+                    logger.info(f"Phân tách theo câu: {len(paragraphs)} đoạn")
+                
+                # Lọc các đoạn rỗng
+                paragraphs = [p.strip() for p in paragraphs if p.strip()]
+                logger.info(f"Sau khi lọc: {len(paragraphs)} đoạn không rỗng")
+                
+                # Gom các đoạn thành các trang ảo, mỗi trang ~2000 ký tự
+                current_page_text = ""
+                current_page_num = 1
+                
+                for para in paragraphs:
+                    # Nếu thêm đoạn này sẽ vượt quá 2000 ký tự và trang hiện tại không rỗng
+                    if len(current_page_text) + len(para) > 2000 and current_page_text:
+                        # Lưu trang hiện tại
                         pages_text.append({
                             "page_num": current_page_num,
                             "text": current_page_text
                         })
-                    
-                    # Cập nhật tổng số trang
-                    doc_metadata["total_pages"] = current_page_num
+                        current_page_num += 1
+                        current_page_text = para
+                    else:
+                        # Thêm vào trang hiện tại
+                        if current_page_text:
+                            current_page_text += "\n\n" + para
+                        else:
+                            current_page_text = para
+                
+                # Lưu trang cuối cùng nếu còn nội dung
+                if current_page_text:
+                    pages_text.append({
+                        "page_num": current_page_num,
+                        "text": current_page_text
+                    })
+                
+                # Cập nhật tổng số trang
+                doc_metadata["total_pages"] = current_page_num
+                logger.info(f"Đã tạo {current_page_num} trang ảo từ file docx")
             
             elif "text" in file_type.lower() or file_path.lower().endswith(('.txt', '.md')):
                 # Sử dụng TextLoader với encoding UTF-8
@@ -989,10 +988,9 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                             current_page_num += 1
                             current_page_text = para
                         else:
-                            if current_page_text:
-                                current_page_text += "\n\n" + para
-                            else:
-                                current_page_text = para
+                            current_page_text = para
+                else:
+                            current_page_text = para
                 
                 # Lưu trang cuối cùng
                 if current_page_text:
@@ -1063,36 +1061,13 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
             
             # Tạo chunk với metadata
             for i, chunk_text in enumerate(splits):
-                # Tìm vị trí bắt đầu của chunk trong page_text (dùng để highlight chính xác)
-                start_pos = page_text.find(chunk_text[:50])  # Dùng 50 ký tự đầu để xác định
-                if start_pos == -1:  # Nếu không tìm thấy chính xác, dùng phương pháp gần đúng
-                    start_pos = 0
-                
-                # Tạo thông tin vị trí đoạn văn chi tiết
-                position_info = {
-                    "start_pos": start_pos,
-                    "end_pos": start_pos + len(chunk_text),
-                    "length": len(chunk_text),
-                    "paragraph_index": i
-                }
-                
-                # Tạo URL trích dẫn chi tiết hơn
-                citation_url = f"/documents/{doc_id}?page={page_num}&highlight={i}&pos={start_pos}"
-                
-                # Trích xuất vài chục ký tự đầu tiên làm preview
-                preview_length = 200
-                content_preview = chunk_text[:preview_length] + "..." if len(chunk_text) > preview_length else chunk_text
-                
                 chunk_metadata = {
                     "doc_id": doc_id,
-                    "title": metadata.get("title", f"Tài liệu {doc_id}"),
                     "source": metadata["source"],
                     "page_num": page_num,
                     "chunk_index": i,
-                    "position": position_info,
-                    "content": content_preview,
-                    "citation": f"{metadata.get('title', 'Tài liệu ' + str(doc_id))} - Trang {page_num}, đoạn {i}",
-                    "url": citation_url
+                    "content": chunk_text[:200] + "..." if len(chunk_text) > 200 else chunk_text,  # Trích đoạn ngắn
+                    "url": f"/documents/{doc_id}?page={page_num}&highlight={i}"  # URL để truy cập trực tiếp đến đoạn văn
                 }
                 
                 chunks.append({"text": chunk_text, "metadata": chunk_metadata})
@@ -1190,9 +1165,9 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
         if top_k is None:
             top_k = settings.DEFAULT_TOP_K
             
-        # Log chi tiết các tham số
-        logger.info(f"Truy vấn tài liệu với query: '{query}', doc_ids: {doc_ids}, top_k: {top_k}")
-        
+        # Log thông tin request đầu vào
+        logger.info(f"[CITATION] Bắt đầu truy vấn trích dẫn với query: '{query}', doc_ids: {doc_ids}, top_k: {top_k}")
+            
         # Tiền xử lý query để tăng khả năng tìm kiếm
         processed_query = query.strip().lower()
         
@@ -1210,11 +1185,18 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 f"{concept} có nghĩa",
                 f"khái niệm {concept}"
             ])
-            logger.info(f"Mở rộng truy vấn định nghĩa: {expanded_queries}")
+            logger.info(f"[CITATION] Mở rộng truy vấn định nghĩa: {expanded_queries}")
+        # Thêm biến thể cho các câu hỏi thông thường
+        else:
+            # Thêm các từ khóa của truy vấn làm biến thể
+            keywords = [w for w in processed_query.split() if len(w) >= 4]
+            for keyword in keywords[:3]:
+                if keyword not in expanded_queries:
+                    expanded_queries.append(keyword)
+            logger.info(f"[CITATION] Mở rộng truy vấn với các từ khóa: {expanded_queries}")
         
         results = []
         citations = []
-        detailed_citations = [] # Thêm danh sách chi tiết trích dẫn
         
         for doc_id in doc_ids:
             # Lấy thông tin user_id từ database hoặc từ request
@@ -1222,14 +1204,14 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
             user_id = await self.find_user_id_for_document(doc_id)
             
             if not user_id:
-                logger.warning(f"Không tìm thấy user_id cho document_id: {doc_id}")
+                logger.warning(f"[CITATION] Không tìm thấy user_id cho document_id: {doc_id}")
                 continue
                 
             # Đường dẫn đến vector store
             vector_dir = f"{settings.UPLOAD_VECTOR_DIR}/{user_id}/{doc_id}"
             
             if not os.path.exists(vector_dir):
-                logger.warning(f"Không tìm thấy thư mục vector: {vector_dir}")
+                logger.warning(f"[CITATION] Không tìm thấy thư mục vector: {vector_dir}")
                 continue
                 
             try:
@@ -1238,8 +1220,10 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 if os.path.exists(metadata_path):
                     with open(metadata_path, "r", encoding="utf-8") as f:
                         doc_metadata = json.load(f)
+                    logger.info(f"[CITATION] Đọc metadata tài liệu {doc_id} thành công: {doc_metadata.get('title', 'Không có tiêu đề')}")
                 else:
                     doc_metadata = {"title": f"Tài liệu {doc_id}"}
+                    logger.warning(f"[CITATION] Không tìm thấy metadata cho tài liệu {doc_id}, sử dụng giá trị mặc định")
                     
                 # Tải embedding model
                 embeddings = HuggingFaceEmbeddings(
@@ -1248,7 +1232,8 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 )
                 
                 # Tải vector store
-                vector_store = FAISS.load_local(vector_dir, embeddings)
+                vector_store = FAISS.load_local(vector_dir, embeddings, allow_dangerous_deserialization=True)
+                logger.info(f"[CITATION] Đã tải vector store thành công cho tài liệu {doc_id}")
                 
                 # Thực hiện tìm kiếm với tất cả các biến thể query
                 all_search_results = []
@@ -1256,7 +1241,7 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 for variant in expanded_queries:
                     # Tìm kiếm với biến thể hiện tại
                     search_results = vector_store.similarity_search_with_score(variant, k=top_k+5)  # Tăng số lượng kết quả
-                    logger.info(f"Tìm thấy {len(search_results)} kết quả cho '{variant}' trong tài liệu {doc_id}")
+                    logger.info(f"[CITATION] Tìm thấy {len(search_results)} kết quả cho '{variant}' trong tài liệu {doc_id}")
                     all_search_results.extend(search_results)
                 
                 # Lọc kết quả trùng lặp và sắp xếp theo điểm
@@ -1270,11 +1255,23 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 
                 # Chuyển đổi dict trở lại thành list và sắp xếp theo điểm
                 filtered_results = list(unique_results.values())
-                filtered_results.sort(key=lambda x: x[1])  # Sắp xếp tăng dần theo điểm (điểm thấp = liên quan hơn)
+                filtered_results.sort(key=lambda x: x[1])
                 
-                # Ngưỡng điểm thấp hơn (0.45) để tìm được nhiều kết quả hơn
+                logger.info(f"[CITATION] Sau khi lọc trùng lặp, còn {len(filtered_results)} kết quả duy nhất cho tài liệu {doc_id}")
+                
+                # Log thông tin điểm số của các kết quả để debug
+                if filtered_results:
+                    logger.info(f"[CITATION] Thông tin điểm số của các kết quả cho tài liệu {doc_id}:")
+                    for i, (doc, score) in enumerate(filtered_results[:3]):  # Log 3 kết quả đầu tiên
+                        preview = doc.page_content[:50].replace('\n', ' ') + "..." if len(doc.page_content) > 50 else doc.page_content
+                        logger.info(f"[CITATION] Kết quả #{i+1}: score={score:.4f}, nội dung: {preview}")
+                
+                # Ngưỡng điểm cao hơn (1.5) để chấp nhận nhiều kết quả hơn với các file text
+                score_threshold = 1.5  # Tăng ngưỡng lên để chấp nhận nhiều kết quả hơn
+                
+                qualified_count = 0
                 for doc, score in filtered_results:
-                    if score < 0.45:  # Ngưỡng nới lỏng hơn
+                    if score < score_threshold:  # Sử dụng ngưỡng mới
                         # Tính điểm liên quan cho truy vấn định nghĩa
                         if is_definition_query:
                             content_lower = doc.page_content.lower()
@@ -1290,21 +1287,11 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                                 
                             # Điều chỉnh điểm
                             adjusted_score = max(0.01, score - relevance_bonus)
-                            logger.info(f"Điểm ban đầu: {score}, điểm sau điều chỉnh: {adjusted_score}")
+                            logger.info(f"[CITATION] Điểm ban đầu: {score}, điểm sau điều chỉnh: {adjusted_score}")
                             score = adjusted_score
                         
                         # Thêm vào kết quả với điểm đã điều chỉnh
                         results.append(doc.page_content)
-                        
-                        # Log thông tin chi tiết về metadata
-                        logger.info(f"Metadata của document: {json.dumps(doc.metadata, ensure_ascii=False)}")
-
-                        # Xây dựng URL trích dẫn hoàn chỉnh
-                        doc_url = doc.metadata.get("url", f"/documents/{doc_id}?page={doc.metadata.get('page_num', 1)}&highlight={doc.metadata.get('chunk_index', 0)}")
-                        
-                        # Đảm bảo URL trích dẫn đầy đủ
-                        if not doc_url.startswith("http") and not doc_url.startswith("/"):
-                            doc_url = f"/documents/{doc_id}?page={doc.metadata.get('page_num', 1)}&highlight={doc.metadata.get('chunk_index', 0)}"
                         
                         # Tạo thông tin trích dẫn
                         citation = {
@@ -1313,41 +1300,22 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                             "source": doc.metadata.get("source", ""),
                             "page": doc.metadata.get("page_num", 1),  # Sử dụng page_num thay vì page
                             "chunk_index": doc.metadata.get("chunk_index", 0),
-                            "url": doc_url,
+                            "url": f"/documents/{doc_id}?page={doc.metadata.get('page_num', 1)}&highlight={doc.metadata.get('chunk_index', 0)}",
                             "content_preview": doc.metadata.get("content", ""),
-                            "score": float(score),  # Thêm điểm để có thể sắp xếp sau này
-                            "citation_text": f"{doc_metadata.get('title', f'Tài liệu {doc_id}')} - Trang {doc.metadata.get('page_num', 1)}, đoạn {doc.metadata.get('chunk_index', 0)}"
+                            "score": float(score)  # Thêm điểm để có thể sắp xếp sau này
                         }
-                        logger.info(f"Tạo citation: {json.dumps(citation, ensure_ascii=False)}")
                         citations.append(citation)
+                        qualified_count += 1
                         
-                        # Tạo trích dẫn chi tiết, có thể tiện lợi hơn cho frontend
-                        detailed_citation = {
-                            "text": doc.page_content,
-                            "metadata": {
-                                "doc_id": doc_id,
-                                "title": doc_metadata.get("title", f"Tài liệu {doc_id}"),
-                                "page": doc.metadata.get("page_num", 1),
-                                "chunk_index": doc.metadata.get("chunk_index", 0),
-                                "position": doc.metadata.get("position", {}),
-                                "url": doc_url,
-                                "citation_text": f"{doc_metadata.get('title', f'Tài liệu {doc_id}')} - Trang {doc.metadata.get('page_num', 1)}, đoạn {doc.metadata.get('chunk_index', 0)}",
-                                "score": float(score)
-                            }
-                        }
-                        detailed_citations.append(detailed_citation)
+                logger.info(f"[CITATION] Đã thêm {qualified_count} kết quả đạt điểm cho tài liệu {doc_id}")
             
             except Exception as e:
-                logger.error(f"Lỗi khi truy vấn tài liệu {doc_id}: {str(e)}")
+                logger.error(f"[CITATION] Lỗi khi truy vấn tài liệu {doc_id}: {str(e)}")
                 logger.error(traceback.format_exc())
                 continue
         
         # Sắp xếp citations theo điểm
         citations.sort(key=lambda x: x.get("score", 1.0))
-        
-        # Log kết quả cuối cùng
-        logger.info(f"Tổng số kết quả tìm được: {len(results)}")
-        logger.info(f"Tổng số trích dẫn: {len(citations)}")
         
         # Sắp xếp kết quả để khớp với thứ tự của citations
         if citations and results:
@@ -1365,12 +1333,15 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
         # Giới hạn số lượng kết quả để tránh quá nhiều
         results = results[:min(len(results), 8)]
         citations = citations[:min(len(citations), 8)]
-        detailed_citations = detailed_citations[:min(len(detailed_citations), 8)]
         
+        logger.info(f"[CITATION] Kết quả cuối cùng: {len(results)} đoạn kết quả, {len(citations)} trích dẫn")
+        if citations:
+            logger.info(f"[CITATION] Chi tiết trích dẫn đầu tiên: doc_id={citations[0].get('doc_id')}, page={citations[0].get('page')}, title={citations[0].get('title')}")
+        
+        # Luôn trả về cấu trúc chuẩn, ngay cả khi không có kết quả
         return {
             "results": results,
-            "citations": citations,
-            "detailed_citations": detailed_citations  # Thêm danh sách trích dẫn chi tiết
+            "citations": citations
         }
     
     async def find_user_id_for_document(self, doc_id):
@@ -1390,7 +1361,7 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                         return user_folder
             
             # Thử tìm trong thư mục cũ
-            old_doc_path = os.path.join(settings.DB_FAISS_PATH, f"doc_{doc_id}")
+            old_doc_path = os.path.join(settings.CORE_VECTOR_DIR, f"doc_{doc_id}")
             if os.path.exists(old_doc_path):
                 # Di chuyển sang cấu trúc mới
                 new_doc_dir = f"{settings.UPLOAD_VECTOR_DIR}/0/{doc_id}"  # Gán cho user_id = 0 nếu không xác định
@@ -1408,6 +1379,7 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
     async def process_document(self, request) -> Dict[str, Any]:
         """Xử lý tài liệu và tạo vector embeddings"""
         logger.info(f"Xử lý tài liệu ID: {request.document_id}, Đường dẫn: {request.file_path}")
+        
         try:
             # Khởi tạo các biến
             full_path = None
@@ -1433,14 +1405,14 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                         f"/app/web/public/storage/documents/{request.document_id}/{os.path.basename(original_path)}",
                         f"/app/web/public/storage/{original_path}"
                     ]
-                else:
+            else:
                     laravel_storage_paths = [
                         f"web/public/storage/documents/{request.document_id}/{os.path.basename(original_path)}",
                         f"web/public/storage/{original_path}"
                     ]
                 
                 # Kiểm tra tất cả các đường dẫn Laravel storage
-                for path in laravel_storage_paths:
+            for path in laravel_storage_paths:
                     logger.info(f"Kiểm tra đường dẫn Laravel: {path}")
                     if os.path.exists(path):
                         full_path = path
@@ -1650,23 +1622,11 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                     "error": "Vector store not found"
                 }
             
-            # Đọc metadata của tài liệu
-            doc_title = f"Tài liệu {document_id}"
-            metadata_path = f"{document_vectors_path}/document_metadata.json"
-            if os.path.exists(metadata_path):
-                try:
-                    with open(metadata_path, "r", encoding="utf-8") as f:
-                        doc_metadata = json.load(f)
-                        doc_title = doc_metadata.get("title", f"Tài liệu {document_id}")
-                        logger.info(f"Đọc metadata của tài liệu: {doc_title}")
-                except Exception as e:
-                    logger.error(f"Lỗi khi đọc metadata: {str(e)}")
-            
             # Tải vector database chính
             embedding = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
             
             # Nếu vector database chính không tồn tại, tạo mới
-            main_vector_path = settings.DB_FAISS_PATH
+            main_vector_path = settings.CORE_VECTOR_DIR
             
             if not os.path.exists(os.path.join(main_vector_path, "index.faiss")):
                 logger.info("Không tìm thấy vector database chính, đang tạo mới")
@@ -1677,65 +1637,16 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
             # Tải vector database chính và vector database của tài liệu
             try:
                 main_db = FAISS.load_local(main_vector_path, embedding, allow_dangerous_deserialization=True)
-            except TypeError:
-                main_db = FAISS.load_local(main_vector_path, embedding)
+            except Exception as e:
+                logger.error(f"Failed to load main vectors with allow_dangerous_deserialization=True: {e}")
+                main_db = FAISS.load_local(main_vector_path, embedding, allow_dangerous_deserialization=True)
             
             try:
                 doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
-            except TypeError:
-                doc_db = FAISS.load_local(document_vectors_path, embedding)
+            except Exception as e:
+                logger.error(f"Failed to load document vectors with allow_dangerous_deserialization=True: {e}")
+                doc_db = FAISS.load_local(document_vectors_path, embedding, allow_dangerous_deserialization=True)
             
-            # Đảm bảo thông tin metadata của tài liệu được cập nhật trước khi kết hợp
-            # Lấy tất cả documents từ doc_db để kiểm tra và cập nhật metadata
-            doc_docs = doc_db.similarity_search("", k=1000)  # Lấy tất cả các documents trong cơ sở dữ liệu tài liệu
-            
-            # Đảm bảo mỗi document có thông tin trích dẫn đầy đủ
-            updated_docs = []
-            for doc in doc_docs:
-                # Cập nhật metadata nếu thiếu thông tin quan trọng
-                if "title" not in doc.metadata:
-                    doc.metadata["title"] = doc_title
-                
-                # Đảm bảo có thông tin citation
-                if "citation" not in doc.metadata:
-                    page_num = doc.metadata.get("page_num", 1)
-                    chunk_index = doc.metadata.get("chunk_index", 0)
-                    doc.metadata["citation"] = f"{doc_title} - Trang {page_num}, đoạn {chunk_index}"
-                
-                # Đảm bảo có URL chi tiết
-                if "url" not in doc.metadata or "&pos=" not in doc.metadata["url"]:
-                    page_num = doc.metadata.get("page_num", 1)
-                    chunk_index = doc.metadata.get("chunk_index", 0)
-                    # Nếu không có thông tin position, dùng giá trị mặc định
-                    pos = 0
-                    if "position" in doc.metadata and "start_pos" in doc.metadata["position"]:
-                        pos = doc.metadata["position"]["start_pos"]
-                    doc.metadata["url"] = f"/documents/{document_id}?page={page_num}&highlight={chunk_index}&pos={pos}"
-                
-                # Thêm thông tin position nếu chưa có
-                if "position" not in doc.metadata:
-                    doc.metadata["position"] = {
-                        "start_pos": 0,
-                        "end_pos": len(doc.page_content),
-                        "length": len(doc.page_content),
-                        "paragraph_index": doc.metadata.get("chunk_index", 0)
-                    }
-                
-                updated_docs.append(doc)
-            
-            # Tạo FAISS database mới với metadata đã được cập nhật
-            if updated_docs:
-                logger.info(f"Cập nhật metadata cho {len(updated_docs)} vectors của tài liệu {document_id}")
-                updated_doc_db = FAISS.from_documents(updated_docs, embedding)
-                
-                # Lưu vector database cập nhật của tài liệu
-                updated_doc_db.save_local(document_vectors_path)
-                
-                # Kết hợp vào vector database chính
-                logger.info("Đang kết hợp vector của tài liệu vào vector database chính")
-                main_db.merge_from(updated_doc_db)
-            else:
-                logger.info("Không có vectors nào cần cập nhật. Kết hợp trực tiếp.")
             # Kết hợp hai vector database
             logger.info("Đang kết hợp vector của tài liệu vào vector database chính")
             main_db.merge_from(doc_db)

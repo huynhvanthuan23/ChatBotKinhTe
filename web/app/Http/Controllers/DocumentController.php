@@ -97,13 +97,26 @@ class DocumentController extends Controller
      * @param  int  $id
      * @return \Illuminate\View\View
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
         $document = Document::where('id', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
             
-        return view('documents.show', compact('document'));
+        // Lấy tham số page và highlight từ request nếu có
+        $page = $request->query('page');
+        $highlight = $request->query('highlight');
+        
+        // Log thông tin cho debug
+        if ($page || $highlight) {
+            Log::info('Document view with citation parameters', [
+                'document_id' => $id,
+                'page' => $page,
+                'highlight' => $highlight
+            ]);
+        }
+        
+        return view('documents.show', compact('document', 'page', 'highlight'));
     }
 
     /**
@@ -391,5 +404,610 @@ class DocumentController extends Controller
                 'message' => 'Đã xảy ra lỗi khi lưu lựa chọn: ' . $e->getMessage()
             ], 500);
         }
+    }
+    
+    /**
+     * Hiển thị nội dung tài liệu Word dưới dạng HTML
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
+    public function viewDocument($id, Request $request)
+    {
+        try {
+            // Tìm tài liệu trong database
+            $document = Document::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+            
+            // Đường dẫn đến file
+            $filePath = storage_path('app/public/' . $document->file_path);
+            
+            if (!file_exists($filePath)) {
+                return redirect()->route('documents.show', $id)
+                    ->with('error', 'Không tìm thấy tài liệu');
+            }
+            
+            // Lấy tham số trích dẫn từ URL
+            $page = $request->query('page');
+            $highlight = $request->query('highlight');
+            $citationText = $request->query('citation_text');
+            
+            // Log thông tin cho debug
+            if ($page || $highlight || $citationText) {
+                Log::info('DOCX view with citation parameters', [
+                    'document_id' => $id,
+                    'page' => $page,
+                    'highlight' => $highlight,
+                    'citation_text' => $citationText ? substr($citationText, 0, 50) . '...' : null
+                ]);
+            }
+            
+            // Xác định loại file
+            $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            
+            // Nếu là file Word
+            if (in_array($extension, ['docx', 'doc'])) {
+                // Chỉ hỗ trợ .docx, không hỗ trợ .doc cũ
+                if ($extension == 'doc') {
+                    return redirect()->route('documents.show', $id)
+                        ->with('error', 'Định dạng .doc cũ không được hỗ trợ xem trực tiếp. Vui lòng tải xuống để xem.');
+                }
+                
+                try {
+                    // Tạo đường dẫn cache
+                    $cacheDir = storage_path('app/document_cache');
+                    if (!file_exists($cacheDir)) {
+                        mkdir($cacheDir, 0755, true);
+                    }
+                    
+                    // Tạo tên file cache duy nhất dựa trên ID tài liệu và thời gian sửa đổi
+                    $fileModTime = filemtime($filePath);
+                    $cacheFilename = 'doc_' . $id . '_' . md5($filePath . $fileModTime) . '.html';
+                    $cachePath = $cacheDir . '/' . $cacheFilename;
+                    
+                    // Kiểm tra xem cache có tồn tại không
+                    if (file_exists($cachePath) && is_readable($cachePath)) {
+                        Log::info('Using file cached HTML for document ID: ' . $id);
+                        try {
+                            $htmlContent = file_get_contents($cachePath);
+                            if ($htmlContent === false) {
+                                throw new \Exception("Không thể đọc file cache mặc dù file tồn tại");
+                            }
+                            
+                            // Lưu vào Laravel Cache để truy cập nhanh hơn lần sau
+                            $cacheKey = 'docx_html_' . md5($filePath . filemtime($filePath));
+                            cache()->put($cacheKey, $htmlContent, now()->addDay());
+                        } catch (\Exception $cacheReadException) {
+                            Log::error('Lỗi đọc file cache: ' . $cacheReadException->getMessage(), [
+                                'document_id' => $id,
+                                'cache_path' => $cachePath,
+                                'permissions' => file_exists($cachePath) ? decoct(fileperms($cachePath) & 0777) : 'N/A'
+                            ]);
+                            
+                            // Xóa file cache bị lỗi 
+                            @unlink($cachePath);
+                            
+                            // Chuyển sang tạo cache mới
+                            Log::info('Tiến hành tạo cache mới sau khi xảy ra lỗi đọc cache');
+                            $needToCreateCache = true;
+                        }
+                    } else {
+                        $needToCreateCache = true;
+                    }
+                    
+                    // Nếu cần tạo cache mới
+                    if (isset($needToCreateCache) && $needToCreateCache) {
+                        Log::info('Converting document to HTML for ID: ' . $id);
+                        
+                        // Sử dụng PHPWord để chuyển đổi
+                        $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
+                        $htmlWriter = new \PhpOffice\PhpWord\Writer\HTML($phpWord);
+                        
+                        // Lưu vào file tạm
+                        $tempFile = storage_path('app/temp_' . uniqid() . '.html');
+                        $htmlWriter->save($tempFile);
+                        
+                        // Đọc nội dung từ file tạm
+                        $htmlContent = file_get_contents($tempFile);
+                        
+                        // Xóa file tạm
+                        if (file_exists($tempFile)) {
+                            unlink($tempFile);
+                        }
+                        
+                        // Làm sạch và cải thiện HTML
+                        $htmlContent = $this->cleanWordHtml($htmlContent);
+                        
+                        // Xử lý bổ sung để cải thiện bố cục
+                        $htmlContent = $this->improveLayout($htmlContent);
+                        
+                        // Lưu kết quả vào cache
+                        try {
+                            file_put_contents($cachePath, $htmlContent);
+                            Log::info('Saved HTML cache for document ID: ' . $id);
+                            
+                            // Đảm bảo quyền truy cập
+                            @chmod($cachePath, 0644);
+                            
+                            // Lưu vào Laravel Cache
+                            $cacheKey = 'docx_html_' . md5($filePath . filemtime($filePath));
+                            cache()->put($cacheKey, $htmlContent, now()->addDay());
+                        } catch (\Exception $cacheWriteException) {
+                            Log::error('Lỗi khi ghi file cache: ' . $cacheWriteException->getMessage(), [
+                                'document_id' => $id,
+                                'cache_path' => $cachePath
+                            ]);
+                        }
+                        
+                        // Xóa các file cache cũ
+                        $this->cleanOldCacheFiles($cacheDir, 'doc_' . $id . '_', 5);
+                    }
+                    
+                    // Trả về view với nội dung HTML và các tham số trích dẫn
+                    return view('documents.view_word', [
+                        'document' => $document,
+                        'htmlContent' => $htmlContent,
+                        'page' => $page,
+                        'highlight' => $highlight,
+                        'citation_text' => $citationText
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error converting Word document: ' . $e->getMessage(), [
+                        'document_id' => $id,
+                        'file_path' => $document->file_path
+                    ]);
+                    
+                    return redirect()->route('documents.show', $id)
+                        ->with('error', 'Không thể xử lý tài liệu Word: ' . $e->getMessage());
+                }
+            }
+            
+            // Nếu không phải file Word, chuyển hướng đến phương thức hiển thị thông thường
+            return redirect()->route('documents.show', $id);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in viewDocument: ' . $e->getMessage(), [
+                'document_id' => $id
+            ]);
+            
+            return redirect()->route('documents.index')
+                ->with('error', 'Có lỗi xảy ra khi xử lý tài liệu: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Phương pháp trích xuất nội dung DOCX cải tiến
+     * 
+     * @param string $filePath
+     * @return string
+     */
+    private function extractDocxContentAlt($filePath)
+    {
+        try {
+            // Thử phương pháp cải tiến trước
+            // Kiểm tra xem có tồn tại cache không
+            $cacheKey = 'docx_html_' . md5($filePath . filemtime($filePath));
+            if (cache()->has($cacheKey)) {
+                Log::info('Using Laravel cache for DOCX extraction: ' . $filePath);
+                return cache()->get($cacheKey);
+            }
+            
+            // Phương pháp sử dụng PHPWord
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
+            $objWriter = new \PhpOffice\PhpWord\Writer\HTML($phpWord);
+            
+            // Lưu HTML vào file tạm
+            $tempFile = storage_path('app/temp_' . uniqid() . '.html');
+            $objWriter->save($tempFile);
+            
+            // Đọc nội dung từ file tạm
+            $htmlContent = file_get_contents($tempFile);
+            
+            // Xóa file tạm
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+            
+            // Làm sạch và cải thiện HTML
+            $htmlContent = $this->cleanWordHtml($htmlContent);
+            
+            // Lưu vào Laravel cache với thời gian 24 giờ
+            try {
+                cache()->put($cacheKey, $htmlContent, 60 * 24);
+                Log::info('Saved DOCX HTML to Laravel cache: ' . $filePath);
+            } catch (\Exception $e) {
+                Log::error('Could not save to Laravel cache: ' . $e->getMessage(), [
+                    'file_path' => $filePath
+                ]);
+            }
+            
+            return $htmlContent;
+        } catch (\Exception $e) {
+            Log::error('Error in extractDocxContentAlt: ' . $e->getMessage(), [
+                'file_path' => $filePath,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Giải nén thủ công nếu PHPWord thất bại
+            try {
+                return $this->manualDocxExtraction($filePath);
+            } catch (\Exception $e2) {
+                Log::error('Manual extraction also failed: ' . $e2->getMessage());
+                
+                // Trả về thông báo lỗi dạng HTML
+                return $this->getErrorHtml('Không thể xử lý tài liệu Word');
+            }
+        }
+    }
+    
+    /**
+     * Phương pháp giải nén thủ công và trích xuất nội dung Word
+     * 
+     * @param string $filePath
+     * @return string
+     */
+    private function manualDocxExtraction($filePath)
+    {
+        try {
+            // Tạo thư mục tạm
+            $tempDir = storage_path('app/temp_' . uniqid());
+            if (!file_exists($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+            
+            // Giải nén DOCX (thực chất là tệp ZIP)
+            $zip = new \ZipArchive();
+            if ($zip->open($filePath) === true) {
+                $zip->extractTo($tempDir);
+                $zip->close();
+                
+                // Đọc document.xml
+                $xmlContent = file_get_contents($tempDir . '/word/document.xml');
+                
+                // Tạo HTML đơn giản từ nội dung
+                $html = '<div class="word-document">';
+                
+                // Sử dụng SimpleXML để phân tích
+                $xml = simplexml_load_string($xmlContent);
+                $namespaces = $xml->getNamespaces(true);
+                
+                // Trích xuất văn bản từ XML
+                $body = $xml->xpath('//w:body')[0] ?? null;
+                
+                if ($body) {
+                    // Lấy tất cả các đoạn
+                    $paragraphs = $body->xpath('.//w:p');
+                    foreach ($paragraphs as $paragraph) {
+                        $html .= '<p>';
+                        $textRuns = $paragraph->xpath('.//w:t');
+                        $paragraphText = '';
+                        
+                        foreach ($textRuns as $textRun) {
+                            $paragraphText .= htmlspecialchars((string)$textRun);
+                        }
+                        
+                        $html .= $paragraphText ?: '&nbsp;';
+                        $html .= '</p>';
+                    }
+                }
+                
+                $html .= '</div>';
+                
+                // Xóa thư mục tạm
+                $this->removeTempDir($tempDir);
+                
+                return $this->cleanWordHtml($html);
+            }
+            
+            throw new \Exception('Không thể giải nén tệp DOCX');
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+    
+    /**
+     * Tạo HTML thông báo lỗi
+     * 
+     * @param string $message
+     * @return string
+     */
+    private function getErrorHtml($message)
+    {
+        return '<div class="error-container" style="padding: 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; text-align: center;">
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i>Không thể hiển thị tài liệu</h3>
+            <p style="margin-bottom: 15px;">' . htmlspecialchars($message) . '</p>
+            <p>Vui lòng tải xuống tài liệu để xem nội dung đầy đủ.</p>
+        </div>';
+    }
+    
+    /**
+     * Xóa thư mục tạm và tất cả nội dung bên trong
+     * 
+     * @param string $dir
+     * @return void
+     */
+    private function removeTempDir($dir)
+    {
+        if (!file_exists($dir) || !is_dir($dir)) {
+            return;
+        }
+        
+        try {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    $fullPath = $dir . DIRECTORY_SEPARATOR . $object;
+                    
+                    // Kiểm tra quyền truy cập
+                    if (!is_readable($fullPath)) {
+                        Log::warning("Cannot read path during cleanup: {$fullPath}, skipping");
+                        continue;
+                    }
+                    
+                    if (is_dir($fullPath)) {
+                        // Xử lý đệ quy cho thư mục con
+                        $this->removeTempDir($fullPath);
+                    } else {
+                        // Kiểm tra quyền xóa tệp
+                        if (!is_writable($fullPath)) {
+                            Log::warning("Cannot delete file, no write permission: {$fullPath}");
+                            continue;
+                        }
+                        
+                        try {
+                            if (!unlink($fullPath)) {
+                                Log::warning("Failed to delete file: {$fullPath}");
+                            }
+                        } catch (\Exception $e) {
+                            Log::warning("Error deleting file: {$fullPath}, message: {$e->getMessage()}");
+                        }
+                    }
+                }
+            }
+            
+            // Kiểm tra quyền xóa thư mục
+            if (!is_writable($dir)) {
+                Log::warning("Cannot remove directory, no write permission: {$dir}");
+                return;
+            }
+            
+            try {
+                if (!rmdir($dir)) {
+                    Log::warning("Failed to remove directory: {$dir}");
+                }
+            } catch (\Exception $e) {
+                Log::warning("Error removing directory: {$dir}, message: {$e->getMessage()}");
+            }
+        } catch (\Exception $e) {
+            Log::error("Error in removeTempDir: {$e->getMessage()}", [
+                'dir' => $dir
+            ]);
+        }
+    }
+    
+    /**
+     * Làm sạch và cải thiện HTML từ PHPWord
+     *
+     * @param string $html
+     * @return string
+     */
+    private function cleanWordHtml($html)
+    {
+        // Thêm CSS cơ bản cho giao diện đẹp hơn
+        $styles = '<style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+            table, th, td { border: 1px solid #ddd; }
+            th, td { padding: 8px; text-align: left; }
+            .word-document, .word-content { max-width: 900px; margin: 0 auto; }
+            img { max-width: 100%; height: auto; }
+            h1, h2, h3, h4, h5, h6 { margin-top: 1.5rem; margin-bottom: 1rem; color: #4098e5; }
+            /* Giảm khoảng cách giữa các đoạn */
+            p { margin-bottom: 0.5rem; }
+            /* Ẩn các thẻ p trống không có nội dung */
+            p:empty { display: none; }
+            /* Cải thiện các định dạng đặc biệt của Word */
+            span.MsoHyperlink { color: #0563c1; text-decoration: underline; }
+            p.MsoNormal { margin: 0.3rem 0; }
+            .highlight { background-color: yellow; }
+        </style>';
+        
+        // Kiểm tra xem HTML có chứa nội dung không
+        if (empty(trim(strip_tags($html)))) {
+            return '<html><head>' . $styles . '</head><body><div class="word-document">
+                <div style="padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
+                    <h3>Tài liệu trống</h3>
+                    <p>Rất tiếc, không tìm thấy nội dung trong tài liệu này. Vui lòng tải xuống để xem đầy đủ.</p>
+                </div>
+            </div></body></html>';
+        }
+        
+        // Xử lý các vấn đề xuống dòng quá nhiều
+        // 1. Thay thế nhiều thẻ p trống liên tiếp thành một thẻ duy nhất
+        $html = preg_replace('/<p[^>]*>(\s|&nbsp;)*<\/p>(\s*<p[^>]*>(\s|&nbsp;)*<\/p>)+/', '<p>&nbsp;</p>', $html);
+        
+        // 2. Loại bỏ các khoảng trắng thừa trong thẻ
+        $html = preg_replace('/<p[^>]*>\s+/', '<p>', $html);
+        $html = preg_replace('/\s+<\/p>/', '</p>', $html);
+        
+        // 3. Loại bỏ nhiều thẻ br liên tiếp
+        $html = preg_replace('/(<br\s*\/?>){2,}/', '<br/>', $html);
+        
+        // Thêm doctype và charset nếu chưa có
+        if (strpos($html, '<!DOCTYPE') === false) {
+            $html = '<!DOCTYPE html>' . $html;
+        }
+        
+        if (strpos($html, '<meta charset') === false && strpos($html, '<head>') !== false) {
+            $html = str_replace('<head>', '<head><meta charset="UTF-8">', $html);
+        }
+        
+        // Chèn CSS vào phần head
+        if (strpos($html, '<head>') !== false) {
+            $html = str_replace('<head>', '<head>' . $styles, $html);
+        } else {
+            $html = '<!DOCTYPE html><html><head>' . $styles . '</head><body>' . $html . '</body></html>';
+        }
+        
+        // Bao bọc nội dung trong một div có class để dễ tùy chỉnh CSS
+        if (strpos($html, '<body>') !== false && strpos($html, 'class="word-document"') === false && strpos($html, 'class="word-content"') === false) {
+            $html = str_replace('<body>', '<body><div class="word-document">', $html);
+            $html = str_replace('</body>', '</div></body>', $html);
+        }
+        
+        return $html;
+    }
+
+    /**
+     * Xóa các file cache cũ, chỉ giữ lại số lượng tối đa xác định
+     * 
+     * @param string $cacheDir
+     * @param string $prefix
+     * @param int $maxFiles
+     * @return void
+     */
+    private function cleanOldCacheFiles($cacheDir, $prefix, $maxFiles = 5)
+    {
+        try {
+            // Lấy danh sách tất cả các file cache có prefix chỉ định
+            $files = glob($cacheDir . '/' . $prefix . '*.html');
+            
+            // Sắp xếp theo thời gian sửa đổi (mới nhất sau cùng)
+            usort($files, function($a, $b) {
+                return filemtime($a) - filemtime($b);
+            });
+            
+            // Nếu số lượng file vượt quá giới hạn, xóa các file cũ nhất
+            $fileCount = count($files);
+            if ($fileCount > $maxFiles) {
+                $filesToDelete = array_slice($files, 0, $fileCount - $maxFiles);
+                foreach ($filesToDelete as $file) {
+                    unlink($file);
+                    Log::info('Deleted old cache file: ' . basename($file));
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error cleaning old cache files: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Xóa cache của tài liệu và tạo lại
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function reloadDocCache($id)
+    {
+        try {
+            // Tìm tài liệu trong database
+            $document = Document::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+            
+            // Đường dẫn đến file
+            $filePath = storage_path('app/public/' . $document->file_path);
+            
+            if (!file_exists($filePath)) {
+                return redirect()->route('documents.show', $id)
+                    ->with('error', 'Không tìm thấy tài liệu');
+            }
+            
+            // Xác định loại file
+            $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            
+            // Chỉ xử lý với file docx
+            if (in_array($extension, ['docx'])) {
+                // Xóa cache Laravel
+                $cacheKey = 'docx_html_' . md5($filePath . filemtime($filePath));
+                cache()->forget($cacheKey);
+                
+                // Xóa file cache
+                $cacheDir = storage_path('app/document_cache');
+                $cachePattern = 'doc_' . $id . '_*.html';
+                $cacheFiles = glob($cacheDir . '/' . $cachePattern);
+                
+                foreach ($cacheFiles as $cacheFile) {
+                    try {
+                        if (file_exists($cacheFile) && is_writable($cacheFile)) {
+                            unlink($cacheFile);
+                            Log::info('Deleted document cache file: ' . basename($cacheFile));
+                        } else {
+                            Log::warning('Cannot delete cache file: ' . $cacheFile);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error deleting cache file: ' . $e->getMessage(), [
+                            'file' => $cacheFile
+                        ]);
+                    }
+                }
+                
+                Log::info('Document cache cleared for ID: ' . $id);
+                
+                // Chuyển hướng đến phương thức xem tài liệu để tạo cache mới
+                return redirect()->route('documents.view', $id)
+                    ->with('success', 'Đã làm mới cache tài liệu');
+            }
+            
+            return redirect()->route('documents.show', $id)
+                ->with('error', 'Chỉ hỗ trợ làm mới cache cho tài liệu DOCX');
+            
+        } catch (\Exception $e) {
+            Log::error('Error in reloadDocCache: ' . $e->getMessage(), [
+                'document_id' => $id
+            ]);
+            
+            return redirect()->route('documents.index')
+                ->with('error', 'Có lỗi xảy ra khi làm mới cache: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Thực hiện xử lý bổ sung để cải thiện bố cục HTML
+     * 
+     * @param string $html
+     * @return string
+     */
+    private function improveLayout($html)
+    {
+        // 1. Loại bỏ các thẻ p trống liên tiếp
+        $html = preg_replace('/<p[^>]*>(&nbsp;|\s)*<\/p>\s*<p[^>]*>/', '<p>', $html);
+        
+        // 2. Loại bỏ các thẻ div trống
+        $html = preg_replace('/<div[^>]*>(\s|&nbsp;)*<\/div>/', '', $html);
+        
+        // 3. Thay thế nhiều khoảng trắng liên tiếp bằng một khoảng trắng
+        $html = preg_replace('/\s{2,}/', ' ', $html);
+        
+        // 4. Xử lý các trường hợp xuống dòng đặc biệt từ Word
+        $html = str_replace('<p><o:p>&nbsp;</o:p></p>', '', $html);
+        $html = str_replace('<o:p>&nbsp;</o:p>', '', $html);
+        
+        // 5. Loại bỏ các thuộc tính không cần thiết
+        $html = preg_replace('/(<[^>]+) style="[^"]*"/', '$1', $html);
+        $html = preg_replace('/(<[^>]+) class="Mso[^"]*"/', '$1', $html);
+        
+        // 6. Loại bỏ thẻ div trống giữa các đoạn văn
+        $html = preg_replace('/<\/p>\s*<div[^>]*>\s*<\/div>\s*<p/', '</p><p', $html);
+        
+        // 7. Xử lý các thẻ span không cần thiết
+        $html = preg_replace('/<span[^>]*>([^<]*)<\/span>/', '$1', $html);
+        
+        // 8. Loại bỏ các đoạn trùng lặp
+        $html = preg_replace('/(<p[^>]*>[^<]+<\/p>)(\s*\1)+/', '$1', $html);
+        
+        // 9. Xóa các tham chiếu và định dạng đặc biệt của MS Word
+        $html = preg_replace('/<\/?o:[^>]+>/', '', $html);  // Loại bỏ các thẻ 'o:*'
+        $html = preg_replace('/<\/?w:[^>]+>/', '', $html);  // Loại bỏ các thẻ 'w:*'
+        $html = preg_replace('/<\/?m:[^>]+>/', '', $html);  // Loại bỏ các thẻ 'm:*'
+        
+        // 10. Xử lý các trường hợp xuống dòng quá nhiều trong văn bản
+        $html = preg_replace('/<\/p>\s*<p[^>]*>\s*<\/p>\s*<p/', '</p><p', $html);
+        
+        // 11. Ghép các đoạn bị tách quá nhiều
+        $html = preg_replace('/<\/p>\s*<p[^>]*>([a-z0-9,;])/', '$1', $html);
+        
+        return $html;
     }
 }

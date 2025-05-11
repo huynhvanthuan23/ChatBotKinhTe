@@ -90,7 +90,8 @@ class Settings(BaseSettings):
     TEMPERATURE: float = get_env_float("TEMPERATURE", 0.2)
     
     # Database
-    DB_FAISS_PATH: str = get_env_str("DB_FAISS_PATH", "vector_db")
+    #DB_FAISS_PATH: str = get_env_str("DB_FAISS_PATH", "vector_db")
+    CORE_VECTOR_DIR: str = get_env_str("CORE_VECTOR_DIR", "vector_db/core_data")
     
     # Storage
     STORAGE_PATH: str = get_env_str("STORAGE_PATH", "D:/ThucTap/ChatBotKinhTe/storage")
