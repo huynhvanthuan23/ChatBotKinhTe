@@ -2395,3 +2395,522 @@ URL: https://baomoi.com/lam-gi-sau-khi-my-ho...
 2025-05-11 07:38:52 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=61, page=1, title=OpenAI
 2025-05-11 07:38:52 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 992
 2025-05-11 07:38:53 [app.services.api_service] INFO: Generated response from Gemini in 0.87s
+2025-05-11 11:24:07 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 11:24:07 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 11:24:07 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 11:24:07 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 11:24:07 [app.services.api_service] ERROR: Google API key not configured properly in .env
+2025-05-11 11:24:07 [app.services.api_service] ERROR: Google API key not configured properly in .env
+2025-05-11 11:24:07 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 11:24:23 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 11:24:26 [app.services.chatbot] INFO: Vector database loaded with 79679 vectors
+2025-05-11 11:24:26 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Xử lý tài liệu ID: 75, Đường dẫn: documents/15/1746963833_openai.txt
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/75/1746963833_openai.txt
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/15/1746963833_openai.txt
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/15/1746963833_openai.txt
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 75, người dùng: 0 với chunk_size=100, chunk_overlap=50
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/15/1746963833_openai.txt, loại: text/plain
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 11:43:59 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 11:44:01 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 75 với 26 chunks
+2025-05-11 11:44:01 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 75
+2025-05-11 11:44:05 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 11:44:05 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 11:44:07 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 75
+2025-05-11 11:44:07 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 11:44:09 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 11:44:11 [app.services.chatbot] INFO: Vector database loaded with 79705 vectors
+2025-05-11 11:44:11 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 11:50:55 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 11:50:55 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 11:50:55 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 11:50:55 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 11:50:55 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 11:50:55 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 11:51:12 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 11:51:14 [app.services.chatbot] INFO: Vector database loaded with 79705 vectors
+2025-05-11 11:51:14 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 11:51:14 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 11:51:16 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Xử lý tài liệu ID: 76, Đường dẫn: documents/3/1746964266_openai.txt
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/76/1746964266_openai.txt
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746964266_openai.txt
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746964266_openai.txt
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 76, người dùng: 0 với chunk_size=100, chunk_overlap=50
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746964266_openai.txt, loại: text/plain
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 11:51:24 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 11:51:26 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 76 với 26 chunks
+2025-05-11 11:51:27 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 76
+2025-05-11 11:51:31 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 11:51:31 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 11:51:33 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 76
+2025-05-11 11:51:33 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 11:51:35 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 11:51:37 [app.services.chatbot] INFO: Vector database loaded with 79731 vectors
+2025-05-11 11:51:37 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 11:52:04 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'giới thiệu về openai', doc_ids: [76], top_k: 3
+2025-05-11 11:52:04 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['giới thiệu về openai', 'giới', 'thiệu', 'openai']
+2025-05-11 11:52:04 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 76 thành công: OpenAI
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới thiệu về openai' trong tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới' trong tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'thiệu' trong tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'openai' trong tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 14 kết quả duy nhất cho tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 76:
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=0.8069, nội dung: mở ra nhiều cuộc đối thoại về đạo đức AI, quyền ri...
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=0.8313, nội dung: . Với sự hỗ trợ từ Microsoft và nhiều đối tác công...
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=0.8550, nội dung: . Không chỉ là một công ty công nghệ, OpenAI còn m...
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Đã thêm 14 kết quả đạt điểm cho tài liệu 76
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 8 đoạn kết quả, 8 trích dẫn
+2025-05-11 11:52:07 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=76, page=1, title=OpenAI
+2025-05-11 11:52:07 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 1082
+2025-05-11 11:52:09 [app.services.api_service] INFO: Generated response from Gemini in 2.40s
+2025-05-11 12:02:44 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 12:02:44 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:02:45 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 12:02:45 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:02:45 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 12:02:45 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:03:00 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:03:02 [app.services.chatbot] INFO: Vector database loaded with 79731 vectors
+2025-05-11 12:03:02 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:03:02 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 12:03:04 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Xử lý tài liệu ID: 77, Đường dẫn: documents/3/1746965011_openai.txt
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/77/1746965011_openai.txt
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746965011_openai.txt
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746965011_openai.txt
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 77, người dùng: 0 với chunk_size=100, chunk_overlap=50
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746965011_openai.txt, loại: text/plain
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 12:03:36 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 12:03:39 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 77 với 26 chunks
+2025-05-11 12:03:39 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 77
+2025-05-11 12:03:43 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 12:03:43 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 12:03:45 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 77
+2025-05-11 12:03:45 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:03:47 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:03:49 [app.services.chatbot] INFO: Vector database loaded with 79757 vectors
+2025-05-11 12:03:49 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Xử lý tài liệu ID: 78, Đường dẫn: documents/15/1746965127_openai.txt
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/78/1746965127_openai.txt
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/15/1746965127_openai.txt
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/15/1746965127_openai.txt
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 78, người dùng: 0 với chunk_size=100, chunk_overlap=50
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/15/1746965127_openai.txt, loại: text/plain
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 12:05:36 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 12:05:38 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 78 với 26 chunks
+2025-05-11 12:05:38 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 78
+2025-05-11 12:05:42 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 12:05:43 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 12:05:45 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 78
+2025-05-11 12:05:45 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:05:47 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:05:48 [app.services.chatbot] INFO: Vector database loaded with 79783 vectors
+2025-05-11 12:05:48 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:12:54 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 12:12:54 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:12:54 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 12:12:54 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:12:54 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 12:12:54 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:13:12 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:13:14 [app.services.chatbot] INFO: Vector database loaded with 79783 vectors
+2025-05-11 12:13:14 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:13:14 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 12:13:15 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Xử lý tài liệu ID: 79, Đường dẫn: documents/15/1746965614_openai.txt
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Sử dụng user_id=15 cho tài liệu 79
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/79/1746965614_openai.txt
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/15/1746965614_openai.txt
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/15/1746965614_openai.txt
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 79, người dùng: 15 với chunk_size=100, chunk_overlap=50
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/15/1746965614_openai.txt, loại: text/plain
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 12:13:39 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 12:13:42 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 79 với 26 chunks
+2025-05-11 12:13:42 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 79
+2025-05-11 12:13:46 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 12:13:46 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 12:13:47 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 79
+2025-05-11 12:13:47 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:13:49 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:13:51 [app.services.chatbot] INFO: Vector database loaded with 79809 vectors
+2025-05-11 12:13:51 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:16:40 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 12:16:40 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:16:40 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 12:16:40 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:16:40 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 12:16:40 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:16:56 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:16:58 [app.services.chatbot] INFO: Vector database loaded with 79809 vectors
+2025-05-11 12:16:58 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:16:58 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 12:17:00 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Xử lý tài liệu ID: 80, Đường dẫn: documents/15/1746965818_openai.txt
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Sử dụng user_id=15 cho tài liệu 80
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/80/1746965818_openai.txt
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/15/1746965818_openai.txt
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/15/1746965818_openai.txt
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 80, người dùng: 15 với chunk_size=100, chunk_overlap=50
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/15/1746965818_openai.txt, loại: text/plain
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 12:17:24 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 12:17:27 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 80 với 26 chunks
+2025-05-11 12:17:27 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 80
+2025-05-11 12:17:31 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 12:17:31 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 12:17:33 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 80
+2025-05-11 12:17:33 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:17:35 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:17:37 [app.services.chatbot] INFO: Vector database loaded with 79835 vectors
+2025-05-11 12:17:37 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:18:24 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'giới thiệu openai', doc_ids: [80], top_k: 3
+2025-05-11 12:18:24 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['giới thiệu openai', 'giới', 'thiệu', 'openai']
+2025-05-11 12:18:24 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 80 thành công: OpenAI
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới thiệu openai' trong tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới' trong tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'thiệu' trong tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'openai' trong tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 14 kết quả duy nhất cho tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 80:
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=0.8415, nội dung: mở ra nhiều cuộc đối thoại về đạo đức AI, quyền ri...
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=0.8654, nội dung: . Với sự hỗ trợ từ Microsoft và nhiều đối tác công...
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=0.8695, nội dung: . Không chỉ là một công ty công nghệ, OpenAI còn m...
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Đã thêm 14 kết quả đạt điểm cho tài liệu 80
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 8 đoạn kết quả, 8 trích dẫn
+2025-05-11 12:18:27 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=80, page=1, title=OpenAI
+2025-05-11 12:18:27 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 1113
+2025-05-11 12:18:29 [app.services.api_service] INFO: Generated response from Gemini in 2.47s
+2025-05-11 12:21:58 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'giá gạo', doc_ids: [80], top_k: 3
+2025-05-11 12:21:58 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['giá gạo']
+2025-05-11 12:21:58 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 80 thành công: OpenAI
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 80
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giá gạo' trong tài liệu 80
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 8 kết quả duy nhất cho tài liệu 80
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 80:
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=1.2072, nội dung: nghệ khác, OpenAI đã và đang dẫn đầu xu hướng tron...
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=1.2491, nội dung: việc áp dụng AI vào đời sống, giáo dục, y tế, và k...
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=1.2818, nội dung: mở ra nhiều cuộc đối thoại về đạo đức AI, quyền ri...
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Đã thêm 8 kết quả đạt điểm cho tài liệu 80
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 8 đoạn kết quả, 8 trích dẫn
+2025-05-11 12:22:00 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=80, page=1, title=OpenAI
+2025-05-11 12:22:00 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 1029
+2025-05-11 12:22:01 [app.services.api_service] INFO: Generated response from Gemini in 0.96s
+2025-05-11 12:30:42 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 12:30:42 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:30:42 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 12:30:42 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 12:30:42 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 12:30:42 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:30:58 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:31:00 [app.services.chatbot] INFO: Vector database loaded with 79835 vectors
+2025-05-11 12:31:00 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:31:00 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 12:31:02 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Xử lý tài liệu ID: 81, Đường dẫn: documents/3/1746966687_giao-trinh.txt
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Sử dụng user_id=3 cho tài liệu 81
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/81/1746966687_giao-trinh.txt
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746966687_giao-trinh.txt
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746966687_giao-trinh.txt
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 81, người dùng: 3 với chunk_size=100, chunk_overlap=50
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746966687_giao-trinh.txt, loại: text/plain
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 12:31:31 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 12:31:34 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 81 với 6 chunks
+2025-05-11 12:31:34 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 81
+2025-05-11 12:31:38 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 12:31:39 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 12:31:40 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 81
+2025-05-11 12:31:40 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:31:43 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:31:44 [app.services.chatbot] INFO: Vector database loaded with 79841 vectors
+2025-05-11 12:31:44 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 12:32:45 [app.services.chatbot] INFO: Bắt đầu xóa vector cho tài liệu ID: 81
+2025-05-11 12:32:45 [app.services.chatbot] INFO: Đường dẫn thư mục vector cần xóa: vector_db/uploads/3/81
+2025-05-11 12:32:45 [app.services.chatbot] INFO: Đã xóa thành công thư mục vector: vector_db/uploads/3/81
+2025-05-11 12:32:45 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 12:32:48 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 12:32:49 [app.services.chatbot] INFO: Vector database loaded with 79841 vectors
+2025-05-11 12:32:49 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Xử lý tài liệu ID: 1, Đường dẫn: documents/3/1746970580_openai.txt
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Sử dụng user_id=3 cho tài liệu 1
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/1/1746970580_openai.txt
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746970580_openai.txt
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746970580_openai.txt
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 1, người dùng: 3 với chunk_size=100, chunk_overlap=50
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746970580_openai.txt, loại: text/plain
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 13:36:23 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 13:36:27 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 1 với 26 chunks
+2025-05-11 13:36:27 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 1
+2025-05-11 13:36:36 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 13:36:36 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 13:36:39 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 1
+2025-05-11 13:36:39 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 13:36:41 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 13:36:43 [app.services.chatbot] INFO: Vector database loaded with 79867 vectors
+2025-05-11 13:36:43 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 13:37:44 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'giới thiệu về openai', doc_ids: [1], top_k: 3
+2025-05-11 13:37:44 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['giới thiệu về openai', 'giới', 'thiệu', 'openai']
+2025-05-11 13:37:44 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 1 thành công: OpenAI
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới thiệu về openai' trong tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới' trong tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'thiệu' trong tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'openai' trong tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 14 kết quả duy nhất cho tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 1:
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=0.8069, nội dung: mở ra nhiều cuộc đối thoại về đạo đức AI, quyền ri...
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=0.8313, nội dung: . Với sự hỗ trợ từ Microsoft và nhiều đối tác công...
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=0.8550, nội dung: . Không chỉ là một công ty công nghệ, OpenAI còn m...
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Đã thêm 14 kết quả đạt điểm cho tài liệu 1
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 8 đoạn kết quả, 8 trích dẫn
+2025-05-11 13:37:46 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=1, page=1, title=OpenAI
+2025-05-11 13:37:46 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 1082
+2025-05-11 13:37:48 [app.services.api_service] INFO: Generated response from Gemini in 1.48s
+2025-05-11 13:43:50 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'giới thiệu openai', doc_ids: [77], top_k: 3
+2025-05-11 13:43:50 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['giới thiệu openai', 'giới', 'thiệu', 'openai']
+2025-05-11 13:43:50 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 77 thành công: OpenAI
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới thiệu openai' trong tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'giới' trong tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'thiệu' trong tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'openai' trong tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 14 kết quả duy nhất cho tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 77:
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=0.8415, nội dung: mở ra nhiều cuộc đối thoại về đạo đức AI, quyền ri...
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=0.8654, nội dung: . Với sự hỗ trợ từ Microsoft và nhiều đối tác công...
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=0.8695, nội dung: . Không chỉ là một công ty công nghệ, OpenAI còn m...
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Đã thêm 14 kết quả đạt điểm cho tài liệu 77
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 8 đoạn kết quả, 8 trích dẫn
+2025-05-11 13:43:53 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=77, page=1, title=OpenAI
+2025-05-11 13:43:53 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 1113
+2025-05-11 13:43:56 [app.services.api_service] INFO: Generated response from Gemini in 2.65s
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Xử lý tài liệu ID: 82, Đường dẫn: documents/3/1746971146_openai.txt
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Sử dụng user_id=3 cho tài liệu 82
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/82/1746971146_openai.txt
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746971146_openai.txt
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746971146_openai.txt
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 82, người dùng: 3 với chunk_size=100, chunk_overlap=50
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746971146_openai.txt, loại: text/plain
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 13:45:52 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 13:45:54 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 82 với 26 chunks
+2025-05-11 13:45:54 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 82
+2025-05-11 13:45:59 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 13:45:59 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 13:46:01 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 82
+2025-05-11 13:46:01 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 13:46:03 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 13:46:05 [app.services.chatbot] INFO: Vector database loaded with 79893 vectors
+2025-05-11 13:46:05 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 13:46:44 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'mô hinhd hình ảnh', doc_ids: [82], top_k: 3
+2025-05-11 13:46:44 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['mô hinhd hình ảnh', 'hinhd', 'hình']
+2025-05-11 13:46:44 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 82 thành công: OpenAI
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 82
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'mô hinhd hình ảnh' trong tài liệu 82
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'hinhd' trong tài liệu 82
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Tìm thấy 8 kết quả cho 'hình' trong tài liệu 82
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 12 kết quả duy nhất cho tài liệu 82
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 82:
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=0.8663, nội dung: ảnh như DALL·E, có thể tạo ra hình ảnh từ mô tả bằ...
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=0.9811, nội dung: . Ngoài ra, OpenAI cũng phát triển các mô hình hìn...
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=1.0438, nội dung: . Ban đầu hoạt động như một tổ chức phi lợi nhuận,...
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Đã thêm 11 kết quả đạt điểm cho tài liệu 82
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 8 đoạn kết quả, 8 trích dẫn
+2025-05-11 13:46:47 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=82, page=1, title=OpenAI
+2025-05-11 13:46:47 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 989
+2025-05-11 13:46:49 [app.services.api_service] INFO: Generated response from Gemini in 1.81s
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Xử lý tài liệu ID: 83, Đường dẫn: documents/3/1746971261_giao-trinh.txt
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Sử dụng user_id=3 cho tài liệu 83
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Thư mục hiện tại: /app, Docker: True
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/83/1746971261_giao-trinh.txt
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Kiểm tra đường dẫn Laravel: /app/web/public/storage/documents/3/1746971261_giao-trinh.txt
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Tìm thấy file trong Laravel storage: /app/web/public/storage/documents/3/1746971261_giao-trinh.txt
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Bắt đầu tạo vector cho tài liệu 83, người dùng: 3 với chunk_size=100, chunk_overlap=50
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Đang trích xuất văn bản từ tài liệu: /app/web/public/storage/documents/3/1746971261_giao-trinh.txt, loại: text/plain
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Đọc file text với encoding UTF-8
+2025-05-11 13:47:44 [app.services.chatbot] INFO: Đã trích xuất 1 trang từ tài liệu
+2025-05-11 13:47:46 [app.services.chatbot] INFO: Đã tạo vector thành công cho tài liệu 83 với 6 chunks
+2025-05-11 13:47:47 [app.services.chatbot] INFO: Đang tích hợp vector của tài liệu ID: 83
+2025-05-11 13:47:51 [app.services.chatbot] INFO: Đang kết hợp vector của tài liệu vào vector database chính
+2025-05-11 13:47:51 [app.services.chatbot] INFO: Lưu vector database đã kết hợp
+2025-05-11 13:47:53 [app.services.chatbot] INFO: Tích hợp vector thành công cho tài liệu 83
+2025-05-11 13:47:53 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 13:47:55 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 13:47:57 [app.services.chatbot] INFO: Vector database loaded with 79899 vectors
+2025-05-11 13:47:57 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 13:48:31 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'kinh tế vi mô', doc_ids: [83], top_k: 3
+2025-05-11 13:48:31 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['kinh tế vi mô', 'kinh']
+2025-05-11 13:48:31 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 83 thành công: GIÁO TRÌNH
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 83
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Tìm thấy 6 kết quả cho 'kinh tế vi mô' trong tài liệu 83
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Tìm thấy 6 kết quả cho 'kinh' trong tài liệu 83
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 6 kết quả duy nhất cho tài liệu 83
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 83:
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=1.2466, nội dung: . Với ỷ nghĩa đó, cần khẳng định, nền sàn xuất hàn...
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=1.3005, nội dung: hóa có ưu thế tích cực vượt trội so với nền sản xu...
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=1.3063, nội dung: Khi còn sự tồn tại của hai diều kiện nêu trên, con...
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Đã thêm 5 kết quả đạt điểm cho tài liệu 83
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 5 đoạn kết quả, 5 trích dẫn
+2025-05-11 13:48:33 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=83, page=1, title=GIÁO TRÌNH
+2025-05-11 13:48:33 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 756
+2025-05-11 13:48:34 [app.services.api_service] INFO: Generated response from Gemini in 0.90s
+2025-05-11 13:49:23 [app.services.chatbot] INFO: Initializing ChatbotService components...
+2025-05-11 13:49:23 [app.services.chatbot] INFO: Initializing Gemini API...
+2025-05-11 13:49:23 [app.services.chatbot] INFO: Gemini API initialized successfully with model gemini-2.0-flash
+2025-05-11 13:49:23 [app.services.chatbot] INFO: Vector store path: vector_db/core_data
+2025-05-11 13:49:23 [app.services.chatbot] INFO: Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-05-11 13:49:25 [app.services.chatbot] INFO: Loading vector store from vector_db/core_data
+2025-05-11 13:49:27 [app.services.chatbot] INFO: Vector store loaded successfully with 79899 vectors
+2025-05-11 13:49:27 [app.services.chatbot] INFO: Configuring retriever
+2025-05-11 13:49:27 [app.services.chatbot] INFO: Retriever configured successfully
+2025-05-11 13:49:27 [app.services.chatbot] INFO: Retriever test successful, found 4 document(s)
+2025-05-11 13:49:27 [app.services.chatbot] INFO: ChatbotService components initialized successfully
+2025-05-11 13:49:27 [app.services.chatbot] INFO: Query gốc: 'thương hiệu việt'
+2025-05-11 13:49:27 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['thương hiệu việt', 'thương', 'hiệu', 'việt']
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Đã embedding thành công câu hỏi thành vector kích thước 384, thời gian: 0.018s
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Mẫu vector câu hỏi: [-0.02230096608400345, 0.08515822142362595, -0.01077796146273613, -0.02712395414710045, -0.052334975451231]...
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Không có tài liệu cụ thể, sẽ tìm kiếm trong toàn bộ vector database
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Không có tài liệu được chọn hoặc không tìm thấy kết quả, đang tìm kiếm trong vector database chính
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'thương hiệu việt' trong vector database chính
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'thương hiệu việt'
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'thương' trong vector database chính
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'thương'
+2025-05-11 13:49:29 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'hiệu' trong vector database chính
+2025-05-11 13:49:30 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'hiệu'
+2025-05-11 13:49:30 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'việt' trong vector database chính
+2025-05-11 13:49:30 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'việt'
+2025-05-11 13:49:30 [app.services.chatbot] INFO: Tìm thấy 46 tài liệu liên quan độc nhất trong vector database chính
+2025-05-11 13:49:30 [app.services.chatbot] INFO:   Kết quả 1 từ vector database chính: Vũ Quang Việt
+2025-05-11 13:49:30 [app.services.chatbot] INFO:   Kết quả 2 từ vector database chính: thực hiện có hiệu quả các chính sách xoá đói giảm nghèo
+2025-05-11 13:49:30 [app.services.chatbot] INFO:   Kết quả 3 từ vector database chính: nghĩa ở Việt Nam I- Sự cần thiết khách quan phát triển nền kinh tế thị trường ở Việt Nam 1
+2025-05-11 13:51:54 [app.services.chatbot] INFO: Logger initialized: app.services.chatbot
+2025-05-11 13:51:54 [app.services.chatbot] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 13:51:54 [app.services.api_service] INFO: Logger initialized: app.services.api_service
+2025-05-11 13:51:54 [app.services.api_service] INFO: System info: {'platform': 'Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.36', 'python_version': '3.10.17', 'cwd': '/app', 'log_file': '/app/app.log', 'environment': 'Docker', 'storage_dirs': ['/app/storage (exists, files: 1)', '/app/web/public/storage (exists, files: 5)']}
+2025-05-11 13:51:54 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 13:51:54 [app.services.chatbot] INFO: Initializing vector database...
+2025-05-11 13:52:10 [app.services.chatbot] INFO: Loading vector database from vector_db/core_data
+2025-05-11 13:52:12 [app.services.chatbot] INFO: Vector database loaded with 67072 vectors
+2025-05-11 13:52:12 [app.services.chatbot] INFO: Vector database loaded and retriever configured with enhanced parameters
+2025-05-11 13:52:12 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 13:52:13 [app.services.api_service] INFO: Gemini API initialized successfully
+2025-05-11 13:52:34 [app.services.chatbot] INFO: Initializing ChatbotService components...
+2025-05-11 13:52:34 [app.services.chatbot] INFO: Initializing Gemini API...
+2025-05-11 13:52:34 [app.services.chatbot] INFO: Gemini API initialized successfully with model gemini-2.0-flash
+2025-05-11 13:52:34 [app.services.chatbot] INFO: Vector store path: vector_db/core_data
+2025-05-11 13:52:34 [app.services.chatbot] INFO: Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-05-11 13:52:36 [app.services.chatbot] INFO: Loading vector store from vector_db/core_data
+2025-05-11 13:52:38 [app.services.chatbot] INFO: Vector store loaded successfully with 67072 vectors
+2025-05-11 13:52:38 [app.services.chatbot] INFO: Configuring retriever
+2025-05-11 13:52:38 [app.services.chatbot] INFO: Retriever configured successfully
+2025-05-11 13:52:38 [app.services.chatbot] INFO: Retriever test successful, found 4 document(s)
+2025-05-11 13:52:38 [app.services.chatbot] INFO: ChatbotService components initialized successfully
+2025-05-11 13:52:38 [app.services.chatbot] INFO: Query gốc: 'thương hiệu việt'
+2025-05-11 13:52:38 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['thương hiệu việt', 'thương', 'hiệu', 'việt']
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Đã embedding thành công câu hỏi thành vector kích thước 384, thời gian: 0.008s
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Mẫu vector câu hỏi: [-0.02230096608400345, 0.08515822142362595, -0.01077796146273613, -0.02712395414710045, -0.052334975451231]...
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Không có tài liệu cụ thể, sẽ tìm kiếm trong toàn bộ vector database
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Không có tài liệu được chọn hoặc không tìm thấy kết quả, đang tìm kiếm trong vector database chính
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'thương hiệu việt' trong vector database chính
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'thương hiệu việt'
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'thương' trong vector database chính
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'thương'
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'hiệu' trong vector database chính
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'hiệu'
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'việt' trong vector database chính
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'việt'
+2025-05-11 13:52:41 [app.services.chatbot] INFO: Tìm thấy 43 tài liệu liên quan độc nhất trong vector database chính
+2025-05-11 13:52:41 [app.services.chatbot] INFO:   Kết quả 1 từ vector database chính: Vũ Quang Việt
+2025-05-11 13:52:41 [app.services.chatbot] INFO:   Kết quả 2 từ vector database chính: tức là phải trao đồi dưới hình thức hàng hóa. Các viết:
+2025-05-11 13:52:41 [app.services.chatbot] INFO:   Kết quả 3 từ vector database chính: (Nguồn:Nhôm Việt Dũng)
+2025-05-11 13:53:43 [app.services.chatbot] INFO: [CITATION] Bắt đầu truy vấn trích dẫn với query: 'chính trị', doc_ids: [83], top_k: 3
+2025-05-11 13:53:43 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['chính trị', 'chính']
+2025-05-11 13:53:43 [app.services.chatbot] INFO: [CITATION] Đọc metadata tài liệu 83 thành công: GIÁO TRÌNH
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Đã tải vector store thành công cho tài liệu 83
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Tìm thấy 6 kết quả cho 'chính trị' trong tài liệu 83
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Tìm thấy 6 kết quả cho 'chính' trong tài liệu 83
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Sau khi lọc trùng lặp, còn 6 kết quả duy nhất cho tài liệu 83
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Thông tin điểm số của các kết quả cho tài liệu 83:
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Kết quả #1: score=1.0687, nội dung: . Với ỷ nghĩa đó, cần khẳng định, nền sàn xuất hàn...
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Kết quả #2: score=1.0843, nội dung: Khi còn sự tồn tại của hai diều kiện nêu trên, con...
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Kết quả #3: score=1.1357, nội dung: . Việc cố tình xóa bỏ nền sản xuất hàng hóa, se là...
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Đã thêm 5 kết quả đạt điểm cho tài liệu 83
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Kết quả cuối cùng: 5 đoạn kết quả, 5 trích dẫn
+2025-05-11 13:53:45 [app.services.chatbot] INFO: [CITATION] Chi tiết trích dẫn đầu tiên: doc_id=83, page=1, title=GIÁO TRÌNH
+2025-05-11 13:53:45 [app.services.api_service] INFO: Generating response from Gemini with prompt length: 752
+2025-05-11 13:53:46 [app.services.api_service] INFO: Generated response from Gemini in 0.83s
+2025-05-11 13:55:04 [app.services.chatbot] INFO: Query gốc: 'biến động kinh tế'
+2025-05-11 13:55:04 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['biến động kinh tế', 'biến', 'động', 'kinh']
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Đã embedding thành công câu hỏi thành vector kích thước 384, thời gian: 0.016s
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Mẫu vector câu hỏi: [-0.03060450591146946, 0.10544148832559586, 0.046026960015296936, -0.0787448137998581, -0.02412915602326393]...
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Không có tài liệu cụ thể, sẽ tìm kiếm trong toàn bộ vector database
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Không có tài liệu được chọn hoặc không tìm thấy kết quả, đang tìm kiếm trong vector database chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'biến động kinh tế' trong vector database chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'biến động kinh tế'
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'biến' trong vector database chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'biến'
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'động' trong vector database chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'động'
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'kinh' trong vector database chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'kinh'
+2025-05-11 13:55:07 [app.services.chatbot] INFO: Tìm thấy 47 tài liệu liên quan độc nhất trong vector database chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO:   Kết quả 1 từ vector database chính: việc thành lập Hội đồng biên soạn giáo trình Kinh tế chính
+2025-05-11 13:55:07 [app.services.chatbot] INFO:   Kết quả 2 từ vector database chính: nghiệp; kinh tế chính trị cổ điển xác định đối tượng nghiên
+2025-05-11 13:55:07 [app.services.chatbot] INFO:   Kết quả 3 từ vector database chính: cùng với việc vận dụng phép biện chứng duy vật, kinh tế
+2025-05-11 13:55:44 [app.services.chatbot] INFO: Query gốc: 'giá trị gia tăng'
+2025-05-11 13:55:44 [app.services.chatbot] INFO: [CITATION] Mở rộng truy vấn với các từ khóa: ['giá trị gia tăng', 'tăng']
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Đã embedding thành công câu hỏi thành vector kích thước 384, thời gian: 0.009s
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Mẫu vector câu hỏi: [-0.1351534128189087, 0.032933931797742844, -0.05664454773068428, 0.05377163738012314, -0.02523890510201454]...
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Không có tài liệu cụ thể, sẽ tìm kiếm trong toàn bộ vector database
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Không có tài liệu được chọn hoặc không tìm thấy kết quả, đang tìm kiếm trong vector database chính
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'giá trị gia tăng' trong vector database chính
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'giá trị gia tăng'
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Tìm kiếm với biến thể 'tăng' trong vector database chính
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Tìm thấy 12 kết quả cho biến thể 'tăng'
+2025-05-11 13:55:47 [app.services.chatbot] INFO: Tìm thấy 24 tài liệu liên quan độc nhất trong vector database chính
+2025-05-11 13:55:47 [app.services.chatbot] INFO:   Kết quả 1 từ vector database chính: động, hàng hóa, giá trị, tiền tệ, giá cả, giá cả thị
+2025-05-11 13:55:47 [app.services.chatbot] INFO:   Kết quả 2 từ vector database chính: Lệ Giang
+2025-05-11 13:55:47 [app.services.chatbot] INFO:   Kết quả 3 từ vector database chính: giáo trình các môn Lý luận Chính trị.
+2025-05-11 13:56:30 [app.services.api_service] INFO: Initialized Openai API service with model: gpt-4o-mini
+2025-05-11 13:56:30 [app.services.api_service] INFO: Initializing OpenAI API with key: sk-p...wCMA
+2025-05-11 13:56:31 [app.services.api_service] ERROR: Error initializing OpenAI API: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************wCMA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-11 13:56:31 [app.services.api_service] ERROR: Traceback (most recent call last):
+  File "/app/app/services/api_service.py", line 102, in initialize_openai
+    response = client.chat.completions.create(
+  File "/usr/local/lib/python3.10/site-packages/openai/_utils/_utils.py", line 275, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/openai/resources/chat/completions.py", line 663, in create
+    return self._post(
+  File "/usr/local/lib/python3.10/site-packages/openai/_base_client.py", line 1200, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/usr/local/lib/python3.10/site-packages/openai/_base_client.py", line 889, in request
+    return self._request(
+  File "/usr/local/lib/python3.10/site-packages/openai/_base_client.py", line 980, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************wCMA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+
+2025-05-11 13:57:24 [app.services.api_service] INFO: Initialized Openai API service with model: gpt-4o-mini
+2025-05-11 13:57:24 [app.services.api_service] INFO: Initializing OpenAI API with key: sk-p...tQgA
+2025-05-11 13:57:25 [app.services.api_service] INFO: OpenAI API initialized successfully
+2025-05-11 13:57:33 [app.services.api_service] INFO: Initialized Google API service with model: gemini-2.0-flash
+2025-05-11 13:57:33 [app.services.api_service] INFO: Initializing Gemini API with key: AIza...UdVw
+2025-05-11 13:57:34 [app.services.api_service] INFO: Gemini API initialized successfully

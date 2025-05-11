@@ -19,6 +19,7 @@ from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2t
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import shutil
 import pdfplumber
+import aiohttp
 
 # Cấu hình logging
 logger = get_logger(__name__)
@@ -1363,16 +1364,72 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
             # Thử tìm trong thư mục cũ
             old_doc_path = os.path.join(settings.CORE_VECTOR_DIR, f"doc_{doc_id}")
             if os.path.exists(old_doc_path):
+                # Lấy user_id từ API Laravel
+                user_id = await self.get_document_user_id(doc_id)
+                if not user_id:
+                    # Sử dụng giá trị mặc định nếu không lấy được từ API
+                    user_id = "0"
+                    logger.warning(f"Không thể lấy được user_id từ API cho document_id {doc_id}, sử dụng giá trị mặc định '0'")
+                
                 # Di chuyển sang cấu trúc mới
-                new_doc_dir = f"{settings.UPLOAD_VECTOR_DIR}/0/{doc_id}"  # Gán cho user_id = 0 nếu không xác định
+                new_doc_dir = f"{settings.UPLOAD_VECTOR_DIR}/{user_id}/{doc_id}"
                 os.makedirs(os.path.dirname(new_doc_dir), exist_ok=True)
                 shutil.move(old_doc_path, new_doc_dir)
                 logger.info(f"Đã chuyển tài liệu từ {old_doc_path} sang {new_doc_dir}")
-                return "0"
+                return user_id
                 
             return None
         except Exception as e:
             logger.error(f"Lỗi khi tìm user_id cho document_id {doc_id}: {str(e)}")
+            logger.error(traceback.format_exc())
+            return None
+            
+    async def get_document_user_id(self, doc_id):
+        """Gọi API để lấy thông tin user_id của tài liệu từ Laravel"""
+        try:
+            # Xác định URL API
+            api_url = os.environ.get('LARAVEL_API_URL', 'http://localhost:8000')
+            endpoint = f"/api/documents/{doc_id}/info"
+            url = f"{api_url}{endpoint}"
+            
+            # Gọi API
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "X-API-Key": os.environ.get('LARAVEL_API_KEY', '')  # Nếu có authentication
+            }
+            
+            logger.info(f"Gọi API để lấy thông tin document: {url}")
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if data.get('success') and data.get('document'):
+                            user_id = str(data['document'].get('user_id'))
+                            logger.info(f"Đã lấy được user_id={user_id} cho document_id={doc_id}")
+                            return user_id
+                    
+                    # Nếu không thành công, thử cách khác (gọi đến API documents/type)
+                    url_alt = f"{api_url}/api/citations/document-type/{doc_id}"
+                    logger.info(f"Thử gọi API thay thế: {url_alt}")
+                    
+                    async with session.get(url_alt, headers=headers) as alt_response:
+                        if alt_response.status == 200:
+                            data = await alt_response.json()
+                            if data.get('success') and data.get('document_user_id'):
+                                user_id = str(data['document_user_id'])
+                                logger.info(f"Đã lấy được user_id={user_id} qua API thay thế cho document_id={doc_id}")
+                                return user_id
+            
+            # Nếu không lấy được qua API, thử lấy từ MySQL nếu có thể
+            # Thêm mã kết nối MySQL ở đây nếu cần
+            
+            logger.warning(f"Không thể lấy được user_id từ API cho document_id={doc_id}")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Lỗi khi gọi API để lấy user_id: {str(e)}")
             logger.error(traceback.format_exc())
             return None
 
@@ -1381,6 +1438,19 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
         logger.info(f"Xử lý tài liệu ID: {request.document_id}, Đường dẫn: {request.file_path}")
         
         try:
+            # Lấy user_id từ request nếu có
+            user_id = getattr(request, 'user_id', None)
+            if not user_id:
+                # Nếu không có trong request, thử lấy từ API
+                user_id = await self.get_document_user_id(request.document_id)
+                
+            # Nếu vẫn không có user_id, sử dụng giá trị mặc định là "0"
+            if not user_id:
+                logger.info(f"Không có user_id được cung cấp hoặc tìm thấy cho tài liệu {request.document_id}, sử dụng mặc định 0")
+                user_id = "0"
+            else:
+                logger.info(f"Sử dụng user_id={user_id} cho tài liệu {request.document_id}")
+            
             # Khởi tạo các biến
             full_path = None
             original_path = request.file_path
@@ -1563,9 +1633,6 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 else:
                     mime_type = 'application/octet-stream'
             
-            # Lấy user_id từ request nếu có
-            user_id = getattr(request, 'user_id', 0)
-            
             # Lấy thông số chunk từ request hoặc sử dụng giá trị mặc định
             chunk_size = getattr(request, 'chunk_size', settings.DEFAULT_CHUNK_SIZE)
             chunk_overlap = getattr(request, 'chunk_overlap', settings.DEFAULT_CHUNK_OVERLAP)
@@ -1573,7 +1640,7 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
             # Gọi hàm tạo vector tối ưu
             result = await self.create_document_vector(
                 doc_id=request.document_id,
-                user_id=user_id,
+                user_id=user_id,  # Sử dụng user_id đã xác định ở đầu phương thức
                 file_path=full_path,
                 file_type=mime_type,
                 doc_title=request.title or os.path.basename(full_path),
@@ -1696,3 +1763,57 @@ Yêu cầu: Chỉ sử dụng thông tin từ các đoạn văn được cung c�
                 "document_id": document_id,
                 "error": str(e)
             } 
+
+    async def delete_document_vector(self, doc_id, user_id=None):
+        """Xóa vector của tài liệu"""
+        try:
+            logger.info(f"Bắt đầu xóa vector cho tài liệu ID: {doc_id}")
+            
+            # Tìm user_id nếu không được cung cấp
+            if not user_id:
+                user_id = await self.find_user_id_for_document(doc_id)
+                
+            # Xác định đường dẫn thư mục vector
+            if user_id:
+                vector_path = f"{settings.UPLOAD_VECTOR_DIR}/{user_id}/{doc_id}"
+            else:
+                # Đường dẫn cũ
+                vector_path = f"{settings.CORE_VECTOR_DIR}/doc_{doc_id}"
+                
+            logger.info(f"Đường dẫn thư mục vector cần xóa: {vector_path}")
+            
+            # Kiểm tra thư mục tồn tại
+            if not os.path.exists(vector_path):
+                logger.warning(f"Không tìm thấy thư mục vector: {vector_path}")
+                return {
+                    "success": True,  # Vẫn trả về success vì mục tiêu là không còn vector
+                    "message": f"Không tìm thấy vector của tài liệu {doc_id} để xóa",
+                    "document_id": doc_id
+                }
+            
+            # Nếu là thư mục trong vector database chính, cần gọi hàm tích hợp ngược
+            if vector_path.startswith(settings.CORE_VECTOR_DIR):
+                logger.info(f"Vector cần xóa nằm trong vector database chính, đường dẫn: {vector_path}")
+                # TODO: Xử lý xóa vector từ database chính
+                # Hiện tại chỉ xóa thư mục
+                
+            # Xóa thư mục vector
+            import shutil
+            shutil.rmtree(vector_path)
+            logger.info(f"Đã xóa thành công thư mục vector: {vector_path}")
+            
+            return {
+                "success": True,
+                "message": f"Đã xóa vector của tài liệu {doc_id} thành công",
+                "document_id": doc_id
+            }
+                
+        except Exception as e:
+            logger.error(f"Lỗi khi xóa vector tài liệu {doc_id}: {str(e)}")
+            logger.error(traceback.format_exc())
+            return {
+                "success": False,
+                "message": f"Lỗi khi xóa vector tài liệu: {str(e)}",
+                "document_id": doc_id,
+                "error": str(e)
+            }

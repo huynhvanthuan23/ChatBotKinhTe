@@ -889,6 +889,46 @@ async def integrate_document(document_id: int):
             "error": str(e)
         }
 
+@app.delete("/api/v1/documents/delete")
+async def delete_document_vector(request: Request):
+    """
+    Xóa vector của tài liệu khi tài liệu được xóa từ Laravel UI
+    """
+    try:
+        # Đọc dữ liệu từ request
+        data = await request.json()
+        document_id = data.get("document_id")
+        user_id = data.get("user_id")
+        
+        if not document_id:
+            logger.error("Missing document_id in delete request")
+            return {
+                "success": False,
+                "message": "Missing document_id parameter",
+                "error": "Invalid request"
+            }
+            
+        logger.info(f"Đang xóa vector cho tài liệu ID: {document_id}, user_id: {user_id}")
+        
+        # Gọi service để xóa vector
+        result = await chatbot_service.delete_document_vector(doc_id=document_id, user_id=user_id)
+        
+        # Khởi động lại vector retriever để cập nhật thay đổi
+        if result["success"]:
+            global vector_retriever
+            vector_retriever = initialize_vector_db()
+        
+        return result
+            
+    except Exception as e:
+        logger.error(f"Lỗi khi xử lý yêu cầu xóa vector: {str(e)}")
+        logger.error(traceback.format_exc())
+        return {
+            "success": False,
+            "message": "Lỗi khi xóa vector tài liệu",
+            "error": str(e)
+        }
+
 # Khởi tạo components khi server start
 @app.on_event("startup")
 async def startup_event():

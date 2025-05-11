@@ -36,9 +36,10 @@ return [
     ],
 
     'chatbot' => [
-        'url' => env('CHATBOT_API_URL', 'http://localhost:55050/api/v1/chat/chat-direct'),
+        'api_url' => env('CHATBOT_API_URL', 'http://localhost:55050'),
         'process_url' => env('CHATBOT_PROCESS_URL', 'http://localhost:55050/api/v1/documents/process'),
         'integrate_url' => env('CHATBOT_INTEGRATE_URL', 'http://localhost:55050/api/v1/documents/integrate'),
+        'delete_url' => env('CHATBOT_DELETE_URL', 'http://localhost:55050/api/v1/documents/delete'),
         'timeout' => env('CHATBOT_TIMEOUT', 90),
     ],
 

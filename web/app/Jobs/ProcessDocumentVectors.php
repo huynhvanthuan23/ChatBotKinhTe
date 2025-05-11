@@ -63,7 +63,8 @@ class ProcessDocumentVectors implements ShouldQueue
                 'description' => $this->document->description,
                 'file_type' => $this->document->file_type,
                 'chunk_size' => 100, // Thiết lập kích thước chunk
-                'chunk_overlap' => 50 // Thiết lập kích thước overlap
+                'chunk_overlap' => 50, // Thiết lập kích thước overlap
+                'user_id' => $this->document->user_id // Thêm user_id để tạo vector đúng thư mục
             ];
 
             // Gọi API xử lý tài liệu

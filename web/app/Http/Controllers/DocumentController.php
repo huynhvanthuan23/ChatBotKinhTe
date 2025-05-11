@@ -137,6 +137,40 @@ class DocumentController extends Controller
                 Storage::disk('public')->delete($document->file_path);
             }
             
+            // Gọi API Python để xóa vector tài liệu
+            try {
+                $user_id = $document->user_id;
+                $document_id = $document->id;
+                $apiUrl = config('services.chatbot.delete_url', 'http://localhost:55050/api/v1/documents/delete');
+                
+                // Log thông tin gọi API
+                Log::info("Gọi API xóa vector tài liệu: {$apiUrl}", [
+                    'document_id' => $document_id,
+                    'user_id' => $user_id
+                ]);
+                
+                // Gọi API xóa vector
+                $response = Http::timeout(10)->delete($apiUrl, [
+                    'document_id' => $document_id,
+                    'user_id' => $user_id
+                ]);
+                
+                if ($response->successful()) {
+                    Log::info("Đã xóa vector tài liệu thành công: document_id={$document_id}, user_id={$user_id}");
+                } else {
+                    Log::warning("Không thể xóa vector tài liệu: document_id={$document_id}, user_id={$user_id}", [
+                        'status' => $response->status(),
+                        'response' => $response->body()
+                    ]);
+                }
+            } catch (\Exception $api_e) {
+                // Chỉ log lỗi, không dừng quá trình xóa record
+                Log::error("Lỗi khi gọi API xóa vector: {$api_e->getMessage()}", [
+                    'document_id' => $document->id,
+                    'trace' => $api_e->getTraceAsString()
+                ]);
+            }
+            
             // Xóa record
             $document->delete();
             
@@ -1009,5 +1043,54 @@ class DocumentController extends Controller
         $html = preg_replace('/<\/p>\s*<p[^>]*>([a-z0-9,;])/', '$1', $html);
         
         return $html;
+    }
+
+    /**
+     * API endpoint để lấy thông tin về document cho Python backend
+     * 
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDocumentInfo($id)
+    {
+        try {
+            Log::info("[API] Yêu cầu lấy thông tin document_id={$id} từ Python backend");
+            
+            // Tìm document (không cần xác thực user vì đây là API nội bộ)
+            $document = Document::find($id);
+            
+            if (!$document) {
+                Log::warning("[API] Không tìm thấy document_id={$id}");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document not found'
+                ], 404);
+            }
+            
+            // Trả về thông tin cần thiết
+            return response()->json([
+                'success' => true,
+                'document' => [
+                    'id' => $document->id,
+                    'user_id' => $document->user_id,
+                    'title' => $document->title,
+                    'file_name' => $document->file_name,
+                    'file_type' => $document->file_type,
+                    'file_path' => $document->file_path,
+                    'vector_status' => $document->vector_status,
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error("[API] Lỗi khi lấy thông tin document: " . $e->getMessage(), [
+                'document_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error getting document info: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

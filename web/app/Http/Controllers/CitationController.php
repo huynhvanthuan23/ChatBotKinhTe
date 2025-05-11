@@ -232,6 +232,7 @@ class CitationController extends Controller
             return response()->json([
                 'success' => true,
                 'document_id' => $docId,
+                'document_user_id' => $document->user_id,
                 'file_type' => $fileExtension,
                 'file_name' => $fileName,
                 'title' => $document->title
