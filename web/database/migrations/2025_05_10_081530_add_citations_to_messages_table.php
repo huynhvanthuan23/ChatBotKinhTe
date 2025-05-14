@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->json('citations')->nullable()->after('content')->comment('Lưu trữ thông tin trích dẫn dưới dạng JSON');
+            if (!Schema::hasColumn('messages', 'citations')) {
+                $table->json('citations')->nullable()->after('content')->comment('Lưu trữ thông tin trích dẫn dưới dạng JSON');
+            }
         });
     }
 

@@ -11,10 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mysql_vector_tables', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('vector_entries')) {
+            Schema::create('vector_entries', function (Blueprint $table) {
+                $table->id();
+                $table->string('item_id');
+                $table->text('content');
+                $table->json('metadata')->nullable();
+                $table->binary('embedding');
+                $table->string('collection', 100)->index();
+                $table->timestamps();
+                
+                // Tạo index cho item_id và collection để tìm kiếm nhanh
+                $table->index(['item_id', 'collection']);
+            });
+        }
+        
+        // Xóa bảng tạm mysql_vector_tables nếu có
+        Schema::dropIfExists('mysql_vector_tables');
     }
 
     /**
@@ -22,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('mysql_vector_tables');
+        Schema::dropIfExists('vector_entries');
     }
 };
