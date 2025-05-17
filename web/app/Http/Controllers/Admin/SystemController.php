@@ -37,8 +37,8 @@ class SystemController extends Controller
         ];
         
         try {
-            // Xây dựng URL trực tiếp thay vì thay thế chuỗi
-            $healthUrl = "http://localhost:55050/health";
+            // Sử dụng URL từ cấu hình
+            $healthUrl = env('CHATBOT_API_URL', 'http://localhost:55050') . "/health";
             
             $client = new Client(['timeout' => 5]);
             $response = $client->get($healthUrl);
@@ -153,8 +153,8 @@ class SystemController extends Controller
         ]);
         
         try {
-            // Đọc file .env
-            $envFile = base_path('../.env');
+            // Đọc file .env (sửa đường dẫn)
+            $envFile = base_path('.env');
             $envContent = file_get_contents($envFile);
             
             // Cập nhật API_TYPE
@@ -262,7 +262,7 @@ class SystemController extends Controller
         
         try {
             // Kiểm tra kết nối API
-            $serviceInfoUrl = "http://localhost:55050/api/v1/chat/service-info";
+            $serviceInfoUrl = env('CHATBOT_API_URL', 'http://localhost:55050') . "/api/v1/chat/service-info";
             
             $client = new Client(['timeout' => 10]);
             $response = $client->get($serviceInfoUrl);
@@ -318,7 +318,7 @@ class SystemController extends Controller
             }
             
             // Gọi endpoint reload-config trên API server
-            $reloadUrl = "http://localhost:55050/api/v1/admin/reload-config";
+            $reloadUrl = env('CHATBOT_API_URL', 'http://localhost:55050') . "/api/v1/admin/reload-config";
             
             $client = new Client(['timeout' => 15]);
             $response = $client->post($reloadUrl, [

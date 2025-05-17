@@ -78,23 +78,21 @@ class MediaController extends Controller
             $path = 'media/' . date('Y/m');
             $storedPath = $file->store($path, 'public');
             
-            // Lưu thông tin vào database
-            $media = Media::create([
-                'name' => $name,
-                'file_name' => $fileName,
-                'mime_type' => $file->getMimeType(),
-                'path' => $storedPath,
-                'disk' => 'public',
-                'file_hash' => $fileHash,
-                'size' => $file->getSize(),
-                'user_id' => auth()->id(),
-            ]);
+            // Lưu thông tin vào database mà không sử dụng cột disk
+            $media = new Media();
+            $media->name = $name;
+            $media->file_name = $fileName;
+            $media->mime_type = $file->getMimeType();
+            $media->path = $storedPath;
+            $media->size = $file->getSize();
+            $media->user_id = auth()->id();
+            $media->save();
             
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
                     'media' => $media,
-                    'url' => $media->getFullUrl(),
+                    'url' => url('storage/' . $storedPath), // URL trực tiếp không qua disk
                 ]);
             }
             
@@ -147,8 +145,8 @@ class MediaController extends Controller
      */
     public function destroy(Media $medium)
     {
-        // Xóa file từ storage
-        Storage::disk($medium->disk)->delete($medium->path);
+        // Xóa file từ storage không sử dụng disk
+        Storage::disk('public')->delete($medium->path);
         
         // Xóa record từ database
         $medium->delete();
@@ -176,23 +174,21 @@ class MediaController extends Controller
             $path = 'media/' . date('Y/m');
             $storedPath = $file->store($path, 'public');
             
-            // Lưu thông tin vào database
-            $media = Media::create([
-                'name' => $name,
-                'file_name' => $fileName,
-                'mime_type' => $file->getMimeType(),
-                'path' => $storedPath,
-                'disk' => 'public',
-                'file_hash' => $fileHash,
-                'size' => $file->getSize(),
-                'user_id' => auth()->id(),
-            ]);
+            // Lưu thông tin vào database mà không sử dụng cột disk
+            $media = new Media();
+            $media->name = $name;
+            $media->file_name = $fileName;
+            $media->mime_type = $file->getMimeType();
+            $media->path = $storedPath;
+            $media->size = $file->getSize();
+            $media->user_id = auth()->id();
+            $media->save();
             
             // Trả về response định dạng cho CKEditor
             return response()->json([
                 'uploaded' => 1,
                 'fileName' => $fileName,
-                'url' => $media->getFullUrl(),
+                'url' => url('storage/' . $storedPath),
             ]);
         }
         

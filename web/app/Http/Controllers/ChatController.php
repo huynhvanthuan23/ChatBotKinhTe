@@ -474,8 +474,8 @@ class ChatController extends Controller
     private function callChatAPI($message)
     {
         try {
-            // Sử dụng địa chỉ hardcoded để đảm bảo kết nối
-            $apiUrl = 'http://localhost:55050/api/v1/chat/chat-direct';
+            // Sử dụng biến môi trường từ .env
+            $apiUrl = env('CHATBOT_API_URL', 'http://localhost:55050') . '/api/v1/chat/chat-direct';
             
             // Ghi log thông tin đầy đủ
             Log::info("Calling API at: " . $apiUrl);
