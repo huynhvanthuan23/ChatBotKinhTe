@@ -4,11 +4,13 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ \App\Models\Setting::getValue('site_name', 'Laravel') }}</title>
+        <title>{{ \App\Models\Setting::getValue('site_name', 'ChatBot Kinh Tế') }}</title>
 
         <!-- Favicon -->
         @if(\App\Models\Setting::getValue('site_favicon'))
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . \App\Models\Setting::getValue('site_favicon')) }}">
+            <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . \App\Models\Setting::getValue('site_favicon')) }}">
+        @else
+            <link rel="icon" type="image/png" href="{{ asset('images/chatbot-logo.png') }}">
         @endif
 
         <!-- Fonts -->
@@ -29,6 +31,22 @@
                 background-color: rgba(255, 255, 255, 0.05);
                 border-radius: 8px;
                 overflow: hidden;
+            }
+            
+            .btn-primary {
+                display: inline-block;
+                padding: 0.5rem 1rem;
+                background-color: #4f46e5;
+                color: white;
+                border-radius: 0.375rem;
+                font-weight: 500;
+                text-align: center;
+                transition: all 0.2s ease;
+                min-width: 8rem;
+            }
+            
+            .btn-primary:hover {
+                background-color: #4338ca;
             }
             
             .menu-item {
@@ -175,16 +193,16 @@
                 <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right z-10">
                     @auth
                         <a href="{{ route('chat') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">
-                            Chatbot
+                           
                         </a>
                     @else
                         <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">
-                            Đăng nhập
+                            
                         </a>
 
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="ml-4 font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">
-                                Đăng ký
+                                
                             </a>
                         @endif
                     @endauth
@@ -229,11 +247,16 @@
                                     {{ \App\Models\Setting::getValue('site_description', 'Hệ thống chatbot thông minh cung cấp thông tin và tư vấn về kinh tế, tài chính và đầu tư.') }}
                                 </p>
                                 
-                                <div class="mt-8">
+                                <div class="mt-8 flex justify-center">
                                     @auth
-                                        <a href="{{ route('chat') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Vào trang Chatbot</a>
+                                        <a href="{{ route('chat') }}" class="btn-primary">Vào trang Chatbot</a>
                                     @else
-                                        <a href="{{ route('login') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Đăng nhập ngay</a>
+                                        <div class="flex flex-wrap gap-4">
+                                            <a href="{{ route('login') }}" class="btn-primary">Đăng nhập ngay</a>
+                                            @if (Route::has('register'))
+                                                <a href="{{ route('register') }}" class="btn-primary">Đăng ký ngay</a>
+                                            @endif
+                                        </div>
                                     @endauth
                                 </div>
                             </div>
@@ -287,14 +310,6 @@
                     </div>
                 </div>
                 @endif
-
-                <div class="mt-8 text-center">
-                    @guest
-                        <a href="{{ route('register') }}" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition duration-200">
-                            Đăng ký ngay
-                        </a>
-                    @endguest
-                </div>
             </div>
         </div>
         

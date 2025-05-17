@@ -12,7 +12,7 @@
                         </h5>
                         <div class="mt-2 mt-md-0">
                             <button id="create-all-vectors" class="btn btn-success me-2">
-                                <i class="fas fa-code-branch me-1"></i> Tạo vector tất cả
+                                <i class="fas fa-code-branch me-1"></i>
                             </button>
                             <a href="{{ route('documents.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus-circle me-2"></i> Thêm tài liệu mới

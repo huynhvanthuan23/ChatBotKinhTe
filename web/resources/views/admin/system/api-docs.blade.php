@@ -27,7 +27,7 @@
                         </tr>
                         <tr>
                             <th>Authentication</th>
-                            <td>Không yêu cầu (chỉ cho nội bộ)</td>
+                            <td></td>
                         </tr>
                         <tr>
                             <th>Format</th>

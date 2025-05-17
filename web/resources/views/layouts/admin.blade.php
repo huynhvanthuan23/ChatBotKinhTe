@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - @yield('title', 'Dashboard')</title>
+    
+    <!-- Favicon -->
+    @if(\App\Models\Setting::getValue('site_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . \App\Models\Setting::getValue('site_favicon')) }}">
+    @else
+        <link rel="icon" type="image/png" href="{{ asset('images/chatbot-logo.png') }}">
+    @endif
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -196,13 +204,13 @@
 
     <!-- Flash Messages -->
     <div class="container-fluid mt-4">
-        @if (session('success'))
+        <!-- @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <h5><i class="icon fas fa-check"></i> Thành công!</h5>
                 <p>{{ session('success') }}</p>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        @endif
+        @endif -->
 
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">

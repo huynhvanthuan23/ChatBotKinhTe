@@ -5,8 +5,8 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('chat') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('chat') }}" class="text-lg font-bold text-gray-800 dark:text-gray-200">
+                        {{ config('app.name', 'ChatBot Kinh Tế') }}
                     </a>
                 </div>
 
