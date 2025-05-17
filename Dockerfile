@@ -21,11 +21,12 @@ COPY fix_openai_proxy.py .
 COPY app/ ./app/
 COPY routes/ ./routes/
 COPY resources/ ./resources/
-# COPY .env ./.env
+COPY .env ./.env
 
 # Tạo các thư mục cần thiết
 RUN mkdir -p vector_db
 RUN mkdir -p storage
+RUN mkdir -p vector_db/uploads
 
 # Thiết lập biến môi trường
 ENV DB_FAISS_PATH=/app/vector_db \
