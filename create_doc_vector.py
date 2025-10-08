@@ -111,7 +111,7 @@ def create_vector_from_file(file_path, doc_id, chunk_size=1000, chunk_overlap=20
         # Kiểm tra thành công
         if os.path.exists(os.path.join(document_vectors_path, "index.faiss")) and os.path.exists(os.path.join(document_vectors_path, "index.pkl")):
             elapsed_time = time.time() - start_time
-            print(f"\n✅ Đã tạo vector thành công cho tài liệu ID {doc_id} trong {elapsed_time:.2f} giây!")
+            print(f"\n Đã tạo vector thành công cho tài liệu ID {doc_id} trong {elapsed_time:.2f} giây!")
             print(f"   - Số đoạn: {len(chunks)}")
             print(f"   - Thư mục: {document_vectors_path}")
             
@@ -129,12 +129,12 @@ def create_vector_from_file(file_path, doc_id, chunk_size=1000, chunk_overlap=20
             
             return True
         else:
-            print(f"\n❌ LỖI: Không tạo được vector database!")
+            print(f"\n LỖI: Không tạo được vector database!")
             return False
             
     except Exception as e:
         import traceback
-        print(f"\n❌ LỖI: {str(e)}")
+        print(f"\n LỖI: {str(e)}")
         print(traceback.format_exc())
         return False
 

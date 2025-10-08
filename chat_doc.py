@@ -118,11 +118,11 @@ def check_all_vectors():
     
     print("VECTOR DATABASE CHÍNH:")
     if os.path.exists(main_index) and os.path.exists(main_pkl):
-        print(f"✅ Vector database chính tồn tại")
+        print(f"Vector database chính tồn tại")
         print(f"   - Kích thước index.faiss: {os.path.getsize(main_index)/(1024*1024):.2f} MB")
         print(f"   - Kích thước index.pkl: {os.path.getsize(main_pkl)/(1024*1024):.2f} MB")
     else:
-        print(f"❌ Vector database chính không đầy đủ hoặc không tồn tại")
+        print(f"Vector database chính không đầy đủ hoặc không tồn tại")
     
     # Kiểm tra các vector database tài liệu
     print("\nVECTOR DATABASE TÀI LIỆU:")
@@ -136,12 +136,12 @@ def check_all_vectors():
             doc_pkl = os.path.join(doc_path, "index.pkl")
             
             if os.path.exists(doc_index) and os.path.exists(doc_pkl):
-                status = "✅"
+                status = "Thành Công"
                 size_index = os.path.getsize(doc_index)/(1024*1024)
                 size_pkl = os.path.getsize(doc_pkl)/(1024*1024)
                 print(f"{status} Tài liệu ID {doc_id}: OK (index: {size_index:.2f} MB, pkl: {size_pkl:.2f} MB)")
             else:
-                status = "❌"
+                status = "Thất Bại"
                 print(f"{status} Tài liệu ID {doc_id}: KHÔNG ĐẦY ĐỦ")
             
             doc_dirs.append((doc_id, status))
