@@ -8,7 +8,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
 import torch
 
-def create_vector_from_file(file_path, doc_id, chunk_size=1000, chunk_overlap=150):
+def create_vector_from_file(file_path, doc_id, chunk_size=1000, chunk_overlap=200):
     """
     Tạo vector database từ một file
     
@@ -146,8 +146,6 @@ if __name__ == "__main__":
     chunk_overlap = 200
 
 
-
-    
     # Đọc tham số dòng lệnh
     if len(sys.argv) < 3:
         print("Thiếu tham số! Sử dụng: python create_doc_vector.py [đường_dẫn_file] [id_tài_liệu] [chunk_size] [chunk_overlap]")
