@@ -1,9 +1,34 @@
-link tải model:https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF/resolve/main/mistral-7b-instruct-v0.1.Q2_K.gguf
+## Hướng dẫn clone dự án và setup web Laravel
 
-<!-- https://huggingface.co/second-state/Llama-3.2-1B-Instruct-GGUF/blob/main/Llama-3.2-1B-Instruct-Q5_K_M.gguf -->
+```bash
+# Clone dự án về máy
+git clone https://github.com/huynhvanthuan23/ChatBotKinhTe.git
 
-composer dump-autoload 
-pip install docx2txt
+# Vào thư mục web
+cd web
+
+# Cài đặt các package của Laravel
+composer install
+
+# Tạo file cấu hình môi trường từ file mẫu
+cp .env.example .env
+
+# Tạo khóa ứng dụng Laravel
+php artisan key:generate
+
+# Tạo autoload mới cho composer
+composer dump-autoload
+
+# Chạy migration tạo bảng trong database
+php artisan migrate
+
+# Seed dữ liệu mặc định vào database (nếu có)
+php artisan db:seed
+
+# Khởi động server Laravel
+php artisan serve
+
+
 
 # Hướng dẫn sử dụng API cho ChatBot Kinh Tế
 
@@ -29,6 +54,8 @@ GOOGLE_MODEL=gemini-1.5-pro
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_MODEL=gpt-4o-mini
 ```
+### lấy data kinh tế để vào thư mụcmục vector_db\core_data
+link core_data:https://drive.google.com/drive/folders/1eODxZ6LP29lnMkd9oEFB6UXgu0dfiWE1?usp=sharing
 
 ### Chuyển đổi giữa Google Gemini và OpenAI
 
@@ -116,3 +143,44 @@ docker-compose up -d
 - Một số model có thể yêu cầu tài khoản trả phí
 - Luôn bảo mật API key của bạn
 - File vector_db chứa dữ liệu vector để truy vấn, không phụ thuộc vào loại API sử dụng 
+
+## 7. Bảo mật API
+
+Để bảo vệ API và tránh lộ thông tin nhạy cảm như OpenAI API key, hệ thống đã được triển khai cơ chế xác thực API key:
+
+### Kích hoạt hệ thống API key
+
+1. Tạo API key mới:
+   ```bash
+   php artisan api:key:generate
+   ```
+
+2. Lệnh trên sẽ tự động thêm API key vào file `.env` của Laravel. Nếu không thể tự động cập nhật, bạn có thể thêm thủ công:
+   ```
+   API_KEY=your_generated_api_key
+   ```
+
+### Sử dụng API key cho các requests
+
+Khi gọi các API endpoints từ bên ngoài, thêm header `X-API-KEY` với giá trị là API key đã tạo:
+
+```bash
+curl -X GET https://api.chatbotkinhte.example.com/api/documents/123/info \
+  -H "X-API-KEY: your_generated_api_key"
+```
+
+### Các endpoints được bảo vệ
+
+Tất cả API endpoints đã được bảo vệ bằng middleware `api.key`, ngoại trừ một số endpoints công khai như `/api/info`.
+
+### Khi triển khai lên server
+
+Khi triển khai ứng dụng lên server production:
+
+1. Đảm bảo file `.env` chứa API_KEY với giá trị mạnh
+2. Không bao giờ chia sẻ API key trong mã nguồn công khai
+3. Chỉ cung cấp API key cho các ứng dụng và người dùng được ủy quyền
+4. Thay đổi API key định kỳ để tăng cường bảo mật
+5. Giám sát logs để phát hiện các nỗ lực truy cập trái phép
+
+Với cơ chế này, ứng dụng của bạn sẽ được bảo vệ khỏi các truy cập trái phép và tránh lộ thông tin nhạy cảm khi triển khai lên server public. 
