@@ -1,113 +1,138 @@
-## Hướng dẫn clone dự án và setup web Laravel
+# ChatBot Kinh Tế
 
+Tài liệu hướng dẫn cài đặt, cấu hình và sử dụng dự án ChatBot Kinh Tế.
+
+
+## Mục lục
+
+1. [Hướng dẫn Cài đặt & Khởi chạy](#hướng-dẫn-cài-đặt--khởi-chạy)
+2. [Cấu hình API (Google Gemini & OpenAI)](#cấu-hình-api-google-gemini--openai)
+3. [Hướng dẫn lấy API Key](#hướng-dẫn-lấy-api-key)
+4. [Bảo mật API của ứng dụng](#bảo-mật-api-của-ứng-dụng)
+5. [Lưu ý quan trọng](#lưu-ý-quan-trọng)
+
+## Hướng dẫn Cài đặt & Khởi chạy
+
+Thực hiện các bước sau để cài đặt và chạy ứng dụng web Laravel.
+
+**1. Clone dự án**
+Sao chép mã nguồn từ repository về máy của bạn:
 ```bash
-# Clone dự án về máy
 git clone https://github.com/huynhvanthuan23/ChatBotKinhTe.git
-
-# Vào thư mục web
-cd web
-
-# Cài đặt các package của Laravel
-composer install
-
-# Tạo file cấu hình môi trường từ file mẫu
-cp .env.example .env
-
-# Tạo khóa ứng dụng Laravel
-php artisan key:generate
-
-# Tạo autoload mới cho composer
-composer dump-autoload
-
-# Chạy migration tạo bảng trong database
-php artisan migrate
-
-# Seed dữ liệu mặc định vào database (nếu có)
-php artisan db:seed
-
-# Khởi động server Laravel
-php artisan serve
-
-
-
-# Hướng dẫn sử dụng API cho ChatBot Kinh Tế
-
-Chatbot hỗ trợ hai loại API: Google Gemini và OpenAI (GPT-4o Mini). Dưới đây là hướng dẫn chi tiết về cách cấu hình và sử dụng.
-
-## 1. Cấu hình API
-
-### Cấu hình trong file .env
-
-File `.env` chứa các cấu hình quan trọng để kết nối với API:
-
 ```
-# API Configuration
+
+**2. Di chuyển vào thư mục `web`**
+```bash
+cd web
+```
+
+**3. Cài đặt các thư viện PHP**
+Sử dụng Composer để cài đặt các package cần thiết:
+```bash
+composer install
+```
+
+**4. Tải và đặt dữ liệu kinh tế**
+Tải thư mục `core_data` từ link Google Drive dưới đây và đặt nó vào trong thư mục `vector_db` của dự án.
+- **Link tải:** [https://drive.google.com/drive/folders/1eODxZ6LP29lnMkd9oEFB6UXgu0dfiWE1?usp=sharing](https://drive.google.com/drive/folders/1eODxZ6LP29lnMkd9oEFB6UXgu0dfiWE1?usp=sharing)
+
+Cấu trúc thư mục cuối cùng sẽ là: `your-project/vector_db/core_data`.
+
+**5. Tạo file môi trường `.env`**
+Sao chép file cấu hình mẫu:
+```bash
+cp .env.example .env
+```
+
+**6. Tạo khóa ứng dụng (App Key)**
+Lệnh này sẽ sinh ra một khóa bảo mật cho ứng dụng Laravel:
+```bash
+php artisan key:generate
+```
+
+**7. Tối ưu hóa Autoload**
+Cập nhật file autoload của Composer để tối ưu hiệu suất:
+```bash
+composer dump-autoload
+```
+
+**8. Chạy Migrations**
+Tạo các bảng cần thiết trong cơ sở dữ liệu của bạn:
+```bash
+php artisan migrate
+```
+
+**9. (Tùy chọn) Seed dữ liệu mẫu**
+Thêm dữ liệu mặc định vào database nếu có:
+```bash
+php artisan db:seed
+```
+
+**10. Khởi động server**
+Chạy server phát triển của Laravel (mặc định tại `http://127.0.0.1:8000`):
+```bash
+php artisan serve
+```
+
+---
+
+## Cấu hình API (Google Gemini & OpenAI)
+
+Chatbot hỗ trợ hai loại API: **Google Gemini** và **OpenAI (GPT)**.
+
+### 1. Cấu hình trong file `.env`
+
+Mở file `.env` và cập nhật các biến sau để kết nối với API mong muốn.
+
+```dotenv
+# Bật/tắt việc sử dụng API bên ngoài
 USE_API=true
-# Loại API (google hoặc openai)
+
+# Chọn loại API: 'google' hoặc 'openai'
 API_TYPE=google
 
-# Google API settings
+# --- Cấu hình cho Google Gemini ---
 GOOGLE_API_KEY=your_google_api_key_here
 GOOGLE_MODEL=gemini-1.5-pro
 
-# OpenAI API settings
+# --- Cấu hình cho OpenAI ---
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_MODEL=gpt-4o-mini
 ```
-### lấy data kinh tế để vào thư mụcmục vector_db\core_data
-link core_data:https://drive.google.com/drive/folders/1eODxZ6LP29lnMkd9oEFB6UXgu0dfiWE1?usp=sharing
 
-### Chuyển đổi giữa Google Gemini và OpenAI
+### 2. Chuyển đổi giữa các API
 
-Để chuyển đổi giữa hai loại API, bạn chỉ cần thay đổi giá trị `API_TYPE` trong file `.env`:
+Để thay đổi nhà cung cấp API, bạn chỉ cần chỉnh sửa giá trị của `API_TYPE` trong file `.env`:
+- **Sử dụng Google Gemini**:
+  ```dotenv
+  API_TYPE=google
+  ```
+- **Sử dụng OpenAI**:
+  ```dotenv
+  API_TYPE=openai
+  ```
 
-- Sử dụng Google Gemini: `API_TYPE=google`
-- Sử dụng OpenAI: `API_TYPE=openai`
+### 3. Các model được hỗ trợ
 
-## 2. Lấy API Key
+Bạn có thể thay đổi model bằng cách cập nhật các biến `GOOGLE_MODEL` hoặc `OPENAI_MODEL`.
 
-### Google Gemini API
+- **Google Gemini:**
+  - `gemini-1.5-pro` (mặc định)
+  - `gemini-1.5-flash`
+  - `gemini-pro`
+- **OpenAI:**
+  - `gpt-4o-mini` (mặc định)
+  - `gpt-4o`
+  - `gpt-3.5-turbo`
 
-1. Truy cập [Google AI Studio](https://ai.google.dev/)
-2. Đăng nhập với tài khoản Google của bạn
-3. Vào mục "API keys" để tạo hoặc lấy API key
-4. Sao chép API key và thêm vào file `.env` ở trường `GOOGLE_API_KEY`
+### 4. Kiểm tra API đang hoạt động
 
-### OpenAI API
-
-1. Truy cập [OpenAI Platform](https://platform.openai.com/)
-2. Đăng nhập hoặc đăng ký tài khoản
-3. Vào mục "API keys" để tạo API key mới
-4. Sao chép API key và thêm vào file `.env` ở trường `OPENAI_API_KEY`
-
-## 3. Các model hỗ trợ
-
-### Google Gemini
-- gemini-1.5-pro (mặc định)
-- gemini-1.5-flash
-- gemini-pro
-- và các model khác từ Google
-
-### OpenAI
-- gpt-4o-mini (mặc định)
-- gpt-4o
-- gpt-3.5-turbo
-- và các model khác từ OpenAI
-
-Để thay đổi model, cập nhật giá trị tương ứng trong file `.env`:
-- `GOOGLE_MODEL=tên_model` cho Google Gemini
-- `OPENAI_MODEL=tên_model` cho OpenAI
-
-## 4. Kiểm tra API đang sử dụng
-
-Bạn có thể kiểm tra thông tin API đang sử dụng bằng cách gọi API endpoint:
-
-```
-http://localhost:55050/api/v1/chat/service-info
+Sử dụng endpoint sau để xem thông tin về dịch vụ API đang được cấu hình:
+```bash
+http://localhost:8000/api/v1/chat/service-info
 ```
 
-Response sẽ hiển thị thông tin API đang được sử dụng:
-
+**Phản hồi nếu dùng Google:**
 ```json
 {
   "service_type": "API",
@@ -116,9 +141,7 @@ Response sẽ hiển thị thông tin API đang được sử dụng:
   "status": "active"
 }
 ```
-
-hoặc:
-
+**Phản hồi nếu dùng OpenAI:**
 ```json
 {
   "service_type": "API",
@@ -128,59 +151,76 @@ hoặc:
 }
 ```
 
-## 5. Khởi động lại Docker sau khi thay đổi
+### 5. Khởi động lại Docker (Nếu sử dụng)
 
-Sau khi thay đổi cấu hình API trong file `.env`, bạn cần khởi động lại Docker container:
+Nếu bạn đang chạy dự án với Docker, sau khi thay đổi file `.env`, hãy khởi động lại các container để áp dụng cấu hình mới.
 
+Tắt các container:
 ```bash
 docker-compose down
+```
+Khởi động lại ở chế độ nền:
+```bash
 docker-compose up -d
 ```
 
-## 6. Lưu ý
+---
 
-- API key có giới hạn về số request, hãy sử dụng hợp lý
-- Một số model có thể yêu cầu tài khoản trả phí
-- Luôn bảo mật API key của bạn
-- File vector_db chứa dữ liệu vector để truy vấn, không phụ thuộc vào loại API sử dụng 
+## Hướng dẫn lấy API Key
 
-## 7. Bảo mật API
+### Google Gemini API
 
-Để bảo vệ API và tránh lộ thông tin nhạy cảm như OpenAI API key, hệ thống đã được triển khai cơ chế xác thực API key:
+1.  Truy cập trang [Google AI Studio](https://ai.google.dev/).
+2.  Đăng nhập bằng tài khoản Google của bạn.
+3.  Chọn mục **"API keys"** để tạo hoặc lấy API key đã có.
+4.  Sao chép API key và dán vào biến `GOOGLE_API_KEY` trong file `.env`.
 
-### Kích hoạt hệ thống API key
+### OpenAI API
 
-1. Tạo API key mới:
-   ```bash
-   php artisan api:key:generate
-   ```
+1.  Truy cập trang [OpenAI Platform](https://platform.openai.com/).
+2.  Đăng nhập hoặc đăng ký tài khoản.
+3.  Vào mục **"API keys"** để tạo một API key mới.
+4.  Sao chép API key và dán vào biến `OPENAI_API_KEY` trong file `.env`.
 
-2. Lệnh trên sẽ tự động thêm API key vào file `.env` của Laravel. Nếu không thể tự động cập nhật, bạn có thể thêm thủ công:
-   ```
-   API_KEY=your_generated_api_key
-   ```
+---
 
-### Sử dụng API key cho các requests
+## Bảo mật API của ứng dụng
 
-Khi gọi các API endpoints từ bên ngoài, thêm header `X-API-KEY` với giá trị là API key đã tạo:
+Để bảo vệ các endpoint của ứng dụng khỏi truy cập trái phép, hệ thống sử dụng cơ chế xác thực bằng API key riêng.
 
+### 1. Kích hoạt hệ thống API key
+
+Chạy lệnh sau để tạo một API key mới:
 ```bash
-curl -X GET https://api.chatbotkinhte.example.com/api/documents/123/info \
+php artisan api:key:generate
+```
+Lệnh này sẽ tự động thêm key vào file `.env`. Nếu không, bạn có thể thêm thủ công:
+```dotenv
+API_KEY=your_generated_api_key
+```
+
+### 2. Sử dụng API key khi gọi API
+
+Khi gửi request đến các endpoint được bảo vệ, bạn cần thêm header `X-API-KEY` với giá trị là key đã tạo.
+
+**Ví dụ với cURL:**
+```bash
+curl -X GET http://localhost:8000/api/documents/123/info \
   -H "X-API-KEY: your_generated_api_key"
 ```
 
-### Các endpoints được bảo vệ
+### 3. Triển khai trên server production
 
-Tất cả API endpoints đã được bảo vệ bằng middleware `api.key`, ngoại trừ một số endpoints công khai như `/api/info`.
+- **Bảo mật file `.env`**: Đảm bảo file `.env` chứa `API_KEY` mạnh và không bị lộ.
+- **Không chia sẻ key**: Không bao giờ đưa API key vào mã nguồn công khai (ví dụ: commit lên Git).
+- **Ủy quyền**: Chỉ cung cấp API key cho các ứng dụng và người dùng được phép.
+- **Xoay vòng key**: Thay đổi API key định kỳ để tăng cường bảo mật.
 
-### Khi triển khai lên server
+---
 
-Khi triển khai ứng dụng lên server production:
+## Lưu ý quan trọng
 
-1. Đảm bảo file `.env` chứa API_KEY với giá trị mạnh
-2. Không bao giờ chia sẻ API key trong mã nguồn công khai
-3. Chỉ cung cấp API key cho các ứng dụng và người dùng được ủy quyền
-4. Thay đổi API key định kỳ để tăng cường bảo mật
-5. Giám sát logs để phát hiện các nỗ lực truy cập trái phép
-
-Với cơ chế này, ứng dụng của bạn sẽ được bảo vệ khỏi các truy cập trái phép và tránh lộ thông tin nhạy cảm khi triển khai lên server public. 
+- **Giới hạn API**: Các API key của Google và OpenAI có giới hạn sử dụng. Hãy dùng một cách hợp lý.
+- **Chi phí**: Một số model có thể yêu cầu tài khoản trả phí.
+- **Bảo mật key**: Luôn giữ bí mật API key của bạn, không chia sẻ công khai.
+- **Dữ liệu Vector**: Thư mục `vector_db` chứa dữ liệu đã được vector hóa để truy vấn ngữ nghĩa, hoạt động độc lập và không phụ thuộc vào loại API (Google/OpenAI) bạn đang sử dụng.
